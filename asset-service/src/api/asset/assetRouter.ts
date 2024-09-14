@@ -9,7 +9,7 @@ import { assetController } from "./assetController";
 export const assetRegistry = new OpenAPIRegistry();
 export const assetRouter: Router = express.Router();
 
-assetRegistry.register("User", AssetSchema);
+assetRegistry.register("Asset", AssetSchema);
 
 assetRegistry.registerPath({
   method: "get",
