@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+    asset-service:
+        build: ./asset-service
+        expose:
+            - '3000'
+    
+    thread-service:
+        build: ./thread-service
+        expose:
+            - '3000'
+    
+    voting-service:
+        build: ./voting-service
+        expose:
+            - '3000'
