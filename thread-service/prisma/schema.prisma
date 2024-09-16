@@ -1,1 +1,9 @@
-
+model Thread {
+  id        String   @id @default(uuid())          // Use String for MongoDB UUID with auto-generated UUID
+  title     String
+  content   String
+  createdAt DateTime @default(now())               // Timestamp as DateTime
+  createdBy String                                // Use String for UUID for creator
+  updatedAt DateTime @updatedAt                   // Automatically update DateTime on change
+  updatedBy String                                // Use String for UUID for updater
+}
