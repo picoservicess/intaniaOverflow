@@ -1,34 +1,76 @@
-import express, { Request, Response, type Express } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import { pino } from "pino";
+import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
+import { PrismaClient, Thread } from "@prisma/client";
+import { Empty, ThreadList, ThreadId } from "./utils";
 
-import { openAPIRouter } from "./api-docs/openAPIRouter";
-import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter";
-import { threadRouter } from "./api/thread/threadRouter";
+var grpc = require("@grpc/grpc-js");
+var protoLoader = require("@grpc/proto-loader");
 
-import errorHandler from "./common/middleware/errorHandler";
+const PROTO_PATH = "../proto/thread.proto";
 
-const logger = pino({ name: "server start" });
-const app: Express = express();
+var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  arrays: true,
+});
 
-// Set the application to trust the reverse proxy
-app.set("trust proxy", true);
+var threadProto = grpc.loadPackageDefinition(packageDefinition);
 
-// Middlewares
-app.use(express.json()); // parse json request body
-app.use(express.urlencoded({ extended: true })); // parse urlencoded request body
-app.use(cors()); // enable cors
-app.use(helmet()); // set security HTTP headers
+const prisma = new PrismaClient();
 
-// Routes
-app.use("/health-check", healthCheckRouter);
-app.use("/thread", threadRouter);
+const server = new grpc.Server();
 
-// Swagger UI
-app.use(openAPIRouter);
+server.addService(threadProto.ThreadService.service, {
+  getAllThreads: async (
+    _: ServerUnaryCall<Empty, ThreadList>,
+    callback: sendUnaryData<ThreadList>
+  ) => {
+    const threads = await prisma.thread.findMany();
+    callback(null, { threads });
+  },
 
-// Error handlers
-app.use(errorHandler());
+  getThreadById: async (
+    call: ServerUnaryCall<ThreadId, Thread>,
+    callback: sendUnaryData<Thread>
+  ) => {
+    const thread = await prisma.thread.findUnique({
+      where: call.request,
+    });
+    if (thread) {
+      callback(null, thread);
+    } else {
+      callback({
+        code: grpc.status.NOT_FOUND,
+        details: "Not found",
+      });
+    }
+  },
 
-export { app, logger };
+  createThread: async (
+    call: ServerUnaryCall<Thread, Thread>,
+    callback: sendUnaryData<Thread>
+  ) => {
+    const thread = await prisma.thread.create({
+      data: call.request,
+    });
+    callback(null, thread);
+  },
+
+  // TODO : updateThread
+
+  // TODO : deleteThread
+
+  // TODO : searchThread
+});
+
+server.bindAsync(
+  "127.0.0.1:30043",
+  grpc.ServerCredentials.createInsecure(),
+  (err?: Error) => {
+    if (err) {
+      console.error(`Failed to bind server: ${err.message}`);
+      return;
+    }
+    console.log("Thread Service Server running at http://127.0.0.1:30043");
+  }
+);
