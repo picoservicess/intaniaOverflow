@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+service VotingService {
+  rpc ApplyUpVote (VoteRequest) returns (ActionResponse);
+  rpc ApplyDownVote (VoteRequest) returns (ActionResponse);
+  rpc GetCountVote (CountVoteRequest) returns (CountVoteResponse);
+  rpc IsUserVote (VoteRequest) returns (UserVoteResponse);
+}
+
+message VoteRequest {
+  bool isThread = 1;
+  string targetId = 2;
+  string studentId = 3;
+}
+
+message CountVoteRequest {
+  bool isThread = 1;
+  string targetId = 2;
+}
+
+message CountVoteResponse {
+  int32 upVotes = 1;
+  int32 downVotes = 2;
+  int32 netVotes = 3; // upVotes - downVotes
+}
+
+message UserVoteResponse {
+  int32 voteStatus = 1; // -1: downvote, 0: no vote, 1: upvote
+}
+
+message ActionResponse {
+  bool success = 1;    // Indicates success or failure
+  string message = 2;  // Optional message for more details
+}
