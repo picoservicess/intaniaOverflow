@@ -14,5 +14,8 @@
         "tsup.config.json"
       ]
     }
-  ]
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

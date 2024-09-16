@@ -1,34 +1,50 @@
-import express, { type Express } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import { pino } from "pino";
+import grpc from "@grpc/grpc-js";
+import protoLoader from "@grpc/proto-loader";
+import { votingService } from "./services/votingService";
+import { connectDB } from "./db/database";
 
-import { openAPIRouter } from "./api-docs/openAPIRouter";
-import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter";
-import { voteRouter } from "./api/vote/voteRouter";
+// Define the path to your .proto file
+const PROTO_PATH = "./src/proto/voting.proto";
+console.log(`PROTO_PATH: ${PROTO_PATH}`);
 
-import errorHandler from "./common/middleware/errorHandler";
+// Load the .proto file
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+console.log("Proto package definition loaded.");
 
-const logger = pino({ name: "server start" });
-const app: Express = express();
+// Load the package definition into gRPC
+const votingProto = grpc.loadPackageDefinition(packageDefinition) as any;
 
-// Set the application to trust the reverse proxy
-app.set("trust proxy", true);
+async function main() {
+  // Connect to MongoDB
+  await connectDB();
 
-// Middlewares
-app.use(express.json()); // parse json request body
-app.use(express.urlencoded({ extended: true })); // parse urlencoded request body
-app.use(cors()); // enable cors
-app.use(helmet()); // set security HTTP headers
+  // Create a new gRPC server
+  const server = new grpc.Server();
 
-// Routes
-app.use("/health-check", healthCheckRouter);
-app.use("/vote", voteRouter);
+  // Add the service to the server
+  server.addService(votingProto.VotingService.service, votingService);
 
-// Swagger UI
-app.use(openAPIRouter);
+  // Define the port
+  const port = process.env.PORT || "5000";
 
-// Error handlers
-app.use(errorHandler());
+  // Start the server
+  server.bindAsync(
+    `0.0.0.0:${port}`,
+    grpc.ServerCredentials.createInsecure(),
+    () => {
+      console.log(`Server running at http://0.0.0.0:${port}`);
+      server.start();
+    }
+  );
+}
 
-export { app, logger };
+// Run the main function
+main().catch((err) => {
+  console.error("Error starting server:", err);
+});
