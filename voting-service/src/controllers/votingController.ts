@@ -49,7 +49,7 @@ export const applyDownVote = async (
       return { success: true, message: "Upvote changed to downvote" };
     } else {
       const vote = new Vote({
-        id: targetId,
+        targetId: targetId,
         isThread,
         isUpVote: false,
         studentId,
