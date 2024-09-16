@@ -1,23 +1,97 @@
-import grpc from "@grpc/grpc-js";
-import protoLoader from "@grpc/proto-loader";
+import express from "express";
+import bodyParser from "body-parser";
+import client from "./client";
 
-// Path to your .proto file
-const PROTO_PATH = "../proto/voting.proto";
-// Load protobuf file
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
+const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// Helper function to handle gRPC requests
+const grpcRequest = (method: string, requestData: any) => {
+  return new Promise<any>((resolve, reject) => {
+    client[method](requestData, (error: any, response: any) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(response);
+      }
+    });
+  });
+};
+
+// Render the voting page with current vote counts
+app.get("/", async (req, res) => {
+  try {
+    const countVote = await grpcRequest("GetCountVote", {
+      isThread: req.body.isThread,
+      targetId: req.body.targetId,
+    });
+    res.status(200).render("vote", {
+      upVotes: countVote.upVotes,
+      downVotes: countVote.downVotes,
+      netVotes: countVote.netVotes,
+    });
+  } catch (error) {
+    console.error("Error fetching vote counts:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-const votingProto = grpc.loadPackageDefinition(packageDefinition) as any;
+// Apply upvote
+app.post("/upvote", async (req, res) => {
+  const { isThread, targetId, studentId } = req.body;
+  try {
+    const result = await grpcRequest("ApplyUpVote", {
+      isThread,
+      targetId,
+      studentId,
+    });
+    console.log("Upvote applied successfully", result);
+    res.status(200).send(result);
+    // res.redirect("/");
+  } catch (error) {
+    console.error("Error applying upvote:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
-const port = process.env.PORT || "5000";
-const client = new votingProto.VotingService(
-  `localhost:${port}`, // gRPC server address
-  grpc.credentials.createInsecure()
-);
+// Apply downvote
+app.post("/downvote", async (req, res) => {
+  const { isThread, targetId, studentId } = req.body;
+  try {
+    const result = await grpcRequest("ApplyDownVote", {
+      isThread,
+      targetId,
+      studentId,
+    });
+    console.log("Downvote applied successfully", result);
+    res.status(200).send(result);
+    // res.redirect("/");
+  } catch (error) {
+    console.error("Error applying downvote:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
-export default client;
+// Check user vote status
+app.get("/checkvote", async (req, res) => {
+  const { isThread, targetId, studentId } = req.body;
+  try {
+    const voteStatus = await grpcRequest("IsUserVote", {
+      isThread,
+      targetId,
+      studentId,
+    });
+    console.log("User vote status:", voteStatus);
+    res.status(200).send({ voteStatus });
+  } catch (error) {
+    console.error("Error checking vote status:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+const PORT = process.env.CLIENT_PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});

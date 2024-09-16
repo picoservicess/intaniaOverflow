@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
-dotenv.config({ path: "../config.env" }); // Load environment variables from .env file
+dotenv.config(); // Load environment variables from .env file
 
 mongoose.set("strictQuery", true);
 
@@ -9,7 +9,6 @@ mongoose.set("strictQuery", true);
 export const connectDB = async () => {
   try {
     await mongoose.connect(process.env.DATABASE_URL as string);
-
     console.log("Connected to Database");
   } catch (error) {
     console.error("Error connecting to Database:", error);
