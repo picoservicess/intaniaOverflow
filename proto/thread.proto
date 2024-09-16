@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package thread;
+
+import "google/protobuf/timestamp.proto";
+
+message Thread {
+    string id = 1;
+    string title = 2;
+    string content = 3;
+    google.protobuf.Timestamp createdAt = 4;
+    string createdBy = 5;
+    google.protobuf.Timestamp updatedAt = 6;
+    string updatedBy = 7;
+}
+
+message GetAllThreadsRequest {
+    int32 page_number = 1;  // For pagination (optional)
+    int32 page_size = 2;    // For pagination (optional)
+}
+
+message GetAllThreadsResponse {
+    repeated Thread threads = 1;
+}
+
+message getThreadByIdRequest {
+    uint32 id = 1;
+}
+
+message getThreadByIdResponse {
+    Thread thread = 1;
+}
+
+message CreateThreadRequest {
+    Thread thread = 1;
+}
+
+message createThreadResponse {
+    Thread thread = 1;
+}
+
+message UpdateThreadRequest {
+    Thread thread = 1;
+}
+
+message updateThreadResponse {
+    Thread thread = 1;
+}
+
+message DeleteThreadRequest {
+    uint32 id = 1;
+}
+
+message deleteThreadResponse {
+    Thread thread = 1;
+}
+
+service ThreadService {
+    rpc getAllThreads (GetAllThreadsRequest) returns (GetAllThreadsResponse);
+    rpc getThreadById (getThreadByIdRequest) returns (getThreadByIdResponse);
+    rpc createThread (CreateThreadRequest) returns (createThreadResponse);
+    rpc updateThread (UpdateThreadRequest) returns (updateThreadResponse);
+    rpc deleteThread (DeleteThreadRequest) returns (deleteThreadResponse);
+}
