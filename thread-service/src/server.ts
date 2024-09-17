@@ -1,9 +1,10 @@
 import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
 import { PrismaClient, Thread } from "@prisma/client";
-import { Empty, ThreadList, ThreadId, SearchQuery } from "./models";
+import { Empty, ThreadList, SearchQuery, ThreadId } from "./models";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import { prepareUpdateThread } from "./decorator";
+import { sanitizeThreadRequest } from "./decorator";
+import { z } from "zod";
 
 const PROTO_PATH = "../proto/thread.proto";
 
@@ -76,8 +77,40 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<Thread>
     ) => {
         try {
+            const threadSchema = z.object({
+                id: z.string().uuid().optional(),
+                title: z.string().min(1),
+                body: z.string().min(1),
+                assetUrls: z.array(z.string()).optional(),
+                tags: z.array(z.string()).optional(),
+                authorId: z.string().uuid(),
+                createdAt: z.date().optional(),
+                updatedAt: z.date().optional(),
+                isDeleted: z.boolean().optional(),
+            });
+            const sanitizedRequest = threadSchema
+                .omit({
+                    id: true,
+                    updatedAt: true,
+                    createdAt: true,
+                    isDeleted: true,
+                })
+                .parse(call.request);
+
+            const validationResult = threadSchema.safeParse(sanitizedRequest);
+
+            console.log(validationResult);
+            
+            if (!validationResult.success) {
+                callback({
+                    code: grpc.status.INVALID_ARGUMENT,
+                    details: "Invalid thread data",
+                });
+                return;
+            }
+
             const thread = await prisma.thread.create({
-                data: call.request,
+                data: sanitizedRequest,
             });
             callback(null, thread);
         } catch (error) {
@@ -111,7 +144,7 @@ server.addService(threadProto.ThreadService.service, {
                 where: {
                     id: call.request.id,
                 },
-                data: prepareUpdateThread(call.request),
+                data: sanitizeThreadRequest(call.request),
             });
             callback(null, updatedThread);
         } catch (error) {
@@ -130,7 +163,9 @@ server.addService(threadProto.ThreadService.service, {
     ) => {
         try {
             const thread = await prisma.thread.findUnique({
-                where: call.request,
+                where: {
+                    id: call.request.id,
+                },
             });
 
             if (!thread) {

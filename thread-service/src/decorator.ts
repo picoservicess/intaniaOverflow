@@ -1,6 +1,6 @@
 import { Thread } from "@prisma/client";
 
-export const prepareUpdateThread = (
+export const sanitizeThreadRequest = (
     thread: Partial<Thread>
 ): Partial<Thread> => {
     const { id, ...updatedThread } = thread;
