@@ -1,6 +1,6 @@
 import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
 import { PrismaClient, Thread } from "@prisma/client";
-import { Empty, ThreadList, ThreadId } from "./models";
+import { Empty, ThreadList, ThreadId, SearchQuery } from "./models";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { prepareUpdateThread } from "./decorator";
@@ -159,6 +159,38 @@ server.addService(threadProto.ThreadService.service, {
     },
 
     // TODO : searchThread
+    searchThreads: async (
+        call: ServerUnaryCall<SearchQuery, ThreadList>,
+        callback: sendUnaryData<ThreadList>
+    ) => {
+        try {
+            const threads = await prisma.thread.findMany({
+                where: {
+                    OR: [
+                        {
+                            title: {
+                                contains: call.request.query,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            body: {
+                                contains: call.request.query,
+                                mode: "insensitive",
+                            },
+                        },
+                    ],
+                },
+            });
+            callback(null, { threads });
+        } catch (error) {
+            console.error(`searchThreads: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
 });
 
 try {
