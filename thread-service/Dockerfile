@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the TypeScript code
-RUN npm run build
+RUN npx prisma generate & npm run build
 
 # Expose the port the app runs on
 EXPOSE 3000
