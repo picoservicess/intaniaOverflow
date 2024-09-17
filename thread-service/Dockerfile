@@ -2,7 +2,7 @@
 FROM node:18
 
 # Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /src
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
@@ -13,11 +13,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Build the TypeScript code
-RUN npx prisma generate & npm run build
+# Build the schema
+RUN npx prisma generate
 
 # Expose the port the app runs on
 EXPOSE 3000
 
 # Command to run the application
-CMD ["npm", "run", "start"]
+CMD ["npx", "ts-node", "src/server.ts"]
