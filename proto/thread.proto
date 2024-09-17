@@ -6,9 +6,14 @@ service ThreadService {
     rpc createThread (Thread) returns (Thread) {}
     rpc updateThread (Thread) returns (Thread) {}
     rpc deleteThread (ThreadId) returns (Empty) {}
+    rpc searchThreads (SearchQuery) returns (ThreadList) {}
 }
 
 message Empty{}
+
+message SearchQuery {
+    string query = 1;
+}
 
 message Thread {
     string id = 1;
