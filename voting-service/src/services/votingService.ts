@@ -4,7 +4,7 @@ import {
   applyDownVote,
   getCountVote,
   isUserVote,
-} from "../controllers/votingController";
+} from "../repositorys/votingRepository";
 
 export const votingService = {
   ApplyUpVote: async (

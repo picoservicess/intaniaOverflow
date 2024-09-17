@@ -23,9 +23,10 @@ const grpcRequest = (method: string, requestData: any) => {
 // Render the voting page with current vote counts
 app.get("/", async (req, res) => {
   try {
+    const { isThread, targetId } = req.body;
     const countVote = await grpcRequest("GetCountVote", {
-      isThread: req.body.isThread,
-      targetId: req.body.targetId,
+      isThread,
+      targetId,
     });
     res.status(200).render("vote", {
       upVotes: countVote.upVotes,
