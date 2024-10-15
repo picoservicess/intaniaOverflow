@@ -1,7 +1,6 @@
 import grpc from "@grpc/grpc-js";
 import protoLoader from "@grpc/proto-loader";
 
-// Path to your .proto file
 const PROTO_PATH = "../proto/voting.proto";
 // Load protobuf file
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
