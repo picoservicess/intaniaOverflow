@@ -21,7 +21,7 @@ message CountVoteRequest {
 message CountVoteResponse {
   int32 upVotes = 1;
   int32 downVotes = 2;
-  int32 netVotes = 3; // upVotes - downVotes
+  int32 netVotes = 3; 
 }
 
 message UserVoteResponse {
@@ -29,6 +29,6 @@ message UserVoteResponse {
 }
 
 message ActionResponse {
-  bool success = 1;    // Indicates success or failure
-  string message = 2;  // Optional message for more details
+  bool success = 1;   
+  string message = 2;  
 }

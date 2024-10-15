@@ -3,8 +3,7 @@ import protoLoader from "@grpc/proto-loader";
 import { votingService } from "./services/votingService";
 import { connectDB } from "./db/database";
 
-// Define the path to your .proto file
-const PROTO_PATH = "./src/proto/voting.proto";
+const PROTO_PATH = "../proto/voting.proto";
 console.log(`PROTO_PATH: ${PROTO_PATH}`);
 
 // Load the .proto file
