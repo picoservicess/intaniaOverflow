@@ -7,6 +7,7 @@ service ThreadService {
     rpc updateThread (Thread) returns (Thread) {}
     rpc deleteThread (ThreadId) returns (Empty) {}
     rpc searchThreads (SearchQuery) returns (ThreadList) {}
+    rpc healthCheck (Empty) returns (Empty) {}
 }
 
 message Empty{}

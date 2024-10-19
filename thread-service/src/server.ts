@@ -226,6 +226,14 @@ server.addService(threadProto.ThreadService.service, {
             });
         }
     },
+
+    // TODO : healthCheck
+    healthCheck: async (
+        _: ServerUnaryCall<Empty, Empty>,
+        callback: sendUnaryData<Empty>
+    ) => {
+        callback(null, {});
+    },
 });
 
 try {
