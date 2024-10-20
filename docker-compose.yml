@@ -4,7 +4,7 @@ services:
     asset-service:
         build: ./asset-service
         expose:
-            - '3000'
+            - "3000"
 
     thread-service:
         build:
@@ -12,14 +12,26 @@ services:
             dockerfile: ./thread-service/Dockerfile
         container_name: thread-service
         expose:
-            - '30043'
+            - "30043"
+        ports:
+            - "30043:30043"
         networks:
             - intania-overflow-network
 
     voting-service:
         build: ./voting-service
         expose:
-            - '3000'
+            - "3000"
+
+    # rabbitmq:
+    #     image: rabbitmq:4.0-management
+    #     container_name: rabbitmq
+    #     ports:
+    #         - "5672:5672"
+    #         - "15672:15672"
+    #     restart: always
+    #     networks:
+    #         - intania-overflow-network
 
 networks:
     intania-overflow-network:
