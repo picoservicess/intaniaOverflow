@@ -1,6 +1,16 @@
 version: "3.8"
 
 services:
+    mongodb:
+        image: mongo:latest
+        container_name: mongodb
+        ports:
+            - "27017:27017"
+        environment:
+            MONGO_INITDB_DATABASE: replies
+        networks:
+            - intania-overflow-network
+
     asset-service:
         build: ./asset-service
         container_name: asset-service
@@ -16,6 +26,20 @@ services:
             - "30043"
         ports:
             - "30043:30043"
+        networks:
+            - intania-overflow-network
+
+    reply-service:
+        build: ./reply-service
+        container_name: reply-service
+        expose:
+            - "5000"
+        ports:
+            - "5000:5000"
+        environment:
+            MONGO_URI: mongodb://mongodb:27017/replies
+        depends_on:
+            - mongodb
         networks:
             - intania-overflow-network
 
