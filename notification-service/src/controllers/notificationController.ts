@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAllNotificationsService, getAllNotificationsByStudentIdService, getUnreadNotificationsByStudentIdService, createNotificationService, markNotificationsAsSeenByStudentIdService } from "../services/notificationService";
 import { INotification } from "../models/notification";
+
 export const getAllNotifications = async (req: Request, res: Response): Promise<void> => {
     try {
         const notifications = await getAllNotificationsService();

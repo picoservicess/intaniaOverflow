@@ -29,7 +29,6 @@ export const getUnreadNotificationsByStudentIdRepo = async (studentId: string): 
 
 export const createNotificationRepo = async (notificationData: INotification): Promise<INotification> => {
     try {
-
         const newNotification = new Notification(notificationData);
         return await newNotification.save();
     } catch (error) {
