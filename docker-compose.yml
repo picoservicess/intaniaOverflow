@@ -3,6 +3,7 @@ version: "3.8"
 services:
     asset-service:
         build: ./asset-service
+        container_name: asset-service
         expose:
             - "3000"
 
@@ -19,9 +20,15 @@ services:
             - intania-overflow-network
 
     voting-service:
-        build: ./voting-service
+        build: 
+            context: ./
+            dockerfile: ./voting-service/Dockerfile
         expose:
             - "3000"
+        ports:
+            - "3000:3000"
+        networks:
+            - intania-overflow-network
 
     # rabbitmq:
     #     image: rabbitmq:4.0-management

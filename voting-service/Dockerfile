@@ -2,19 +2,20 @@
 FROM node:18
 
 # Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /usr/src/voting-service
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY voting-service/package*.json /usr/src/voting-service
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the application code
-COPY . .
+ADD voting-service /usr/src/voting-service
 
-# Build the TypeScript code
-RUN npm run build
+# Copy the proto folder into the project (one level up from voting-service)
+RUN mkdir -p /usr/src/proto
+ADD proto/*.proto /usr/src/proto
 
 # Expose the port the app runs on
 EXPOSE 3000
