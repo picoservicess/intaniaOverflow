@@ -1,17 +1,26 @@
-version: '3'
+version: "3.8"
 
 services:
     asset-service:
         build: ./asset-service
         expose:
             - '3000'
-    
+
     thread-service:
-        build: ./thread-service
+        build:
+            context: ./
+            dockerfile: ./thread-service/Dockerfile
+        container_name: thread-service
         expose:
-            - '3000'
-    
+            - '30043'
+        networks:
+            - intania-overflow-network
+
     voting-service:
         build: ./voting-service
         expose:
             - '3000'
+
+networks:
+    intania-overflow-network:
+        driver: bridge

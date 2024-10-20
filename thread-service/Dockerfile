@@ -2,22 +2,23 @@
 FROM node:18
 
 # Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /usr/src/thread-service
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copy package.json and package-lock.json into the working directory
+COPY thread-service/package*.json /usr/src/thread-service
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY . .
+# Copy the rest of the application code into the working directory
+ADD thread-service /usr/src/thread-service
 
-# Build the TypeScript code
-RUN npm run build
+# Copy the proto folder into the project (one level up from thread-service)
+RUN mkdir -p /usr/src/proto
+ADD proto/*.proto /usr/src/proto
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 30043
 
 # Command to run the application
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]

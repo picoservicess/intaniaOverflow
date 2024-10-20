@@ -1,34 +1,272 @@
-import express, { Request, Response, type Express } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import { pino } from "pino";
+import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
+import { PrismaClient, Thread } from "@prisma/client";
+import { Empty, ThreadList, SearchQuery, ThreadId } from "./models";
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
+import { sanitizeThreadRequest } from "./decorator";
+import { z } from "zod";
+import amqp, { Connection } from 'amqplib/callback_api'
 
-import { openAPIRouter } from "./api-docs/openAPIRouter";
-import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter";
-import { threadRouter } from "./api/thread/threadRouter";
+const PROTO_PATH = "../proto/thread.proto";
 
-import errorHandler from "./common/middleware/errorHandler";
+var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    arrays: true,
+});
 
-const logger = pino({ name: "server start" });
-const app: Express = express();
+var threadProto = grpc.loadPackageDefinition(packageDefinition) as any;
 
-// Set the application to trust the reverse proxy
-app.set("trust proxy", true);
+const prisma = new PrismaClient();
 
-// Middlewares
-app.use(express.json()); // parse json request body
-app.use(express.urlencoded({ extended: true })); // parse urlencoded request body
-app.use(cors()); // enable cors
-app.use(helmet()); // set security HTTP headers
+console.log("Database connected");
 
-// Routes
-app.use("/health-check", healthCheckRouter);
-app.use("/thread", threadRouter);
+const server = new grpc.Server();
 
-// Swagger UI
-app.use(openAPIRouter);
+server.addService(threadProto.ThreadService.service, {
+    getAllThreads: async (
+        _: ServerUnaryCall<Empty, ThreadList>,
+        callback: sendUnaryData<ThreadList>
+    ) => {
+        try {
+            const threads = await prisma.thread.findMany({
+                where: {
+                    isDeleted: false,
+                },
+            });
+            callback(null, { threads });
+        } catch (error) {
+            console.error(`getAllThreads: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
 
-// Error handlers
-app.use(errorHandler());
+    getThreadById: async (
+        call: ServerUnaryCall<ThreadId, Thread>,
+        callback: sendUnaryData<Thread>
+    ) => {
+        try {
+            const thread = await prisma.thread.findUnique({
+                where: {
+                    id: call.request.id,
+                    isDeleted: false,
+                },
+            });
+            if (thread) {
+                callback(null, thread);
+            } else {
+                callback({
+                    code: grpc.status.NOT_FOUND,
+                    details: "Not found",
+                });
+            }
+        } catch (error) {
+            console.error(`getThreadById: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
 
-export { app, logger };
+    createThread: async (
+        call: ServerUnaryCall<Thread, Thread>,
+        callback: sendUnaryData<Thread>
+    ) => {
+        try {
+            const threadSchema = z.object({
+                id: z.string().uuid().optional(),
+                title: z.string().min(1),
+                body: z.string().min(1),
+                assetUrls: z.array(z.string()).optional(),
+                tags: z.array(z.string()).optional(),
+                authorId: z.string().uuid(),
+                createdAt: z.date().optional(),
+                updatedAt: z.date().optional(),
+                isDeleted: z.boolean().optional(),
+            });
+            const sanitizedRequest = threadSchema
+                .omit({
+                    id: true,
+                    updatedAt: true,
+                    createdAt: true,
+                    isDeleted: true,
+                })
+                .parse(call.request);
+
+            const validationResult = threadSchema.safeParse(sanitizedRequest);
+
+            console.log(validationResult);
+            
+            if (!validationResult.success) {
+                callback({
+                    code: grpc.status.INVALID_ARGUMENT,
+                    details: "Invalid thread data",
+                });
+                return;
+            }
+
+            const thread = await prisma.thread.create({
+                data: sanitizedRequest,
+            });
+            callback(null, thread);
+        } catch (error) {
+            console.error(`createThread: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    updateThread: async (
+        call: ServerUnaryCall<Thread, Thread>,
+        callback: sendUnaryData<Thread>
+    ) => {
+        try {
+            const thread = await prisma.thread.findUnique({
+                where: {
+                    id: call.request.id,
+                    isDeleted: false,
+                },
+            });
+
+            if (!thread) {
+                callback({
+                    code: grpc.status.NOT_FOUND,
+                    details: "Not found",
+                });
+            }
+            const updatedThread = await prisma.thread.update({
+                where: {
+                    id: call.request.id,
+                },
+                data: sanitizeThreadRequest(call.request),
+            });
+            callback(null, updatedThread);
+            console.log('⏳ Connecting to RabbitMQ...')
+            amqp.connect('amqp://localhost', (errorConnect: Error, connection: Connection) => {
+                if (errorConnect) {
+                    console.log('🫵 Error connecting to RabbitMQ')
+                    throw errorConnect;
+                }
+                connection.createChannel((errorChannel: Error, channel) => {
+                    if (errorChannel) {
+                        console.log('🫵 Error creating channel')
+                        throw errorChannel;
+                    }
+                    console.log('🐇 Connected to RabbitMQ')
+                    var queue = 'thread_queue'
+                    channel.assertQueue(queue, {
+                        durable: true
+                    });
+                    channel.sendToQueue(queue, Buffer.from(JSON.stringify(updatedThread)), {persistent: true})
+                    console.log('✅ Successfully sent %s', updatedThread)
+                })
+            })
+        } catch (error) {
+            console.error(`updateThread: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    // TODO : deleteThread
+    deleteThread: async (
+        call: ServerUnaryCall<ThreadId, Empty>,
+        callback: sendUnaryData<Empty>
+    ) => {
+        try {
+            const thread = await prisma.thread.findUnique({
+                where: {
+                    id: call.request.id,
+                },
+            });
+
+            if (!thread) {
+                callback({
+                    code: grpc.status.NOT_FOUND,
+                    details: "Not found",
+                });
+            }
+
+            await prisma.thread.update({
+                where: {
+                    id: call.request.id,
+                },
+                data: {
+                    isDeleted: true,
+                },
+            });
+            callback(null, {});
+        } catch (error) {
+            console.error(`deleteThread: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    // TODO : searchThread
+    searchThreads: async (
+        call: ServerUnaryCall<SearchQuery, ThreadList>,
+        callback: sendUnaryData<ThreadList>
+    ) => {
+        try {
+            const threads = await prisma.thread.findMany({
+                where: {
+                    OR: [
+                        {
+                            title: {
+                                contains: call.request.query,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            body: {
+                                contains: call.request.query,
+                                mode: "insensitive",
+                            },
+                        },
+                    ],
+                },
+            });
+            callback(null, { threads });
+        } catch (error) {
+            console.error(`searchThreads: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    // TODO : healthCheck
+    healthCheck: async (
+        _: ServerUnaryCall<Empty, Empty>,
+        callback: sendUnaryData<Empty>
+    ) => {
+        callback(null, {});
+    },
+});
+
+try {
+    server.bindAsync(
+        "127.0.0.1:30043",
+        grpc.ServerCredentials.createInsecure(),
+        () => {
+            console.log(
+                "Thread Service Server running at http://127.0.0.1:30043"
+            );
+        }
+    );
+} catch (error) {
+    console.error(`Failed to bind server: ${error}`);
+}
