@@ -5,7 +5,7 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { sanitizeThreadRequest } from "./decorator";
 import { z } from "zod";
-import amqp, { Connection } from 'amqplib/callback_api'
+import amqp, { Connection, Channel, Message } from 'amqplib/callback_api';
 
 const PROTO_PATH = "../proto/thread.proto";
 
@@ -160,7 +160,7 @@ server.addService(threadProto.ThreadService.service, {
                         throw errorChannel;
                     }
                     console.log('🐇 Connected to RabbitMQ')
-                    var queue = 'thread_queue'
+                    var queue = 'notification_queue'
                     channel.assertQueue(queue, {
                         durable: true
                     });
