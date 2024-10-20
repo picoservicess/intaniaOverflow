@@ -23,6 +23,10 @@ console.log("Database connected");
 
 const server = new grpc.Server();
 
+const HOST = process.env.THREAD_SERVICE_HOST || "0.0.0.0";
+const PORT = Number(process.env.THREAD_SERVICE_PORT) || 30043;
+const address = `${HOST}:${PORT}`;
+
 server.addService(threadProto.ThreadService.service, {
     getAllThreads: async (
         _: ServerUnaryCall<Empty, ThreadList>,
@@ -100,7 +104,7 @@ server.addService(threadProto.ThreadService.service, {
             const validationResult = threadSchema.safeParse(sanitizedRequest);
 
             console.log(validationResult);
-            
+
             if (!validationResult.success) {
                 callback({
                     code: grpc.status.INVALID_ARGUMENT,
@@ -238,12 +242,15 @@ server.addService(threadProto.ThreadService.service, {
 
 try {
     server.bindAsync(
-        "127.0.0.1:30043",
+        address,
         grpc.ServerCredentials.createInsecure(),
-        () => {
-            console.log(
-                "Thread Service Server running at http://127.0.0.1:30043"
-            );
+        (error, port) => {
+            if (error) {
+                console.error("Error binding server:", error);
+                return;
+            }
+            console.log(`Thread service server is running on port ${port}`);
+            server.start();
         }
     );
 } catch (error) {
