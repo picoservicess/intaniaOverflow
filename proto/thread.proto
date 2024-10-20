@@ -17,7 +17,7 @@ message SearchQuery {
 }
 
 message Thread {
-    string id = 1;
+    string threadId = 1;
     string title = 2;
     string body = 3;
     repeated string assetUrls = 4;
@@ -33,5 +33,5 @@ message ThreadList {
 }
 
 message ThreadId {
-    string id = 1;
+    string ThreadId = 1;
 }

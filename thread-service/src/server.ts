@@ -55,7 +55,7 @@ server.addService(threadProto.ThreadService.service, {
         try {
             const thread = await prisma.thread.findUnique({
                 where: {
-                    id: call.request.id,
+                    threadId: call.request.threadId,
                     isDeleted: false,
                 },
             });
@@ -133,7 +133,7 @@ server.addService(threadProto.ThreadService.service, {
         try {
             const thread = await prisma.thread.findUnique({
                 where: {
-                    id: call.request.id,
+                    threadId: call.request.threadId,
                     isDeleted: false,
                 },
             });
@@ -146,7 +146,7 @@ server.addService(threadProto.ThreadService.service, {
             }
             const updatedThread = await prisma.thread.update({
                 where: {
-                    id: call.request.id,
+                    threadId: call.request.threadId,
                 },
                 data: sanitizeThreadRequest(call.request),
             });
@@ -168,7 +168,7 @@ server.addService(threadProto.ThreadService.service, {
         try {
             const thread = await prisma.thread.findUnique({
                 where: {
-                    id: call.request.id,
+                    threadId: call.request.threadId,
                 },
             });
 
@@ -181,7 +181,7 @@ server.addService(threadProto.ThreadService.service, {
 
             await prisma.thread.update({
                 where: {
-                    id: call.request.id,
+                    threadId: call.request.threadId,
                 },
                 data: {
                     isDeleted: true,
