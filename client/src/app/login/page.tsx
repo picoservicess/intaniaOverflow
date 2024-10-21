@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/card";
+import { Button } from "@/components/button";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
-import CUIcon from '../assets/account-link-logo-cu.svg';
+import CUIcon from "../assets/account-link-logo-cu.svg";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -14,10 +14,10 @@ const LoginPage = () => {
   const handleChulaSSOSignIn = async () => {
     try {
       router.push(
-        'https://account.it.chula.ac.th/login?serviceName=app.vercel.sci-locker&service=http://localhost:3000/api/auth/callback/chula-sso'
+        "https://account.it.chula.ac.th/login?serviceName=app.vercel.sci-locker&service=http://localhost:3000/api/auth/callback/chula-sso"
       );
     } catch (error) {
-      console.error('Error signing in with Chula SSO:', error);
+      console.error("Error signing in with Chula SSO:", error);
       // TODO: Handle sign-in error (e.g., show error message to user)
     }
   };
@@ -26,7 +26,9 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Login
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Button
