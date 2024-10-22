@@ -1,11 +1,21 @@
 version: "3.8"
 
 services:
-    # asset-service:
-    #     build: ./asset-service
-    #     container_name: asset-service
-    #     expose:
-    #         - "3000"
+    mongodb:
+        image: mongo:latest
+        container_name: mongodb
+        ports:
+            - "27017:27017"
+        environment:
+            MONGO_INITDB_DATABASE: replies
+        networks:
+            - intania-overflow-network
+
+    asset-service:
+        build: ./asset-service
+        container_name: asset-service
+        expose:
+            - "3000"
 
     # thread-service:
     #     build:
@@ -19,16 +29,30 @@ services:
     #     networks:
     #         - intania-overflow-network
 
-    voting-service:
-        build: 
-            context: ./
-            dockerfile: ./voting-service/Dockerfile
+    reply-service:
+        build: ./reply-service
+        container_name: reply-service
         expose:
-            - "3000"
+            - "5000"
         ports:
-            - "3000:3000"
+            - "5000:5000"
+        environment:
+            MONGO_URI: mongodb://mongodb:27017/replies
+        depends_on:
+            - mongodb
         networks:
             - intania-overflow-network
+
+    # voting-service:
+    #     build: 
+    #         context: ./
+    #         dockerfile: ./voting-service/Dockerfile
+    #     expose:
+    #         - "3000"
+    #     ports:
+    #         - "3000:3000"
+    #     networks:
+    #         - intania-overflow-network
 
     # rabbitmq:
     #     image: rabbitmq:4.0-management
