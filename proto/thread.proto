@@ -1,24 +1,25 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 service ThreadService {
     // Get all threads
     rpc getAllThreads (google.protobuf.Empty) returns (ThreadList) {
         option (google.api.http) = {
-            get: "/v1/threads"
+            get: "/threads"
         };
     }
 
     // Get thread by ID
     rpc getThreadById (ThreadId) returns (Thread) {
         option (google.api.http) = {
-            get: "/v1/threads/{ThreadId}"
+            get: "/threads/{ThreadId}"
         };
     }
 
     // Create new thread
     rpc createThread (Thread) returns (Thread) {
         option (google.api.http) = {
-            post: "/v1/threads"
+            post: "/threads"
             body: "*"
         };
     }
@@ -26,7 +27,7 @@ service ThreadService {
     // Update existing thread
     rpc updateThread (Thread) returns (Thread) {
         option (google.api.http) = {
-            put: "/v1/threads/{threadId}"
+            put: "/threads/{threadId}"
             body: "*"
         };
     }
@@ -34,21 +35,21 @@ service ThreadService {
     // Delete thread
     rpc deleteThread (ThreadId) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            delete: "/v1/threads/{ThreadId}"
+            delete: "/threads/{ThreadId}"
         };
     }
 
     // Search threads
     rpc searchThreads (SearchQuery) returns (ThreadList) {
         option (google.api.http) = {
-            get: "/v1/threads/search"
+            get: "/threads/search"
         };
     }
 
     // Health check
     rpc healthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            get: "/v1/health"
+            get: "/health"
         };
     }
 }
