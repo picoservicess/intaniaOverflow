@@ -1,23 +1,23 @@
 version: "3.8"
 
 services:
-    asset-service:
-        build: ./asset-service
-        container_name: asset-service
-        expose:
-            - "3000"
+    # asset-service:
+    #     build: ./asset-service
+    #     container_name: asset-service
+    #     expose:
+    #         - "3000"
 
-    thread-service:
-        build:
-            context: ./
-            dockerfile: ./thread-service/Dockerfile
-        container_name: thread-service
-        expose:
-            - "30043"
-        ports:
-            - "30043:30043"
-        networks:
-            - intania-overflow-network
+    # thread-service:
+    #     build:
+    #         context: ./
+    #         dockerfile: ./thread-service/Dockerfile
+    #     container_name: thread-service
+    #     expose:
+    #         - "30043"
+    #     ports:
+    #         - "30043:30043"
+    #     networks:
+    #         - intania-overflow-network
 
     voting-service:
         build: 
@@ -39,6 +39,35 @@ services:
     #     restart: always
     #     networks:
     #         - intania-overflow-network
+
+    postgres:
+        image: postgres:latest
+        environment:
+            POSTGRES_USER: yourusername
+            POSTGRES_PASSWORD: yourpassword
+            POSTGRES_DB: userdatabase
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./postgres_data:/var/lib/postgresql/data
+        networks:
+            - intania-overflow-network
+
+    user-service:
+        build: 
+            context: ./
+            dockerfile: ./user-service/Dockerfile
+        container_name: user-service
+        expose:
+            - "50051"
+        ports:
+            - "50051:50051"
+        depends_on:
+            - postgres
+        networks:
+            - intania-overflow-network
+        environment:
+            DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
 
 networks:
     intania-overflow-network:
