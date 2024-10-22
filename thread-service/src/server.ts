@@ -53,6 +53,7 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<Thread>
     ) => {
         try {
+            console.log(call.request);
             const thread = await prisma.thread.findUnique({
                 where: {
                     threadId: call.request.threadId,
@@ -82,7 +83,7 @@ server.addService(threadProto.ThreadService.service, {
     ) => {
         try {
             const threadSchema = z.object({
-                id: z.string().uuid().optional(),
+                threadId: z.string().uuid().optional(),
                 title: z.string().min(1),
                 body: z.string().min(1),
                 assetUrls: z.array(z.string()).optional(),
@@ -94,7 +95,7 @@ server.addService(threadProto.ThreadService.service, {
             });
             const sanitizedRequest = threadSchema
                 .omit({
-                    id: true,
+                    threadId: true,
                     updatedAt: true,
                     createdAt: true,
                     isDeleted: true,
