@@ -36,7 +36,7 @@ amqp.connect('amqp://localhost', function(errorConnect: Error, connection: Conne
         const secs = msg.content.toString().split('.').length - 1;
         const message = JSON.parse(msg.content.toString()) as
         {
-          id: string;
+          threadId: string;
           title: string;
           body: string;
           assetUrls: string[];
@@ -51,7 +51,7 @@ amqp.connect('amqp://localhost', function(errorConnect: Error, connection: Conne
         try {
           const notificationData: INotification = {
             studentId: message.authorId as string,
-            targetId: message.id as string,       
+            targetId: message.threadId as string,       
             isThread: true,              
             isReply: false,              
             isUser: false,                 
