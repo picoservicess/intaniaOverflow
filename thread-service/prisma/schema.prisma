@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
@@ -15,13 +15,13 @@ datasource db {
 }
 
 model Thread {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  body        String
-  assetUrls   String[]
-  tags        String[]
-  authorId    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-  isDeleted   Boolean  @default(false)
+  threadId  String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  body      String
+  assetUrls String[]
+  tags      String[]
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
 }
