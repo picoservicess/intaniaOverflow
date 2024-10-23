@@ -14,11 +14,11 @@ RUN npm install
 ADD user-service /usr/src/user-service
 
 # Copy the proto folder into the project (one level up from thread-service)
-RUN mkdir -p /usr/src/proto
-ADD proto/*.proto /usr/src/proto
+RUN mkdir -p /usr/proto
+ADD proto/*.proto /usr/proto
 
 # Expose the port the app runs on
-EXPOSE 50051
+EXPOSE 5005
 
 # Command to run the application
 CMD ["npm", "start"]

@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 console.log("Database connected");
 
-const PROTO_PATH = '../proto/user.proto';
+const PROTO_PATH = '../../proto/user.proto';
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
@@ -212,7 +212,12 @@ function main() {
     ViewPinned: viewPinned,
     GetUserDetail: getUserDetail,
   });
-  const address = '0.0.0.0:50051';
+
+  const host = process.env.HOST || '0.0.0.0';
+  const port = process.env.PORT || '5005';
+
+  const address = `${host}:${port}`;
+
   server.bindAsync(address, grpc.ServerCredentials.createInsecure(), () => {
     console.log(`Server running at ${address}`);
     server.start();

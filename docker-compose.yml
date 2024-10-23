@@ -1,19 +1,9 @@
 version: "3.8"
 
-services:
-    mongodb:
-        image: mongo:latest
-        expose:
-            - "27017"
-        ports:
-            - "27017:27017"
-        environment:
-            MONGO_INITDB_DATABASE: replies
-        networks:
-            - intania-overflow-network
-    
+services:    
     postgres:
         image: postgres:latest
+        container_name: postgres
         expose:
             - "5432"
         ports:
@@ -27,85 +17,104 @@ services:
         networks:
             - intania-overflow-network
 
+    rabbitmq:
+        image: rabbitmq:4.0-management
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        restart: always
+        networks:
+            - intania-overflow-network
+
     asset-service:
         build: ./asset-service
         container_name: asset-service
-        expose:
-            - "3000"
-        ports:
-            - "3000:3000"
-        networks:
-            - intania-overflow-network
-
-    # thread-service:
-    #     build:
-    #         context: ./
-    #         dockerfile: ./thread-service/Dockerfile
-    #     container_name: thread-service
-    #     expose:
-    #         - "30043"
-    #     ports:
-    #         - "30043:30043"
-    #     networks:
-    #         - intania-overflow-network
-
-    reply-service:
-        build: ./reply-service
-        container_name: reply-service
-        expose:
-            - "5000"
-        ports:
-            - "5000:5000"
-        environment:
-            MONGO_URI: mongodb://mongodb:27017/replies
-        depends_on:
-            - mongodb
-        networks:
-            - intania-overflow-network
-
-    voting-service:
-        build: 
-            context: ./
-            dockerfile: ./reply-service/Dockerfile
-        container_name: reply-service
         expose:
             - "5001"
         ports:
             - "5001:5001"
         environment:
-            MONGO_URI: mongodb://mongodb:27017/replies
+            PORT: 5001
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
-        depends_on:
-            - mongodb
         networks:
             - intania-overflow-network
 
-    # rabbitmq:
-    #     image: rabbitmq:4.0-management
-    #     container_name: rabbitmq
+    # notification-service:
+    #     build: ./notification-service
+    #     container_name: asset-service
+    #     expose:
+    #         - "5002"
     #     ports:
-    #         - "5672:5672"
-    #         - "15672:15672"
-    #     restart: always
+    #         - "5002:5002"
+    #     environment:
+    #         HOST: localhost
+    #         PORT: 5002
     #     networks:
     #         - intania-overflow-network
 
+    reply-service:
+        build:
+            context: ./
+            dockerfile: ./reply-service/Dockerfile
+        container_name: reply-service
+        expose:
+            - "5003"
+        ports:
+            - "5003:5003"
+        environment:
+            PORT: 5003
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
+
+    thread-service:
+        build:
+            context: ./
+            dockerfile: ./thread-service/Dockerfile
+        container_name: thread-service
+        expose:
+            - "5004"
+        ports:
+            - "5004:5004"
+        environment:
+            PORT: 5004
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
+    
     user-service:
         build: 
             context: ./
             dockerfile: ./user-service/Dockerfile
         container_name: user-service
         expose:
-            - "50051"
+            - "5005"
         ports:
-            - "50051:50051"
+            - "5005:5005"
+        environment:
+            PORT: 5005
+            DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         depends_on:
             - postgres
         networks:
             - intania-overflow-network
+
+    voting-service:
+        build: 
+            context: ./
+            dockerfile: ./voting-service/Dockerfile
+        container_name: voting-service
+        expose:
+            - "5006"
+        ports:
+            - "5006:5006"
         environment:
-            DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
+            PORT: 5006
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
 
 networks:
     intania-overflow-network:

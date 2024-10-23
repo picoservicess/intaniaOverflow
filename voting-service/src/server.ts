@@ -3,7 +3,7 @@ import protoLoader from "@grpc/proto-loader";
 import { votingService } from "./services/votingService";
 import { connectDB } from "./db/database";
 
-const PROTO_PATH = "../proto/voting.proto";
+const PROTO_PATH = "../../proto/voting.proto";
 console.log(`PROTO_PATH: ${PROTO_PATH}`);
 
 // Load the .proto file
@@ -30,7 +30,7 @@ async function main() {
   server.addService(votingProto.VotingService.service, votingService);
 
   // Define the port
-  const port = process.env.PORT || "5000";
+  const port = process.env.PORT || "5006";
 
   // Start the server
   server.bindAsync(

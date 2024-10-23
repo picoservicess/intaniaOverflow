@@ -8,7 +8,7 @@ import { z } from "zod";
 import { rabbitMQManager } from "./rabbitMQManager";
 // import amqp, { Connection, Channel, Message } from 'amqplib/callback_api';
 
-const PROTO_PATH = "../proto/thread.proto";
+const PROTO_PATH = "../../proto/thread.proto";
 
 var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
     keepCase: true,
@@ -25,8 +25,8 @@ console.log("Database connected");
 
 const server = new grpc.Server();
 
-const HOST = process.env.THREAD_SERVICE_HOST || "0.0.0.0";
-const PORT = Number(process.env.THREAD_SERVICE_PORT) || 30043;
+const HOST = process.env.HOST || "0.0.0.0";
+const PORT = Number(process.env.PORT) || 5004;
 const address = `${HOST}:${PORT}`;
 
 server.addService(threadProto.ThreadService.service, {
