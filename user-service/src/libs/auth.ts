@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
-import cookie from 'cookie';
 import * as grpc from '@grpc/grpc-js';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
+import { decodeJWT } from './token';
 
 const prisma = new PrismaClient();
 
@@ -32,15 +32,6 @@ interface CuAuthResponse {
   firstnameth: string;
   lastnameth: string;
   ouid: string;
-}
-
-export const decodeJWT = (token: string): { userId: string } | null => {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    return decoded;
-  } catch (error) {
-    return null;
-  }
 }
 
 export const getAuthenticatedUserId = async (metadata: grpc.Metadata): Promise<string | null> => {

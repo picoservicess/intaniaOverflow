@@ -2,22 +2,37 @@ import express from "express";
 import db from "../db/conn.mjs";
 import { ObjectId } from "mongodb";
 
+import { decodeJWT } from "../../user-service/token.mjs"
+
 const router = express.Router();
 
 // Create a new reply
 router.post("/", async (req, res) => {
   try {
+    // Get authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Unauthorized: No bearer token provided" });
+    }
+
+    // Extract and decode JWT token
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log(token)
+    const decodedToken = decodeJWT(token);
+    console.log(decodedToken)
+    if (!decodedToken) {
+      return res.status(401).json({ error: "Unauthorized: Invalid token" });
+    }
+
     // Extract the required fields from the request body
-    const { threadId, text, assetUrls = [], userId } = req.body;
+    const { threadId, text, assetUrls = [] } = req.body;
+
+    // Use the userId from the decoded JWT
+    const userId = decodedToken.userId;
 
     // Check if threadId and text are provided
     if (!threadId || !text) {
       return res.status(400).json({ error: "threadId and text are required" });
-    }
-
-    // Check if userId is provided
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized: uid is required" });
     }
 
     // Inser the new reply into the database

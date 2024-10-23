@@ -3,7 +3,8 @@ version: "3.8"
 services:
     mongodb:
         image: mongo:latest
-        container_name: mongodb
+        expose:
+            - "27017"
         ports:
             - "27017:27017"
         environment:
@@ -11,11 +12,26 @@ services:
         networks:
             - intania-overflow-network
 
-    asset-service:
-        build: ./asset-service
-        container_name: asset-service
+    postgres:
+        image: postgres:latest
+        environment:
+            POSTGRES_USER: yourusername
+            POSTGRES_PASSWORD: yourpassword
+            POSTGRES_DB: userdatabase
         expose:
-            - "3000"
+            - "5432"
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./postgres_data:/var/lib/postgresql/data
+        networks:
+            - intania-overflow-network
+
+    # asset-service:
+    #     build: ./asset-service
+    #     container_name: asset-service
+    #     expose:
+    #         - "3000"
 
     # thread-service:
     #     build:
@@ -30,14 +46,17 @@ services:
     #         - intania-overflow-network
 
     reply-service:
-        build: ./reply-service
+        build: 
+            context: ./
+            dockerfile: ./reply-service/Dockerfile
         container_name: reply-service
         expose:
-            - "5000"
+            - "5001"
         ports:
-            - "5000:5000"
+            - "5001:5001"
         environment:
             MONGO_URI: mongodb://mongodb:27017/replies
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         depends_on:
             - mongodb
         networks:
@@ -64,19 +83,6 @@ services:
     #     networks:
     #         - intania-overflow-network
 
-    postgres:
-        image: postgres:latest
-        environment:
-            POSTGRES_USER: yourusername
-            POSTGRES_PASSWORD: yourpassword
-            POSTGRES_DB: userdatabase
-        ports:
-            - "5432:5432"
-        volumes:
-            - ./postgres_data:/var/lib/postgresql/data
-        networks:
-            - intania-overflow-network
-
     user-service:
         build: 
             context: ./
@@ -92,6 +98,7 @@ services:
             - intania-overflow-network
         environment:
             DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
 
 networks:
     intania-overflow-network:

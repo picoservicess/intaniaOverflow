@@ -14,7 +14,7 @@ const LoginPage = () => {
   const handleChulaSSOSignIn = async () => {
     try {
       router.push(
-        'https://account.it.chula.ac.th/login?serviceName=app.vercel.sci-locker&service=http://localhost:3000/api/auth/callback/chula-sso'
+        'https://account.it.chula.ac.th/login?serviceName=app.vercel.sci-locker&service=http://localhost:3001/api/auth/callback/chula-sso'
       );
     } catch (error) {
       console.error('Error signing in with Chula SSO:', error);
