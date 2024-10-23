@@ -40,10 +40,6 @@ RUN cd /usr/src/user-service && \
   mv dist/token.js dist/token.mjs && \
   cp dist/token.mjs ./token.mjs && \
   cp dist/token.d.ts ./token.d.ts
-# tsc --project tsconfig.json && \
-# mv dist/token.js dist/token.mjs && \
-# cp dist/token.mjs /usr/src/reply-service/src/token.mjs && \
-# cp dist/token.d.ts /usr/src/reply-service/src/token.d.ts
 
 RUN cd /usr/src/reply-service
 

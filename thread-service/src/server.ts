@@ -82,7 +82,7 @@ server.addService(threadProto.ThreadService.service, {
     ) => {
         try {
             const threadSchema = z.object({
-                id: z.string().uuid().optional(),
+                threadId: z.string().uuid().optional(),
                 title: z.string().min(1),
                 body: z.string().min(1),
                 assetUrls: z.array(z.string()).optional(),
@@ -94,7 +94,7 @@ server.addService(threadProto.ThreadService.service, {
             });
             const sanitizedRequest = threadSchema
                 .omit({
-                    id: true,
+                    threadId: true,
                     updatedAt: true,
                     createdAt: true,
                     isDeleted: true,
@@ -102,8 +102,6 @@ server.addService(threadProto.ThreadService.service, {
                 .parse(call.request);
 
             const validationResult = threadSchema.safeParse(sanitizedRequest);
-
-            console.log(validationResult);
 
             if (!validationResult.success) {
                 callback({

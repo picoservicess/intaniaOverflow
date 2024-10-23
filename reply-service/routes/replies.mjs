@@ -17,9 +17,7 @@ router.post("/", async (req, res) => {
 
     // Extract and decode JWT token
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    console.log(token)
     const decodedToken = decodeJWT(token);
-    console.log(decodedToken)
     if (!decodedToken) {
       return res.status(401).json({ error: "Unauthorized: Invalid token" });
     }
