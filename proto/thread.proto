@@ -33,5 +33,5 @@ message ThreadList {
 }
 
 message ThreadId {
-    string ThreadId = 1;
+    string threadId = 1;
 }
