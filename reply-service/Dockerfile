@@ -15,7 +15,7 @@ COPY reply-service/  /usr/src/reply-service
 
 # Copy the user-service/libs directory
 RUN mkdir -p /usr/src/user-service/src
-COPY user-service/src/libs/token.ts /usr/src/user-service/src/token.ts
+COPY user-service/src/libs/token.ts /usr/src/user-service/src/libs/token.ts
 COPY user-service/package*.json /usr/src/user-service
 
 # Create a tsconfig.json for the libs.ts compilation
@@ -34,17 +34,17 @@ RUN echo '{ \
 
 # Compile libs.ts to mjs
 RUN cd /usr/src/user-service && \
-  npm install && \
-  npm install -g typescript && \
-  tsc --project tsconfig.json && \
-  mv dist/token.js dist/token.mjs && \
-  cp dist/token.mjs ./token.mjs && \
-  cp dist/token.d.ts ./token.d.ts
+  npm install
+# npm install -g typescript && \
+# tsc --project tsconfig.json && \
+# mv dist/token.js dist/token.mjs && \
+# cp dist/token.mjs ./token.mjs && \
+# cp dist/token.d.ts ./token.d.ts
 
 RUN cd /usr/src/reply-service
 
 # Expose the port the app runs on
-EXPOSE 5001
+EXPOSE 5003
 
 # Command to run the application
 CMD ["npm", "start"]
