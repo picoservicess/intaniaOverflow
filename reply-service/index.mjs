@@ -4,7 +4,7 @@ import "./loadEnv.mjs";
 import "express-async-errors";
 import replies from "./routes/replies.mjs";
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 const app = express();
 
 app.use(cors());

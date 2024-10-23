@@ -1,0 +1,26 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String   @id @default(uuid()) // Changed to UUID
+  studentId     String   @unique
+  email         String   @unique
+  displayname   String
+  firstname     String
+  lastname      String
+  firstnameth   String
+  lastnameth    String
+  profileImage  String?
+  pinnedThreads String[]
+  roles         String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([studentId])
+}

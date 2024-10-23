@@ -3,11 +3,27 @@ version: "3.8"
 services:
     mongodb:
         image: mongo:latest
-        container_name: mongodb
+        expose:
+            - "27017"
         ports:
             - "27017:27017"
         environment:
             MONGO_INITDB_DATABASE: replies
+        networks:
+            - intania-overflow-network
+    
+    postgres:
+        image: postgres:latest
+        expose:
+            - "5432"
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: yourusername
+            POSTGRES_PASSWORD: yourpassword
+            POSTGRES_DB: userdatabase
+        volumes:
+            - ./postgres_data:/var/lib/postgresql/data
         networks:
             - intania-overflow-network
 
@@ -16,18 +32,22 @@ services:
         container_name: asset-service
         expose:
             - "3000"
-
-    thread-service:
-        build:
-            context: ./
-            dockerfile: ./thread-service/Dockerfile
-        container_name: thread-service
-        expose:
-            - "30043"
         ports:
-            - "30043:30043"
+            - "3000:3000"
         networks:
             - intania-overflow-network
+
+    # thread-service:
+    #     build:
+    #         context: ./
+    #         dockerfile: ./thread-service/Dockerfile
+    #     container_name: thread-service
+    #     expose:
+    #         - "30043"
+    #     ports:
+    #         - "30043:30043"
+    #     networks:
+    #         - intania-overflow-network
 
     reply-service:
         build: ./reply-service
@@ -46,11 +66,17 @@ services:
     voting-service:
         build: 
             context: ./
-            dockerfile: ./voting-service/Dockerfile
+            dockerfile: ./reply-service/Dockerfile
+        container_name: reply-service
         expose:
-            - "3000"
+            - "5001"
         ports:
-            - "3000:3000"
+            - "5001:5001"
+        environment:
+            MONGO_URI: mongodb://mongodb:27017/replies
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        depends_on:
+            - mongodb
         networks:
             - intania-overflow-network
 
@@ -63,6 +89,23 @@ services:
     #     restart: always
     #     networks:
     #         - intania-overflow-network
+
+    user-service:
+        build: 
+            context: ./
+            dockerfile: ./user-service/Dockerfile
+        container_name: user-service
+        expose:
+            - "50051"
+        ports:
+            - "50051:50051"
+        depends_on:
+            - postgres
+        networks:
+            - intania-overflow-network
+        environment:
+            DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
 
 networks:
     intania-overflow-network:
