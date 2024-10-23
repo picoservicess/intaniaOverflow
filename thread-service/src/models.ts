@@ -1,5 +1,5 @@
 export interface Thread {
-  id: string;
+  threadId: string;
   title: string;
   body: string;
   assetUrls: string[];
@@ -15,10 +15,10 @@ export interface ThreadList {
 }
 
 export interface ThreadId {
-  id: string;
+  threadId: string;
 }
 
-export interface Empty {}
+export interface Empty { }
 
 export interface SearchQuery {
   query: string;
