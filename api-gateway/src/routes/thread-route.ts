@@ -30,6 +30,6 @@ threadRouter.delete("/threads/:threadId", deleteThread);
 threadRouter.get("/threads/search", searchThreads);
 
 // Health check
-threadRouter.get("/health", healthCheck);
+threadRouter.get("/threads/health", healthCheck);
 
 export default threadRouter;
