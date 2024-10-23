@@ -40,18 +40,21 @@ services:
         networks:
             - intania-overflow-network
 
-    # notification-service:
-    #     build: ./notification-service
-    #     container_name: asset-service
-    #     expose:
-    #         - "5002"
-    #     ports:
-    #         - "5002:5002"
-    #     environment:
-    #         HOST: localhost
-    #         PORT: 5002
-    #     networks:
-    #         - intania-overflow-network
+    notification-service:
+        build:
+            context: ./
+            dockerfile: ./notification-service/Dockerfile
+        container_name: notification-service
+        expose:
+            - "5002"
+        ports:
+            - "5002:5002"
+        environment:
+            PORT: 5002
+        depends_on:
+            - rabbitmq
+        networks:
+            - intania-overflow-network
 
     reply-service:
         build:
