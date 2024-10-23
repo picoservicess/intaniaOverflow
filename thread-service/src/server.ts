@@ -5,6 +5,8 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { sanitizeThreadRequest } from "./decorator";
 import { z } from "zod";
+import { rabbitMQManager } from "./rabbitMQManager";
+// import amqp, { Connection, Channel, Message } from 'amqplib/callback_api';
 
 const PROTO_PATH = "../proto/thread.proto";
 
@@ -148,7 +150,35 @@ server.addService(threadProto.ThreadService.service, {
                 },
                 data: sanitizeThreadRequest(call.request),
             });
+
+            try {
+                await rabbitMQManager.publishMessage(updatedThread);
+            } catch (mqError) {
+                console.error('Failed to publish message to RabbitMQ:', mqError);
+            }
+
             callback(null, updatedThread);
+
+            // console.log('⏳ Connecting to RabbitMQ...')
+            // amqp.connect('amqp://localhost', (errorConnect: Error, connection: Connection) => {
+            //     if (errorConnect) {
+            //         console.log('🫵 Error connecting to RabbitMQ')
+            //         throw errorConnect;
+            //     }
+            //     connection.createChannel((errorChannel: Error, channel) => {
+            //         if (errorChannel) {
+            //             console.log('🫵 Error creating channel')
+            //             throw errorChannel;
+            //         }
+            //         console.log('🐇 Connected to RabbitMQ')
+            //         var queue = 'notification_queue'
+            //         channel.assertQueue(queue, {
+            //             durable: true
+            //         });
+            //         channel.sendToQueue(queue, Buffer.from(JSON.stringify(updatedThread)), { persistent: true })
+            //         console.log('✅ Successfully sent %s', updatedThread)
+            //     })
+            // })
         } catch (error) {
             console.error(`updateThread: ${error}`);
             callback({
@@ -249,6 +279,7 @@ try {
             }
             console.log(`Thread service server is running on port ${port}`);
             server.start();
+
         }
     );
 } catch (error) {
