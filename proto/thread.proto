@@ -67,9 +67,10 @@ message Thread {
     repeated string assetUrls = 4;
     repeated string tags = 5;
     string authorId = 6;
-    string createdAt = 7;
-    string updatedAt = 8;
-    bool isDeleted = 9;
+    bool isAnonymous = 7;
+    string createdAt = 8;
+    string updatedAt = 9;
+    bool isDeleted = 10;
 }
 
 message ThreadList {
