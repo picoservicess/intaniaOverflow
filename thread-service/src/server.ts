@@ -7,7 +7,7 @@ import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
 import { z } from "zod";
 import { rabbitMQManager } from "./rabbitMQManager";
 
-const PROTO_PATH = "../../proto/thread.proto";
+const PROTO_PATH = "../proto/thread.proto";
 
 var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
     keepCase: true,
@@ -34,12 +34,12 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<ThreadList>
     ) => {
         try {
-            let threads = await prisma.thread.findMany({
+            const rawThreads = await prisma.thread.findMany({
                 where: {
                     isDeleted: false,
                 },
             });
-            threads = threads.map((thread) => applyAnonymity(thread));
+            const threads = rawThreads.map((thread) => applyAnonymity(thread));
             callback(null, { threads });
         } catch (error) {
             console.error(`getAllThreads: ${error}`);
@@ -55,14 +55,14 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<Thread>
     ) => {
         try {
-            let thread = await prisma.thread.findUnique({
+            const rawThread = await prisma.thread.findUnique({
                 where: {
                     threadId: call.request.threadId,
                     isDeleted: false,
                 },
             });
-            if (thread) {
-                thread = applyAnonymity(thread);
+            if (rawThread) {
+                const thread = applyAnonymity(rawThread);
                 callback(null, thread);
             } else {
                 callback({
@@ -91,6 +91,7 @@ server.addService(threadProto.ThreadService.service, {
                 assetUrls: z.array(z.string()).optional(),
                 tags: z.array(z.string()).optional(),
                 authorId: z.string().uuid(),
+                isAnonymous: z.boolean().optional(),
                 createdAt: z.date().optional(),
                 updatedAt: z.date().optional(),
                 isDeleted: z.boolean().optional(),
@@ -211,7 +212,7 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<ThreadList>
     ) => {
         try {
-            let threads = await prisma.thread.findMany({
+            const rawThreads = await prisma.thread.findMany({
                 where: {
                     OR: [
                         {
@@ -229,7 +230,7 @@ server.addService(threadProto.ThreadService.service, {
                     ],
                 },
             });
-            threads = threads.map((thread) => applyAnonymity(thread));
+            const threads = rawThreads.map((thread) => applyAnonymity(thread));
             callback(null, { threads });
         } catch (error) {
             console.error(`searchThreads: ${error}`);
