@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "dev": "tsx watch --clear-screen=false src/index.ts | pino-pretty",
+    "dev": "tsx watch --clear-screen=false src/server.ts | pino-pretty",
     "build": "tsup",
     "start": "npx tsx src/server.ts",
     "lint": "biome check src/",
