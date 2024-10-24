@@ -1,22 +1,7 @@
 import { Router } from "express";
-import grpc from "@grpc/grpc-js";
-import protoLoader from "@grpc/proto-loader";
-const votingRouter = Router();
-const PROTO_PATH = "../proto/voting.proto";
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true,
-});
-const votingProto = grpc.loadPackageDefinition(packageDefinition) as any;
-const VOTING_SERVICE_PORT = process.env.VOTING_SERVICE_PORT || "5006";
+import client from "./client";
 
-const client = new votingProto.VotingService(
-    `localhost:${VOTING_SERVICE_PORT}`, // gRPC server address
-    grpc.credentials.createInsecure()
-);
+const votingRouter = Router();
 
 // Helper function to handle gRPC requests
 const grpcRequest = (method: string, requestData: any) => {
@@ -32,7 +17,7 @@ const grpcRequest = (method: string, requestData: any) => {
 };
 
 // Render the voting page with current vote counts
-votingRouter.get("/", async (req, res) => {
+votingRouter.get("/votes/", async (req, res) => {
     try {
         const { isThread, targetId } = req.body;
         const countVote = await grpcRequest("GetCountVote", {
@@ -51,7 +36,7 @@ votingRouter.get("/", async (req, res) => {
 });
 
 // Apply upvote
-votingRouter.post("/upvote", async (req, res) => {
+votingRouter.post("/votes/upvote", async (req, res) => {
     const { isThread, targetId, studentId } = req.body;
     try {
         const result = await grpcRequest("ApplyUpVote", {
@@ -69,7 +54,7 @@ votingRouter.post("/upvote", async (req, res) => {
 });
 
 // Apply downvote
-votingRouter.post("/downvote", async (req, res) => {
+votingRouter.post("/votes/downvote", async (req, res) => {
     const { isThread, targetId, studentId } = req.body;
     try {
         const result = await grpcRequest("ApplyDownVote", {
@@ -87,7 +72,7 @@ votingRouter.post("/downvote", async (req, res) => {
 });
 
 // Check user vote status
-votingRouter.get("/checkvote", async (req, res) => {
+votingRouter.get("/votes/checkvote", async (req, res) => {
     const { isThread, targetId, studentId } = req.body;
     try {
         const voteStatus = await grpcRequest("IsUserVote", {
