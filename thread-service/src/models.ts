@@ -5,6 +5,7 @@ export interface Thread {
   assetUrls: string[];
   tags: string[];
   authorId: string;
+  isAnonymous: boolean;
   createdAt: Date;
   updatedAt: Date;
   isDeleted: boolean;

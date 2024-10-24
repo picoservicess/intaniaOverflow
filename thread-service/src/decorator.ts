@@ -15,3 +15,12 @@ export const sanitizeThreadRequest = (
     }
     return updatedThread;
 };
+
+export const applyAnonymity = (thread: Thread): Thread => {
+    const newThread = { ...thread };
+    const isAnonymous = thread?.isAnonymous;
+    if (isAnonymous) {
+        newThread.authorId = "";
+    }
+    return newThread;
+};
