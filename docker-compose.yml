@@ -1,12 +1,75 @@
 version: "3.8"
 
-services:
-    # asset-service:
-    #     build: ./asset-service
-    #     container_name: asset-service
-    #     expose:
-    #         - "3000"
+services:    
+    postgres:
+        image: postgres:latest
+        container_name: postgres
+        expose:
+            - "5432"
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: yourusername
+            POSTGRES_PASSWORD: yourpassword
+            POSTGRES_DB: userdatabase
+        volumes:
+            - ./postgres_data:/var/lib/postgresql/data
+        networks:
+            - intania-overflow-network
 
+    rabbitmq:
+        image: rabbitmq:4.0-management
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        restart: always
+        networks:
+            - intania-overflow-network
+
+    asset-service:
+        build: ./asset-service
+        container_name: asset-service
+        expose:
+            - "5001"
+        ports:
+            - "5001:5001"
+        environment:
+            PORT: 5001
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
+
+    notification-service:
+        build:
+            context: ./
+            dockerfile: ./notification-service/Dockerfile
+        container_name: notification-service
+        expose:
+            - "5002"
+        ports:
+            - "5002:5002"
+        environment:
+            PORT: 5002
+        depends_on:
+            - rabbitmq
+        networks:
+            - intania-overflow-network
+
+    reply-service:
+        build:
+            context: ./
+            dockerfile: ./reply-service/Dockerfile
+        container_name: reply-service
+        expose:
+            - "5003"
+        ports:
+            - "5003:5003"
+        environment:
+            PORT: 5003
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
 
     thread-service:
         build:
@@ -14,32 +77,48 @@ services:
             dockerfile: ./thread-service/Dockerfile
         container_name: thread-service
         expose:
-            - "30043"
+            - "5004"
         ports:
-            - "30043:30043"
+            - "5004:5004"
+        environment:
+            PORT: 5004
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
+    
+    user-service:
+        build: 
+            context: ./
+            dockerfile: ./user-service/Dockerfile
+        container_name: user-service
+        expose:
+            - "5005"
+        ports:
+            - "5005:5005"
+        environment:
+            PORT: 5005
+            DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        depends_on:
+            - postgres
         networks:
             - intania-overflow-network
 
-    # voting-service:
-    #     build: 
-    #         context: ./
-    #         dockerfile: ./voting-service/Dockerfile
-    #     expose:
-    #         - "3000"
-    #     ports:
-    #         - "3000:3000"
-    #     networks:
-    #         - intania-overflow-network
+    voting-service:
+        build: 
+            context: ./
+            dockerfile: ./voting-service/Dockerfile
+        container_name: voting-service
+        expose:
+            - "5006"
+        ports:
+            - "5006:5006"
+        environment:
+            PORT: 5006
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
 
-    # rabbitmq:
-    #     image: rabbitmq:4.0-management
-    #     container_name: rabbitmq
-    #     ports:
-    #         - "5672:5672"
-    #         - "15672:15672"
-    #     restart: always
-    #     networks:
-    #         - intania-overflow-network
 
     api-gateway:
         build:

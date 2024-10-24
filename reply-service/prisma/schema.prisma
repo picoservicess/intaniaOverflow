@@ -1,0 +1,25 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Reply {
+  replyId   String    @id @default(auto()) @map("_id") @db.ObjectId
+  threadId  String
+  userId    String
+  text      String
+  assetUrls String[]
+  replyAt   DateTime  @default(now())
+  editAt    DateTime?
+  edited    Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+
+  @@index([threadId])
+  @@index([userId])
+}
