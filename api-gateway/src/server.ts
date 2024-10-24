@@ -4,7 +4,7 @@ import threadRouter from "./routes/thread-route";
 import assetRouter from "./routes/asset-route";
 
 const app = express();
-const PORT = Number(process.env.THREAD_SERVICE_PORT) || 8000;
+const PORT = Number(process.env.THREAD_SERVICE_PORT) || 80;
 
 // Apply security middleware
 applySecurityMiddleware(app);
