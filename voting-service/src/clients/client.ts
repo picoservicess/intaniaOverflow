@@ -13,7 +13,7 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 
 const votingProto = grpc.loadPackageDefinition(packageDefinition) as any;
 
-const port = process.env.PORT || "5000";
+const port = process.env.PORT || "5006";
 const client = new votingProto.VotingService(
   `localhost:${port}`, // gRPC server address
   grpc.credentials.createInsecure()
