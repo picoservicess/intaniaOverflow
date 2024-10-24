@@ -15,5 +15,5 @@ app.use(assetRouter);
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`API gateway server is running on http://localhost:${PORT}`);
+    console.log(`🥳 API gateway server is running on http://localhost:${PORT}`);
 });
