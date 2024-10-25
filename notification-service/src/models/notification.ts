@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface INotification extends Document {
-    studentId: string;
+    userId: string;
     targetId: string;
     isThread: boolean;
     isReply: boolean;
@@ -13,7 +13,7 @@ export interface INotification extends Document {
 }
 
 const NotificationSchema: Schema = new mongoose.Schema({
-    studentId: { type: String, required: true },
+    userId: { type: String, required: true },
     targetId: { type: String, required: true },
     isThread: { type: Boolean, required: true },
     isReply: { type: Boolean, required: true },

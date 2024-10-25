@@ -3,12 +3,12 @@ import { Vote } from "../models/vote";
 export const applyUpVote = async (
   isThread: boolean,
   targetId: string,
-  studentId: string
+  userId: string
 ) => {
   try {
-    const existingVote = await Vote.findOne({ isThread, targetId, studentId });
+    const existingVote = await Vote.findOne({ isThread, targetId, userId });
     if (existingVote && existingVote.isUpVote) {
-      await Vote.deleteOne({ isThread, targetId, studentId });
+      await Vote.deleteOne({ isThread, targetId, userId });
       return { success: true, message: "Upvote removed" };
     } else if (existingVote && !existingVote.isUpVote) {
       existingVote.isUpVote = true;
@@ -19,7 +19,7 @@ export const applyUpVote = async (
         targetId: targetId,
         isThread,
         isUpVote: true,
-        studentId,
+        userId,
       });
       await vote.save();
       return { success: true, message: "Upvote applied" };
@@ -32,16 +32,16 @@ export const applyUpVote = async (
 export const applyDownVote = async (
   isThread: boolean,
   targetId: string,
-  studentId: string
+  userId: string
 ) => {
   try {
     const existingVote = await Vote.findOne({
       isThread,
       targetId,
-      studentId,
+      userId,
     });
     if (existingVote && !existingVote.isUpVote) {
-      await Vote.deleteOne({ isThread, targetId, studentId });
+      await Vote.deleteOne({ isThread, targetId, userId });
       return { success: true, message: "Downvote removed" };
     } else if (existingVote && existingVote.isUpVote) {
       existingVote.isUpVote = false;
@@ -52,7 +52,7 @@ export const applyDownVote = async (
         targetId: targetId,
         isThread,
         isUpVote: false,
-        studentId,
+        userId,
       });
       await vote.save();
       return { success: true, message: "Downvote applied" };
@@ -85,10 +85,10 @@ export const getCountVote = async (isThread: boolean, targetId: string) => {
 export const isUserVote = async (
   isThread: boolean,
   targetId: string,
-  studentId: string
+  userId: string
 ) => {
   try {
-    const vote = await Vote.findOne({ isThread, targetId, studentId });
+    const vote = await Vote.findOne({ isThread, targetId, userId });
     if (vote) {
       return vote.isUpVote ? 1 : -1;
     }

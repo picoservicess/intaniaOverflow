@@ -1,3 +1,4 @@
+import * as grpc from '@grpc/grpc-js';
 import jwt from 'jsonwebtoken';
 
 const {
@@ -18,3 +19,28 @@ export const decodeJWT = (token: string): { userId: string } | null => {
     return null;
   }
 }
+
+export const getAuthenticatedUserId = async (metadata: grpc.Metadata): Promise<string | null> => {
+  const authHeader = metadata.get('authorization');
+  if (!authHeader || typeof authHeader[0] !== 'string') {
+    return null;
+  }
+
+  // Extract the token from the Bearer format
+  const bearerToken = authHeader[0];
+  if (!bearerToken.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = bearerToken.substring(7); // Remove 'Bearer ' prefix
+  if (!token) {
+    return null;
+  }
+
+  return decodeJWT(token)?.userId ?? null;
+};
+
+export const createAuthCookie = (userId: string): string => {
+  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '1h' });
+  return token;
+};

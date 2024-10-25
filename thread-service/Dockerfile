@@ -1,24 +1,55 @@
-# Use the official Node.js image as the base image
-FROM node:20-alpine
+# Use multi-stage build to minimize final image size
+FROM node:20-alpine AS builder
 
-# Set the working directory
-WORKDIR /usr/src/thread-service
+# Set working directory
+WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json into the working directory
-COPY thread-service/package*.json /usr/src/thread-service
+# Copy package files first to leverage Docker cache
+COPY thread-service/package*.json ./thread-service/
+COPY user-service/package*.json ./user-service/
 
-# Install dependencies
+# Install dependencies in thread-service
+WORKDIR /usr/src/app/thread-service
 RUN npm install
 
-# Copy the rest of the application code into the working directory
-ADD thread-service /usr/src/thread-service
+# Copy prisma schema and generate Prisma client
+COPY thread-service/prisma ./prisma/
+RUN npm run generate
 
-# Copy the proto folder into the project (one level up from thread-service)
-RUN mkdir -p /usr/src/proto
-ADD proto/*.proto /usr/src/proto
+# Install dependencies and compile user-service libs
+WORKDIR /usr/src/app/user-service
+RUN npm install
+
+# Copy necessary source files
+COPY proto/*.proto /usr/src/app/proto/
+COPY user-service/src/libs/token.ts ./src/libs/
+COPY thread-service /usr/src/app/thread-service/
+
+# Start fresh with a new base image for the final stage
+FROM node:20-alpine
+
+# Create non-root user for security
+RUN addgroup -g 1001 nodejs && \
+  adduser -S -u 1001 -G nodejs nodejs
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy built artifacts from builder stage
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/thread-service/node_modules ./thread-service/node_modules
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/thread-service ./thread-service
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/proto ./proto
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/user-service/node_modules ./user-service/node_modules
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/user-service/src ./user-service/src
+
+# Set user
+USER nodejs
 
 # Expose the port the app runs on
 EXPOSE 5004
+
+# Set working directory for the application
+WORKDIR /usr/src/app/thread-service
 
 # Command to run the application
 CMD ["npm", "start"]

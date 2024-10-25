@@ -1,22 +1,22 @@
-import { getAllNotificationsRepo, getAllNotificationsByStudentIdRepo, getUnreadNotificationsByStudentIdRepo, createNotificationRepo, markNotificationsAsSeenByStudentIdRepo } from "../repositories/notificationRepository";
+import { getAllNotificationsRepo, getAllNotificationsByUserIdRepo, getUnreadNotificationsByUserIdRepo, createNotificationRepo, markNotificationsAsSeenByUserIdRepo } from "../repositories/notificationRepository";
 import { INotification } from "../models/notification";
 
 export const getAllNotificationsService = async (): Promise<INotification[]> => {
     return await getAllNotificationsRepo();
 };
 
-export const getAllNotificationsByStudentIdService = async (studentId: string): Promise<INotification[]> => {
-    return await getAllNotificationsByStudentIdRepo(studentId);
+export const getAllNotificationsByUserIdService = async (userId: string): Promise<INotification[]> => {
+    return await getAllNotificationsByUserIdRepo(userId);
 };
 
-export const getUnreadNotificationsByStudentIdService = async (studentId: string): Promise<INotification[]> => {
-    return await getUnreadNotificationsByStudentIdRepo(studentId);
+export const getUnreadNotificationsByUserIdService = async (userId: string): Promise<INotification[]> => {
+    return await getUnreadNotificationsByUserIdRepo(userId);
 };
 
 export const createNotificationService = async (notification: INotification): Promise<INotification> => {
     return await createNotificationRepo(notification);
 };
 
-export const markNotificationsAsSeenByStudentIdService = async (studentId: string, timestamp: Date): Promise<void> => {
-    await markNotificationsAsSeenByStudentIdRepo(studentId, timestamp);
+export const markNotificationsAsSeenByUserIdService = async (userId: string, timestamp: Date): Promise<void> => {
+    await markNotificationsAsSeenByUserIdRepo(userId, timestamp);
 };

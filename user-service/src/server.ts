@@ -1,7 +1,8 @@
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { PrismaClient } from '@prisma/client';
-import { getAuthenticatedUserId, createAuthCookie, verifyTicket } from './libs/auth';
+import { getAuthenticatedUserId, createAuthCookie } from './libs/token';
+import { verifyTicket } from './libs/auth';
 
 const prisma = new PrismaClient();
 
