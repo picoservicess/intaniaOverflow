@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 console.log("Database connected");
 
-const PROTO_PATH = '../../proto/user.proto';
+const PROTO_PATH = '../proto/user.proto';
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
