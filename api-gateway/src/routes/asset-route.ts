@@ -9,7 +9,7 @@ const ASSET_SERVICE_URL =
     process.env.ASSET_SERVICE_URL || "192.168.194.88:5001";
 console.log("ASSET_SERVICE_URL", ASSET_SERVICE_URL);
 
-assetRouter.post("/assets", async (req: Request, res: Response) => {
+assetRouter.post("/asset/upload", async (req: Request, res: Response) => {
     try {
         // Forward the request to the asset service
         const response = await axios.post(
@@ -23,14 +23,14 @@ assetRouter.post("/assets", async (req: Request, res: Response) => {
         );
         res.status(response.status).json(response.data);
     } catch (error: any) {
-        console.error("Error in /assets:", error.message);
+        console.error("Error in /asset/upload:", error.message);
         res.status(error.response?.status || 500).json({
             message: "Error uploading asset",
         });
     }
 });
 
-assetRouter.get("/health/assets", async (req: Request, res: Response) => {
+assetRouter.get("/health/asset", async (req: Request, res: Response) => {
     try {
         // Forward the request to the asset service health check
         console.log(`${ASSET_SERVICE_URL}/health-check`);
