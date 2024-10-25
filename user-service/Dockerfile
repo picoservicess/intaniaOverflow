@@ -1,24 +1,43 @@
-# Use the official Node.js image as the base image
-FROM node:20-alpine
+# Use multi-stage build to minimize final image size
+FROM node:20-alpine AS builder
 
-# Set the working directory
-WORKDIR /usr/src/user-service
+# Set working directory
+WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json into the working directory
-COPY user-service/package*.json /usr/src/user-service
+# Copy package files first to leverage Docker cache
+COPY user-service/package*.json ./user-service/
 
-# Install dependencies
+# Install dependencies in user-service
+WORKDIR /usr/src/app/user-service
 RUN npm install
 
-# Copy the rest of the application code into the working directory
-ADD user-service /usr/src/user-service
+# Copy necessary source files
+COPY user-service /usr/src/app/user-service/
+COPY proto/*.proto /usr/src/app/proto/
 
-# Copy the proto folder into the project (one level up from thread-service)
-RUN mkdir -p /usr/src/proto
-ADD proto/*.proto /usr/src/proto
+# Start fresh with a new base image for the final stage
+FROM node:20-alpine
+
+# Create non-root user for security
+RUN addgroup -g 1001 nodejs && \
+  adduser -S -u 1001 -G nodejs nodejs
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy built artifacts from builder stage
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/user-service/node_modules ./user-service/node_modules
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/user-service ./user-service
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/proto ./proto
+
+# Set user
+USER nodejs
 
 # Expose the port the app runs on
 EXPOSE 5005
+
+# Set working directory for the application
+WORKDIR /usr/src/app/user-service
 
 # Command to run the application
 CMD ["npm", "start"]

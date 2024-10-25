@@ -9,18 +9,18 @@ export const getAllNotificationsRepo = async (): Promise<INotification[]> => {
     }
 };
 
-export const getAllNotificationsByStudentIdRepo = async (studentId: string): Promise<INotification[]> => {
+export const getAllNotificationsByUserIdRepo = async (userId: string): Promise<INotification[]> => {
     try {
-        return await Notification.find({ studentId });  // Query the notifications by studentId
+        return await Notification.find({ userId });  // Query the notifications by userId
     } catch (error) {
         console.error("Repository Error:", error);
         throw new Error("Error fetching notifications by student ID");
     }
 };
 
-export const getUnreadNotificationsByStudentIdRepo = async (studentId: string): Promise<INotification[]> => {
+export const getUnreadNotificationsByUserIdRepo = async (userId: string): Promise<INotification[]> => {
     try {
-        return await Notification.find({ studentId, isSeen: false });
+        return await Notification.find({ userId, isSeen: false });
     } catch (error) {
         console.error("Repository Error:", error);
         throw new Error("Error fetching unread notifications by student ID");
@@ -37,9 +37,16 @@ export const createNotificationRepo = async (notificationData: INotification): P
     }
 }
 
-export const markNotificationsAsSeenByStudentIdRepo = async (studentId: string, timestamp: Date): Promise<void> => {
+export const markNotificationsAsSeenByUserIdRepo = async (userId: string, timestamp: Date): Promise<void> => {
     try {
-        await Notification.updateMany({ studentId, createdAt: { $lt: timestamp } }, { isSeen: true });
+        const result = await Notification.updateMany(
+            { userId, createdAt: { $lt: timestamp }, isSeen: false },
+            { isSeen: true }
+        );
+
+        if (result.modifiedCount === 0) {
+            throw new Error("No notifications found to update");
+        }
     } catch (error) {
         console.error("Repository Error:", error);
         throw new Error("Error updating notifications");

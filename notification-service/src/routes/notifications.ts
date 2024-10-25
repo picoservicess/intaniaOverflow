@@ -1,12 +1,15 @@
 import express from "express";
-import { getAllNotifications, getAllNotificationsByStudentId, getUnreadNotificationsByStudentId, createNotification, markNotificationsAsSeenByStudentId } from "../controllers/notificationController";
+import { getAllNotificationsByUserId, getUnreadNotificationsByUserId, markNotificationsAsSeenByUserId } from "../controllers/notificationController";
+import { authenticateToken } from "../middlewares/auth";
 
 const router = express.Router();
 
-router.get("/", getAllNotifications);
-router.get("/:studentId", getAllNotificationsByStudentId);
-router.get("/:studentId/unread", getUnreadNotificationsByStudentId);
-router.post("/", createNotification);
-router.patch("/:studentId", markNotificationsAsSeenByStudentId);
+router.use(authenticateToken);
+
+// router.get("/", getAllNotifications); // This route is not used, we want only authenticated user to get their notifications
+router.get("/", getAllNotificationsByUserId);
+router.get("/unread", getUnreadNotificationsByUserId);
+// router.post("/", createNotification); // Create a new notification done by message queue
+router.patch("/", markNotificationsAsSeenByUserId);
 
 export default router;

@@ -1,26 +1,43 @@
-import { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
+import { ServerUnaryCall, sendUnaryData, status } from "@grpc/grpc-js";
 import {
   applyUpVote,
   applyDownVote,
   getCountVote,
   isUserVote,
 } from "../repositorys/votingRepository";
+import { getAuthenticatedUserId } from "../../../user-service/src/libs/token"
 
 export const votingService = {
   ApplyUpVote: async (
     call: ServerUnaryCall<any, any>,
     callback: sendUnaryData<any>
   ) => {
-    const { isThread, targetId, studentId } = call.request;
-    const result = await applyUpVote(isThread, targetId, studentId);
+    const userId = await getAuthenticatedUserId(call.metadata);
+    if (!userId) {
+      return callback({
+        code: status.UNAUTHENTICATED,
+        details: 'Authentication required',
+      });
+    }
+
+    const { isThread, targetId } = call.request;
+    const result = await applyUpVote(isThread, targetId, userId);
     callback(null, result);
   },
   ApplyDownVote: async (
     call: ServerUnaryCall<any, any>,
     callback: sendUnaryData<any>
   ) => {
-    const { isThread, targetId, studentId } = call.request;
-    const result = await applyDownVote(isThread, targetId, studentId);
+    const userId = await getAuthenticatedUserId(call.metadata);
+    if (!userId) {
+      return callback({
+        code: status.UNAUTHENTICATED,
+        message: 'Authentication required',
+      });
+    }
+
+    const { isThread, targetId } = call.request;
+    const result = await applyDownVote(isThread, targetId, userId);
     callback(null, result);
   },
   GetCountVote: async (
@@ -35,8 +52,16 @@ export const votingService = {
     call: ServerUnaryCall<any, any>,
     callback: sendUnaryData<any>
   ) => {
-    const { isThread, targetId, studentId } = call.request;
-    const result = await isUserVote(isThread, targetId, studentId);
+    const userId = await getAuthenticatedUserId(call.metadata);
+    if (!userId) {
+      return callback({
+        code: status.UNAUTHENTICATED,
+        message: 'Authentication required',
+      });
+    }
+
+    const { isThread, targetId } = call.request;
+    const result = await isUserVote(isThread, targetId, userId);
     callback(null, { voteStatus: result });
   },
 };

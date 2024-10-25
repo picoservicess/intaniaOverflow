@@ -28,7 +28,9 @@ services:
             - intania-overflow-network
 
     asset-service:
-        build: ./asset-service
+        build:
+            context: ./
+            dockerfile: ./asset-service/Dockerfile
         container_name: asset-service
         expose:
             - "5001"
@@ -51,6 +53,7 @@ services:
             - "5002:5002"
         environment:
             PORT: 5002
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         depends_on:
             - rabbitmq
         networks:

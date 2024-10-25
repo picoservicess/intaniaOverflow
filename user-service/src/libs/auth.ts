@@ -1,13 +1,9 @@
-import jwt from 'jsonwebtoken';
-import * as grpc from '@grpc/grpc-js';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
-import { decodeJWT } from './token';
 
 const prisma = new PrismaClient();
 
 const {
-  JWT_SECRET = 'your_jwt_secret',
   CU_AUTH_URL = 'https://account.it.chula.ac.th/serviceValidation',
   CU_APP_ID = 'your-app-id',
   CU_APP_SECRET = 'your-app-secret'
@@ -33,32 +29,6 @@ interface CuAuthResponse {
   lastnameth: string;
   ouid: string;
 }
-
-export const getAuthenticatedUserId = async (metadata: grpc.Metadata): Promise<string | null> => {
-  const authHeader = metadata.get('authorization');
-  if (!authHeader || typeof authHeader[0] !== 'string') {
-    return null;
-  }
-
-  // Extract the token from the Bearer format
-  const bearerToken = authHeader[0];
-  if (!bearerToken.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = bearerToken.substring(7); // Remove 'Bearer ' prefix
-  if (!token) {
-    return null;
-  }
-
-  return decodeJWT(token)?.userId ?? null;
-};
-
-
-export const createAuthCookie = (userId: string): string => {
-  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '1h' });
-  return token;
-};
 
 export const verifyTicket = async (ticket: string): Promise<VerifiedUser | null> => {
   try {

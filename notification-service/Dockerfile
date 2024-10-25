@@ -1,50 +1,51 @@
-# Use the official Node.js image as the base image
-FROM node:20
+# Use multi-stage build to minimize final image size
+FROM node:20-alpine AS builder
 
-# Set the working directory inside the container
-WORKDIR /usr/src/notification-service
+# Set working directory
+WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json to the working directory
-COPY notification-service/package*.json /usr/src/notification-service
+# Copy package files first to leverage Docker cache
+COPY notification-service/package*.json ./notification-service/
+COPY user-service/package*.json ./user-service/
 
-# Install dependencies
+# Install dependencies in notification-service
+WORKDIR /usr/src/app/notification-service
 RUN npm install
 
-# Copy the rest of the application code
-COPY notification-service/  /usr/src/notification-service
+# Install dependencies and compile user-service libs
+WORKDIR /usr/src/app/user-service
+RUN npm install
 
-# Copy the user-service/libs directory
-RUN mkdir -p /usr/src/user-service/src/libs
-COPY user-service/src/libs/token.ts /usr/src/user-service/src/libs/token.ts
-COPY user-service/package*.json /usr/src/user-service
+# Copy necessary source files
+COPY proto/*.proto /usr/src/app/proto/
+COPY user-service/src/libs/token.ts ./src/libs/
+COPY notification-service /usr/src/app/notification-service/
 
-# Create a tsconfig.json for the libs.ts compilation
-RUN echo '{ \
-  "compilerOptions": { \
-  "target": "ES2020", \
-  "module": "ESNext", \
-  "moduleResolution": "bundler", \
-  "esModuleInterop": true, \
-  "outDir": "dist", \
-  "strict": true, \
-  "declaration": true \
-  }, \
-  "include": ["/usr/src/user-service/src/token.ts"] \
-  }' > /usr/src/user-service/tsconfig.json
+# Start fresh with a new base image for the final stage
+FROM node:20-alpine
 
-# Compile libs.ts to mjs
-RUN cd /usr/src/user-service && \
-  npm install
-# npm install -g typescript && \
-# tsc --project tsconfig.json && \
-# mv dist/token.js dist/token.mjs && \
-# cp dist/token.mjs ./token.mjs && \
-# cp dist/token.d.ts ./token.d.ts
+# Create non-root user for security
+RUN addgroup -g 1001 nodejs && \
+  adduser -S -u 1001 -G nodejs nodejs
 
-RUN cd /usr/src/notification-service
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy built artifacts from builder stage
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/notification-service/node_modules ./notification-service/node_modules
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/notification-service ./notification-service
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/proto ./proto
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/user-service/node_modules ./user-service/node_modules
+COPY --from=builder --chown=nodejs:nodejs /usr/src/app/user-service/src ./user-service/src
+
+# Set user
+USER nodejs
 
 # Expose the port the app runs on
 EXPOSE 5002
+
+# Set working directory for the application
+WORKDIR /usr/src/app/notification-service
 
 # Command to run the application
 CMD ["npm", "start"]
