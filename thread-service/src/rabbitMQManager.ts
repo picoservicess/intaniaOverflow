@@ -11,7 +11,7 @@ class RabbitMQManager {
   private readonly maxRetries: number = 5;
 
   private constructor() {
-    this.url = process.env.RABBITMQ_URL || 'amqp://localhost';
+    this.url = process.env.RABBITMQ_URL || 'amqp://rabitmq:5672';
     this.queue = process.env.RABBITMQ_QUEUE || 'notification_queue';
   }
 

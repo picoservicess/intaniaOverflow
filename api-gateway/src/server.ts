@@ -5,7 +5,7 @@ import votingRouter from "./routes/voting-route";
 import threadRouter from "./routes/thread-route";
 
 const app = express();
-const PORT = Number(process.env.THREAD_SERVICE_PORT) || 80;
+const PORT = Number(process.env.API_GATEWAY_PORT) || 80;
 
 // Apply security middleware
 applySecurityMiddleware(app);
