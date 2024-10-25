@@ -6,6 +6,7 @@ import * as protoLoader from "@grpc/proto-loader";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
 import { z } from "zod";
 import { rabbitMQManager } from "./rabbitMQManager";
+import { getAuthenticatedUserId } from "../../user-service/src/libs/token"
 
 const PROTO_PATH = "../proto/thread.proto";
 
@@ -30,7 +31,7 @@ const address = `${HOST}:${PORT}`;
 
 server.addService(threadProto.ThreadService.service, {
     getAllThreads: async (
-        _: ServerUnaryCall<Empty, ThreadList>,
+        call: ServerUnaryCall<Empty, ThreadList>,
         callback: sendUnaryData<ThreadList>
     ) => {
         try {
@@ -83,6 +84,14 @@ server.addService(threadProto.ThreadService.service, {
         call: ServerUnaryCall<Thread, Thread>,
         callback: sendUnaryData<Thread>
     ) => {
+        const userId = await getAuthenticatedUserId(call.metadata);
+        if (!userId) {
+            return callback({
+                code: grpc.status.UNAUTHENTICATED,
+                details: 'Authentication required',
+            });
+        }
+
         try {
             const threadSchema = z.object({
                 threadId: z.string().uuid().optional(),
@@ -96,24 +105,18 @@ server.addService(threadProto.ThreadService.service, {
                 updatedAt: z.date().optional(),
                 isDeleted: z.boolean().optional(),
             });
-            const sanitizedRequest = threadSchema
-                .omit({
-                    threadId: true,
-                    updatedAt: true,
-                    createdAt: true,
-                    isDeleted: true,
-                })
-                .parse(call.request);
 
-            const validationResult = threadSchema.safeParse(sanitizedRequest);
-
-            if (!validationResult.success) {
-                callback({
-                    code: grpc.status.INVALID_ARGUMENT,
-                    details: "Invalid thread data",
-                });
-                return;
-            }
+            const sanitizedRequest = {
+                ...threadSchema
+                    .omit({
+                        threadId: true,
+                        updatedAt: true,
+                        createdAt: true,
+                        isDeleted: true,
+                    })
+                    .parse(call.request),
+                authorId: userId, // Enforce the authenticated user's ID
+            };
 
             const thread = await prisma.thread.create({
                 data: sanitizedRequest,
@@ -132,20 +135,39 @@ server.addService(threadProto.ThreadService.service, {
         call: ServerUnaryCall<Thread, Thread>,
         callback: sendUnaryData<Thread>
     ) => {
+        const userId = await getAuthenticatedUserId(call.metadata);
+        if (!userId) {
+            return callback({
+                code: grpc.status.UNAUTHENTICATED,
+                details: 'Authentication required',
+            });
+        }
+
         try {
+            // First check if thread exists
             const thread = await prisma.thread.findUnique({
                 where: {
                     threadId: call.request.threadId,
-                    isDeleted: false,
+                    isDeleted: false,  // Only allow updates on non-deleted threads
                 },
             });
 
             if (!thread) {
-                callback({
+                return callback({
                     code: grpc.status.NOT_FOUND,
-                    details: "Not found",
+                    details: "Thread not found or has been deleted",
                 });
             }
+
+            // Then check ownership
+            const isOwner = thread.authorId === userId;
+            if (!isOwner) {
+                return callback({
+                    code: grpc.status.PERMISSION_DENIED,
+                    details: "You don't have permission to update this thread",
+                });
+            }
+
             const updatedThread = await prisma.thread.update({
                 where: {
                     threadId: call.request.threadId,
@@ -174,17 +196,36 @@ server.addService(threadProto.ThreadService.service, {
         call: ServerUnaryCall<ThreadId, Empty>,
         callback: sendUnaryData<Empty>
     ) => {
+        const userId = await getAuthenticatedUserId(call.metadata);
+        if (!userId) {
+            return callback({
+                code: grpc.status.UNAUTHENTICATED,
+                details: 'Authentication required',
+            });
+        }
+
         try {
+            // First check if thread exists
             const thread = await prisma.thread.findUnique({
                 where: {
                     threadId: call.request.threadId,
+                    isDeleted: false,  // Only allow deletion of non-deleted threads
                 },
             });
 
             if (!thread) {
-                callback({
+                return callback({
                     code: grpc.status.NOT_FOUND,
-                    details: "Not found",
+                    details: "Thread not found or has already been deleted",
+                });
+            }
+
+            // Then check ownership
+            const isOwner = thread.authorId === userId;
+            if (!isOwner) {
+                return callback({
+                    code: grpc.status.PERMISSION_DENIED,
+                    details: "You don't have permission to delete this thread",
                 });
             }
 
@@ -228,6 +269,7 @@ server.addService(threadProto.ThreadService.service, {
                             },
                         },
                     ],
+                    isDeleted: false,  // Only show non-deleted threads in search
                 },
             });
             const threads = rawThreads.map((thread) => applyAnonymity(thread));
