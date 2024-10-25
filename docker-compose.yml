@@ -122,6 +122,28 @@ services:
         networks:
             - intania-overflow-network
 
+
+    api-gateway:
+        build:
+            context: ./
+            dockerfile: ./api-gateway/Dockerfile
+        container_name: api-gateway
+        env_file:
+            - ./api-gateway/.env
+        expose:
+            - "80"
+        ports:
+            - "80:80"
+        networks:
+            - intania-overflow-network
+        depends_on:
+            - asset-service
+            - notification-service
+            - reply-service
+            - thread-service
+            - user-service
+            - voting-service
+
 networks:
     intania-overflow-network:
         driver: bridge
