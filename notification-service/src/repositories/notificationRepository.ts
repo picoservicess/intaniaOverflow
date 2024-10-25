@@ -39,7 +39,14 @@ export const createNotificationRepo = async (notificationData: INotification): P
 
 export const markNotificationsAsSeenByStudentIdRepo = async (studentId: string, timestamp: Date): Promise<void> => {
     try {
-        await Notification.updateMany({ studentId, createdAt: { $lt: timestamp } }, { isSeen: true });
+        const result = await Notification.updateMany(
+            { studentId, createdAt: { $lt: timestamp }, isSeen: false },
+            { isSeen: true }
+        );
+
+        if (result.modifiedCount === 0) {
+            throw new Error("No notifications found to update");
+        }
     } catch (error) {
         console.error("Repository Error:", error);
         throw new Error("Error updating notifications");
