@@ -3,12 +3,11 @@ import { PrismaClient, Thread } from "@prisma/client";
 import { Empty, ThreadList, SearchQuery, ThreadId } from "./models";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import { sanitizeThreadRequest } from "./decorator";
+import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
 import { z } from "zod";
 import { rabbitMQManager } from "./rabbitMQManager";
-// import amqp, { Connection, Channel, Message } from 'amqplib/callback_api';
 
-const PROTO_PATH = "../../proto/thread.proto";
+const PROTO_PATH = "../proto/thread.proto";
 
 var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
     keepCase: true,
@@ -21,7 +20,7 @@ var threadProto = grpc.loadPackageDefinition(packageDefinition) as any;
 
 const prisma = new PrismaClient();
 
-console.log("Database connected");
+console.log("🥳 Database connected");
 
 const server = new grpc.Server();
 
@@ -35,11 +34,12 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<ThreadList>
     ) => {
         try {
-            const threads = await prisma.thread.findMany({
+            const rawThreads = await prisma.thread.findMany({
                 where: {
                     isDeleted: false,
                 },
             });
+            const threads = rawThreads.map((thread) => applyAnonymity(thread));
             callback(null, { threads });
         } catch (error) {
             console.error(`getAllThreads: ${error}`);
@@ -55,13 +55,14 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<Thread>
     ) => {
         try {
-            const thread = await prisma.thread.findUnique({
+            const rawThread = await prisma.thread.findUnique({
                 where: {
                     threadId: call.request.threadId,
                     isDeleted: false,
                 },
             });
-            if (thread) {
+            if (rawThread) {
+                const thread = applyAnonymity(rawThread);
                 callback(null, thread);
             } else {
                 callback({
@@ -90,6 +91,7 @@ server.addService(threadProto.ThreadService.service, {
                 assetUrls: z.array(z.string()).optional(),
                 tags: z.array(z.string()).optional(),
                 authorId: z.string().uuid(),
+                isAnonymous: z.boolean().optional(),
                 createdAt: z.date().optional(),
                 updatedAt: z.date().optional(),
                 isDeleted: z.boolean().optional(),
@@ -158,27 +160,6 @@ server.addService(threadProto.ThreadService.service, {
             }
 
             callback(null, updatedThread);
-
-            // console.log('⏳ Connecting to RabbitMQ...')
-            // amqp.connect('amqp://localhost', (errorConnect: Error, connection: Connection) => {
-            //     if (errorConnect) {
-            //         console.log('🫵 Error connecting to RabbitMQ')
-            //         throw errorConnect;
-            //     }
-            //     connection.createChannel((errorChannel: Error, channel) => {
-            //         if (errorChannel) {
-            //             console.log('🫵 Error creating channel')
-            //             throw errorChannel;
-            //         }
-            //         console.log('🐇 Connected to RabbitMQ')
-            //         var queue = 'notification_queue'
-            //         channel.assertQueue(queue, {
-            //             durable: true
-            //         });
-            //         channel.sendToQueue(queue, Buffer.from(JSON.stringify(updatedThread)), { persistent: true })
-            //         console.log('✅ Successfully sent %s', updatedThread)
-            //     })
-            // })
         } catch (error) {
             console.error(`updateThread: ${error}`);
             callback({
@@ -231,7 +212,7 @@ server.addService(threadProto.ThreadService.service, {
         callback: sendUnaryData<ThreadList>
     ) => {
         try {
-            const threads = await prisma.thread.findMany({
+            const rawThreads = await prisma.thread.findMany({
                 where: {
                     OR: [
                         {
@@ -249,6 +230,7 @@ server.addService(threadProto.ThreadService.service, {
                     ],
                 },
             });
+            const threads = rawThreads.map((thread) => applyAnonymity(thread));
             callback(null, { threads });
         } catch (error) {
             console.error(`searchThreads: ${error}`);
@@ -274,10 +256,10 @@ try {
         grpc.ServerCredentials.createInsecure(),
         (error, port) => {
             if (error) {
-                console.error("Error binding server:", error);
+                console.error("🚨 Error binding server:", error);
                 return;
             }
-            console.log(`Thread service server is running on port ${port}`);
+            console.log(`💻 Thread service server is running on port ${port}`);
             server.start();
 
         }
