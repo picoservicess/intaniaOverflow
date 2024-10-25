@@ -1,0 +1,28 @@
+# voting-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voting-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: voting-service
+  template:
+    metadata:
+      labels:
+        app: voting-service
+    spec:
+      containers:
+        - name: voting-service
+          image: voting-service:latest
+          ports:
+            - containerPort: 5006
+          env:
+            - name: PORT
+              value: '5006'
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: intania-overflow-config
+                  key: JWT_SECRET

@@ -1,0 +1,11 @@
+# reply-service-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: reply-service
+spec:
+  selector:
+    app: reply-service
+  ports:
+    - port: 5003
+      targetPort: 5003

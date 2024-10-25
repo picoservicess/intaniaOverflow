@@ -1,0 +1,33 @@
+# user-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: user-service:latest
+          ports:
+            - containerPort: 5005
+          env:
+            - name: PORT
+              value: '5005'
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: intania-overflow-config
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: intania-overflow-config
+                  key: JWT_SECRET

@@ -1,0 +1,28 @@
+# reply-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reply-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reply-service
+  template:
+    metadata:
+      labels:
+        app: reply-service
+    spec:
+      containers:
+        - name: reply-service
+          image: reply-service:latest
+          ports:
+            - containerPort: 5003
+          env:
+            - name: PORT
+              value: '5003'
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: intania-overflow-config
+                  key: JWT_SECRET

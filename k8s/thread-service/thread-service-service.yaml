@@ -1,0 +1,11 @@
+# thread-service-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: thread-service
+spec:
+  selector:
+    app: thread-service
+  ports:
+    - port: 5004
+      targetPort: 5004

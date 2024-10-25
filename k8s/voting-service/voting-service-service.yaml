@@ -1,0 +1,11 @@
+# voting-service-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: voting-service
+spec:
+  selector:
+    app: voting-service
+  ports:
+    - port: 5006
+      targetPort: 5006

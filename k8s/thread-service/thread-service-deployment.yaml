@@ -1,0 +1,38 @@
+# thread-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thread-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thread-service
+  template:
+    metadata:
+      labels:
+        app: thread-service
+    spec:
+      containers:
+        - name: thread-service
+          image: thread-service:latest
+          ports:
+            - containerPort: 5004
+          env:
+            - name: PORT
+              value: '5004'
+            - name: RABBITMQ_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: intania-overflow-config
+                  key: RABBITMQ_URL
+            - name: RABBITMQ_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: intania-overflow-config
+                  key: RABBITMQ_QUEUE
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: intania-overflow-config
+                  key: JWT_SECRET
