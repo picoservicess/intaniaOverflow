@@ -1,8 +1,8 @@
 import applySecurityMiddleware from "./utils/sercurity";
 import express from "express";
-import threadRouter from "./routes/thread-route";
 import assetRouter from "./routes/asset-route";
 import votingRouter from "./routes/voting-route";
+import threadRouter from "./routes/thread-route";
 
 const app = express();
 const PORT = Number(process.env.THREAD_SERVICE_PORT) || 80;

@@ -7,7 +7,7 @@ import {
     healthCheck,
     searchThreads,
     updateThread,
-} from "../controllers/thread-controller";
+} from "../../controllers/thread-controller";
 
 const threadRouter = express.Router();
 
@@ -30,6 +30,6 @@ threadRouter.delete("/threads/:threadId", deleteThread);
 threadRouter.get("/threads/search", searchThreads);
 
 // Health check
-threadRouter.get("/threads/health", healthCheck);
+threadRouter.get("/health/threads", healthCheck);
 
 export default threadRouter;
