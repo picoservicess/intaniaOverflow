@@ -52,6 +52,8 @@ services:
         ports:
             - "5002:5002"
         environment:
+            RABBITMQ_URL: "amqp://rabbitmq:5672"
+            RABBITMQ_QUEUE: "notification_queue"
             PORT: 5002
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         depends_on:
@@ -85,6 +87,8 @@ services:
             - "5004:5004"
         environment:
             PORT: 5004
+            RABBITMQ_URL: "amqp://rabbitmq:5672"
+            RABBITMQ_QUEUE: "notification_queue"
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         networks:
             - intania-overflow-network
@@ -121,7 +125,6 @@ services:
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         networks:
             - intania-overflow-network
-
 
     api-gateway:
         build:
