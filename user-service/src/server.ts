@@ -203,6 +203,36 @@ const getUserDetail: grpc.handleUnaryCall<any, any> = async (call, callback) => 
   }
 };
 
+const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (call, callback) => {
+  const { threadId } = call.request;
+  if (!threadId) {
+    return callback({
+      code: grpc.status.INVALID_ARGUMENT,
+      message: 'Thread ID is required',
+    });
+  }
+
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        pinnedThreads: {
+          has: threadId
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    callback(null, { userIds: users.map(user => user.id) });
+  } catch (error) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: 'Failed to fetch users who pinned the thread',
+    });
+  }
+};
+
 function main() {
   const server = new grpc.Server();
   server.addService(userService.service, {
@@ -212,6 +242,7 @@ function main() {
     ApplyPin: applyPin,
     ViewPinned: viewPinned,
     GetUserDetail: getUserDetail,
+    GetUsersWhoPinnedThread: getUsersWhoPinnedThread,
   });
 
   const host = process.env.HOST || '0.0.0.0';

@@ -7,6 +7,7 @@ service UserService {
   rpc ApplyPin (ApplyPinRequest) returns (ApplyPinResponse);
   rpc ViewPinned (ViewPinnedRequest) returns (ViewPinnedResponse);
   rpc GetUserDetail (GetUserDetailRequest) returns (GetUserDetailResponse);
+  rpc GetUsersWhoPinnedThread (GetUsersWhoPinnedThreadRequest) returns (GetUsersWhoPinnedThreadResponse);
 }
 
 message UpdateUserProfileRequest {
@@ -64,4 +65,12 @@ message GetUserDetailRequest {
 message GetUserDetailResponse {
   string displayname = 1;
   string profileImage = 2;
+}
+
+message GetUsersWhoPinnedThreadRequest {
+  string threadId = 1;
+}
+
+message GetUsersWhoPinnedThreadResponse {
+  repeated string userIds = 1;
 }
