@@ -5,8 +5,8 @@ const PROTO_PATH = "../proto/voting.proto";
 
 const votingProto = initiateGrpcProto(PROTO_PATH);
 
-const host = process.env.VOTING_HOST || "localhost";
-const port = process.env.PORT || "5006";
+const host = process.env.VOTING_SERVICE_HOST || "voting-service";
+const port = process.env.VOTING_SERVICE_PORT || "5006";
 
 const votingClient = new votingProto.VotingService(
     `${host}:${port}`, // gRPC server address
