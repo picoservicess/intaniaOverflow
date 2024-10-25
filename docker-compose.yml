@@ -148,9 +148,6 @@ services:
             - USER_SERVICE_PORT=5005
             - VOTING_SERVICE_HOST=voting-service
             - VOTING_SERVICE_PORT=5006
-
-        networks:
-            - intania-overflow-network
         depends_on:
             - asset-service
             - notification-service
@@ -158,6 +155,8 @@ services:
             - thread-service
             - user-service
             - voting-service
+        networks:
+            - intania-overflow-network
 
 networks:
     intania-overflow-network:
