@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getAllNotificationsService, getAllNotificationsByStudentIdService, getUnreadNotificationsByStudentIdService, createNotificationService, markNotificationsAsSeenByStudentIdService } from "../services/notificationService";
+import { getAllNotificationsService, getAllNotificationsByUserIdService, getUnreadNotificationsByUserIdService, createNotificationService, markNotificationsAsSeenByUserIdService } from "../services/notificationService";
 import { INotification } from "../models/notification";
 import { AuthenticatedRequest } from "../middlewares/auth";
 
@@ -12,46 +12,46 @@ import { AuthenticatedRequest } from "../middlewares/auth";
 //     }
 // };
 
-export const getAllNotificationsByStudentId = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const studentId = req.user?.userId;
-    if (!studentId) {
+export const getAllNotificationsByUserId = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) {
         res.status(401).json({ error: 'No bearer token provided' });
         return;
     }
 
     try {
-        const notifications = await getAllNotificationsByStudentIdService(studentId);
+        const notifications = await getAllNotificationsByUserIdService(userId);
         res.status(200).json(notifications);
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving notifications by studentId" });
+        res.status(500).json({ message: "Error retrieving notifications by userId" });
     }
 };
 
-export const getUnreadNotificationsByStudentId = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const studentId = req.user?.userId;
-    if (!studentId) {
+export const getUnreadNotificationsByUserId = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) {
         res.status(401).json({ error: 'No bearer token provided' });
         return;
     }
 
     try {
-        const notifications = await getUnreadNotificationsByStudentIdService(studentId);
+        const notifications = await getUnreadNotificationsByUserIdService(userId);
         res.status(200).json(notifications);
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving unread notifications by studentId" });
+        res.status(500).json({ message: "Error retrieving unread notifications by userId" });
     }
 };
 
 // export const createNotification = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-//     const studentId = req.user?.userId;
-//     if (!studentId) {
+//     const userId = req.user?.userId;
+//     if (!userId) {
 //         res.status(401).json({ error: 'No bearer token provided' });
 //         return;
 //     }
 
 //     try {
 //         const notificationData: INotification = {
-//             studentId: studentId,
+//             userId: userId,
 //             targetId: req.body.targetId as string,
 //             isThread: req.body.isThread as boolean,
 //             isReply: req.body.isReply as boolean,
@@ -67,9 +67,9 @@ export const getUnreadNotificationsByStudentId = async (req: AuthenticatedReques
 //     }
 // }
 
-export const markNotificationsAsSeenByStudentId = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const studentId = req.user?.userId;
-    if (!studentId) {
+export const markNotificationsAsSeenByUserId = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) {
         res.status(401).json({ error: 'No bearer token provided' });
         return;
     }
@@ -77,9 +77,9 @@ export const markNotificationsAsSeenByStudentId = async (req: AuthenticatedReque
     const timestamp = new Date();
 
     console.log("timestamp: " + timestamp)
-    console.log("studentId: " + studentId)
+    console.log("userId: " + userId)
     try {
-        await markNotificationsAsSeenByStudentIdService(studentId, timestamp);
+        await markNotificationsAsSeenByUserIdService(userId, timestamp);
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ message: "Error updating notifications" });

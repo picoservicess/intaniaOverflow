@@ -40,7 +40,7 @@ async function connectToDatabase(): Promise<void> {
 // RabbitMQ message processing
 async function processMessage(message: ThreadMessage): Promise<void> {
   const notificationData: INotification = {
-    studentId: message.authorId,
+    userId: message.authorId,
     targetId: message.threadId,
     isThread: true,
     isReply: false,
