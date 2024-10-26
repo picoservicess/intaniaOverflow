@@ -6,7 +6,7 @@ const assetRouter = express.Router();
 
 // Asset Service URL (replace with your actual asset service URL)
 const ASSET_SERVICE_URL =
-    process.env.ASSET_SERVICE_URL || "192.168.194.88:5001";
+    `http://${process.env.ASSET_SERVICE_HOST}:${process.env.ASSET_SERVICE_PORT}` || "http://asset-service:5001";
 console.log("ASSET_SERVICE_URL", ASSET_SERVICE_URL);
 
 assetRouter.post("/asset/upload", async (req: Request, res: Response) => {

@@ -52,6 +52,8 @@ services:
         ports:
             - "5002:5002"
         environment:
+            RABBITMQ_URL: "amqp://rabbitmq:5672"
+            RABBITMQ_QUEUE: "notification_queue"
             PORT: 5002
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         depends_on:
@@ -85,6 +87,8 @@ services:
             - "5004:5004"
         environment:
             PORT: 5004
+            RABBITMQ_URL: "amqp://rabbitmq:5672"
+            RABBITMQ_QUEUE: "notification_queue"
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
         networks:
             - intania-overflow-network
@@ -122,7 +126,6 @@ services:
         networks:
             - intania-overflow-network
 
-
     api-gateway:
         build:
             context: ./
@@ -134,8 +137,20 @@ services:
             - "80"
         ports:
             - "80:80"
-        networks:
-            - intania-overflow-network
+        environment:
+            - API_GATEWAY_PORT=80
+            - ASSET_SERVICE_HOST=asset-service
+            - ASSET_SERVICE_PORT=5001
+            - NOTIFICATION_SERVICE_HOST=notification-service
+            - NOTIFICATION_SERVICE_PORT=5002
+            - REPLY_SERVICE_HOST=reply-service
+            - REPLY_SERVICE_PORT=5003
+            - THREAD_SERVICE_HOST=thread-service
+            - THREAD_SERVICE_PORT=5004
+            - USER_SERVICE_HOST=user-service
+            - USER_SERVICE_PORT=5005
+            - VOTING_SERVICE_HOST=voting-service
+            - VOTING_SERVICE_PORT=5006
         depends_on:
             - asset-service
             - notification-service
@@ -143,6 +158,8 @@ services:
             - thread-service
             - user-service
             - voting-service
+        networks:
+            - intania-overflow-network
 
 networks:
     intania-overflow-network:
