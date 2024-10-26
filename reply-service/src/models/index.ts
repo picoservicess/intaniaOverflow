@@ -1,12 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const ReplySchema = z.object({
-    threadId: z.string(),
-    text: z.string().min(1),
-    assetUrls: z.array(z.string().url()).default([]),
+  threadId: z.string(),
+  text: z.string().min(1),
+  assetUrls: z.array(z.string().url()).default([]),
 });
 
 export const UpdateReplySchema = z.object({
-    text: z.string().min(1),
-    assetUrls: z.array(z.string().url()),
+  text: z.string().min(1),
+  assetUrls: z.array(z.string().url()),
 });

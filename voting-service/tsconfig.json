@@ -1,18 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "CommonJS",
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["src/*"]
-        },
-        "outDir": "dist",
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "resolveJsonModule": true
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
     },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules"]
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

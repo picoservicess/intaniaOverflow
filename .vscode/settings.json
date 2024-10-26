@@ -1,12 +1,12 @@
 {
-    "conventionalCommits.scopes": [
-        "asset-service",
-        "notification-service",
-        "reply-service",
-        "tag-service",
-        "thread-service",
-        "user-service",
-        "voting-service",
-        "website"
-    ]
+  "conventionalCommits.scopes": [
+    "asset-service",
+    "notification-service",
+    "reply-service",
+    "tag-service",
+    "thread-service",
+    "user-service",
+    "voting-service",
+    "website"
+  ]
 }

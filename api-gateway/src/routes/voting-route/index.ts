@@ -1,25 +1,25 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 import {
-    applyDownvote,
-    applyUpvote,
-    checkVoteStatus,
-    getVotes,
-} from '../../controllers/voting-controller';
-import { authMiddleware } from '../../middleware/auth';
+  applyDownvote,
+  applyUpvote,
+  checkVoteStatus,
+  getVotes,
+} from "../../controllers/voting-controller";
+import { authMiddleware } from "../../middleware/auth";
 
 const votingRouter = Router();
 
 // Render the voting page with current vote counts
-votingRouter.get('/votes/', getVotes);
+votingRouter.get("/votes/", getVotes);
 
 // Apply upvote
-votingRouter.post('/votes/upvote', authMiddleware, applyUpvote);
+votingRouter.post("/votes/upvote", authMiddleware, applyUpvote);
 
 // Apply downvote
-votingRouter.post('/votes/downvote', authMiddleware, applyDownvote);
+votingRouter.post("/votes/downvote", authMiddleware, applyDownvote);
 
 // Check user vote status
-votingRouter.get('/votes/checkvote', authMiddleware, checkVoteStatus);
+votingRouter.get("/votes/checkvote", authMiddleware, checkVoteStatus);
 
 export default votingRouter;
