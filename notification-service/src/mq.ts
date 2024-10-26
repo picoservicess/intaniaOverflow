@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import amqp, { Connection, Channel } from 'amqplib/callback_api';
 import { createNotificationService } from './services/notificationService';
 import { INotification } from './models/notification';
+import { getUsersWhoPinnedThread } from '../../user-service/src/server'
 
 // Types
 interface ThreadMessage {
@@ -45,6 +46,16 @@ async function connectToDatabase(): Promise<void> {
   }
 }
 
+async function getPinnedThreadUsers(threadId: string): Promise <string[]> {
+  try {
+    const usersWhoPinnedThread = await getUsersWhoPinnedThread(threadId)
+    return usersWhoPinnedThread.userIds
+  } catch (error) {
+    console.error("⛔️ Error getting users who pinned thread:", error);
+    throw error;
+  }
+}
+
 async function processMessage(message: ThreadMessage): Promise<void> {
   const notificationData: INotification = {
     userId: message.authorId,
@@ -57,13 +68,14 @@ async function processMessage(message: ThreadMessage): Promise<void> {
   } as INotification;
 
   try {
+    const userIds = await getPinnedThreadUsers(message.threadId)
     const newNotification = await createNotificationService(notificationData);
     console.log("🔔 Notification created:", newNotification._id);
   } catch (error) {
-    console.error("❌ Error creating notification:", error);
+    console.error("⛔️ Error creating notification:", error);
     throw error;
   }
-}
+} 
 
 async function setupQueues(channel: Channel): Promise<void> {
   try {
@@ -141,9 +153,11 @@ function setupChannel(channel: Channel): void {
     if (!msg) return;
 
     try {
+      const producerId = msg.properties.headers
+      console.log(producerId)
       const message = JSON.parse(msg.content.toString()) as ThreadMessage;
-      console.log("✉️ Received message for thread:", message.threadId);
-
+      console.log("📨 Received message for thread:", message.threadId);
+ 
       await processMessage(message);
       channel.ack(msg);
     } catch (error) {
@@ -152,6 +166,27 @@ function setupChannel(channel: Channel): void {
     }
   }, {
     noAck: false
+  });
+}
+
+function createChannel(connection: Connection): Promise<Channel> {
+  return new Promise((resolve, reject) => {
+    connection.createChannel((error, channel) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      channel.on('error', (err) => {
+        console.error('⛔️ Channel error:', err.message);
+      });
+
+      channel.on('close', () => {
+        console.log('📡 Channel closed');
+      });
+
+      resolve(channel);
+    });
   });
 }
 
@@ -177,7 +212,7 @@ function connectWithRetry(retryCount = 0): Promise<Connection> {
       }
 
       connection.on('error', (err) => {
-        console.error('❌ RabbitMQ connection error:', err.message);
+        console.error('⛔️ RabbitMQ connection error:', err.message);
       });
 
       connection.on('close', () => {
@@ -185,27 +220,6 @@ function connectWithRetry(retryCount = 0): Promise<Connection> {
       });
 
       resolve(connection);
-    });
-  });
-}
-
-function createChannel(connection: Connection): Promise<Channel> {
-  return new Promise((resolve, reject) => {
-    connection.createChannel((error, channel) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      channel.on('error', (err) => {
-        console.error('❌ Channel error:', err.message);
-      });
-
-      channel.on('close', () => {
-        console.log('📡 Channel closed');
-      });
-
-      resolve(channel);
     });
   });
 }
@@ -236,9 +250,10 @@ export async function main(): Promise<void> {
   try {
     await connectToDatabase();
     await connectToRabbitMQ();
-    console.log('🚀 Application fully initialized and ready');
+    console.log('🚀 Rabbitmq fully initialized and ready');
+
   } catch (error) {
-    console.error("❌ Application startup error:", error);
+    console.error('🚩 Rabbitmq startup error:', error);
     process.exit(1);
   }
 }
