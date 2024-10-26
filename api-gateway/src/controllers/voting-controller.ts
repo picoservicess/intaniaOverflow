@@ -1,24 +1,7 @@
 import { controllerWrapper, validateAuth } from "../middleware/auth";
+import { VoteCount, VoteRequest, VoteStatus } from "../models/vote-model";
 import votingClient from "../routes/voting-route/client";
 import { getGrpcRequest } from "../utils/grpc";
-
-interface VoteRequest {
-    isThread: boolean;
-    targetId: string;
-}
-
-interface VoteCount {
-    upVotes: number;
-    downVotes: number;
-    netVotes: number;
-}
-
-interface VoteStatus {
-    voteStatus: {
-        hasVoted: boolean;
-        voteType?: 'up' | 'down';
-    };
-}
 
 const grpcRequest = getGrpcRequest(votingClient);
 
