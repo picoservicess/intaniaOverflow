@@ -8,6 +8,7 @@ import {
     searchThreads,
     updateThread,
 } from "../../controllers/thread-controller";
+import { authMiddleware } from "../../middleware/auth";
 
 const threadRouter = express.Router();
 
@@ -18,13 +19,13 @@ threadRouter.get("/threads", getAllThreads);
 threadRouter.get("/threads/:threadId", getThreadById);
 
 // Create a new thread
-threadRouter.post("/threads", createThread);
+threadRouter.post("/threads", authMiddleware, createThread);
 
 // Update existing thread
-threadRouter.put("/threads/:threadId", updateThread);
+threadRouter.put("/threads/:threadId", authMiddleware, updateThread);
 
 // Delete thread
-threadRouter.delete("/threads/:threadId", deleteThread);
+threadRouter.delete("/threads/:threadId", authMiddleware, deleteThread);
 
 // Search threads
 threadRouter.get("/threads/search", searchThreads);
