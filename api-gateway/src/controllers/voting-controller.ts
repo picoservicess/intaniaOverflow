@@ -1,75 +1,109 @@
+import { controllerWrapper, validateAuth } from "../middleware/auth";
+import { VoteCount, VoteRequest, VoteStatus } from "../models/vote-model";
 import votingClient from "../routes/voting-route/client";
 import { getGrpcRequest } from "../utils/grpc";
 
-// Helper function to handle gRPC requests
 const grpcRequest = getGrpcRequest(votingClient);
 
 // Get current vote counts
-export const getVotes = async (req: any, res: any) => {
-    try {
-        const { isThread, targetId } = req.body;
-        const countVote = await grpcRequest("GetCountVote", {
-            isThread,
-            targetId,
-        });
-        res.status(200).json({
-            upVotes: countVote.upVotes,
-            downVotes: countVote.downVotes,
-            netVotes: countVote.netVotes,
-        });
-    } catch (error) {
-        console.error("Error fetching vote counts:", error);
-        res.status(500).send("Internal Server Error");
+export const getVotes = controllerWrapper(async (req: any, res: any) => {
+    const { isThread, targetId }: VoteRequest = req.body;
+
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
+        return;
     }
-};
+
+    const countVote = await grpcRequest("GetCountVote", {
+        isThread,
+        targetId,
+    });
+
+    const response: VoteCount = {
+        upVotes: countVote.upVotes,
+        downVotes: countVote.downVotes,
+        netVotes: countVote.netVotes,
+    };
+
+    res.status(200).json(response);
+});
 
 // Apply upvote
-export const applyUpvote = async (req: any, res: any) => {
-    const { isThread, targetId, studentId } = req.body;
-    try {
-        const result = await grpcRequest("ApplyUpVote", {
-            isThread,
-            targetId,
-            studentId,
-        });
-        console.log("Upvote applied successfully", result);
-        res.status(200).send(result);
-    } catch (error) {
-        console.error("Error applying upvote:", error);
-        res.status(500).send("Internal Server Error");
+export const applyUpvote = controllerWrapper(async (req: any, res: any) => {
+    const token = validateAuth(req);
+    const { isThread, targetId }: VoteRequest = req.body;
+
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
+        return;
     }
-};
+
+    const result = await grpcRequest("ApplyUpVote",
+        {
+            isThread,
+            targetId
+        },
+        { token }
+    );
+
+    console.log("Upvote applied successfully", result);
+
+    res.status(200).json({
+        message: "Upvote applied successfully",
+        result
+    });
+});
 
 // Apply downvote
-export const applyDownvote = async (req: any, res: any) => {
-    const { isThread, targetId, studentId } = req.body;
-    try {
-        const result = await grpcRequest("ApplyDownVote", {
-            isThread,
-            targetId,
-            studentId,
-        });
-        console.log("Downvote applied successfully", result);
-        res.status(200).send(result);
-    } catch (error) {
-        console.error("Error applying downvote:", error);
-        res.status(500).send("Internal Server Error");
+export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
+    const token = validateAuth(req);
+    const { isThread, targetId }: VoteRequest = req.body;
+
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
+        return;
     }
-};
+
+    const result = await grpcRequest("ApplyDownVote",
+        {
+            isThread,
+            targetId
+        },
+        { token }
+    );
+
+    console.log("Downvote applied successfully", result);
+
+    res.status(200).json({
+        message: "Downvote applied successfully",
+        result
+    });
+});
 
 // Check user vote status
-export const checkVoteStatus = async (req: any, res: any) => {
-    const { isThread, targetId, studentId } = req.body;
-    try {
-        const voteStatus = await grpcRequest("IsUserVote", {
-            isThread,
-            targetId,
-            studentId,
-        });
-        console.log("User vote status:", voteStatus);
-        res.status(200).send({ voteStatus });
-    } catch (error) {
-        console.error("Error checking vote status:", error);
-        res.status(500).send("Internal Server Error");
+export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
+    const token = validateAuth(req);
+    const { isThread, targetId }: VoteRequest = req.body;
+
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
+        return;
     }
-};
+
+    const voteStatus = await grpcRequest("IsUserVote",
+        {
+            isThread,
+            targetId
+        },
+        { token }
+    );
+
+    const response: VoteStatus = {
+        voteStatus: {
+            hasVoted: !!voteStatus.voteType,
+            voteType: voteStatus.voteType as 'up' | 'down'
+        }
+    };
+
+    res.status(200).json(response);
+});

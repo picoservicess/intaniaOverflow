@@ -5,6 +5,7 @@ import {
     checkVoteStatus,
     getVotes,
 } from "../../controllers/voting-controller";
+import { authMiddleware } from "../../middleware/auth";
 
 const votingRouter = Router();
 
@@ -12,12 +13,12 @@ const votingRouter = Router();
 votingRouter.get("/votes/", getVotes);
 
 // Apply upvote
-votingRouter.post("/votes/upvote", applyUpvote);
+votingRouter.post("/votes/upvote", authMiddleware, applyUpvote);
 
 // Apply downvote
-votingRouter.post("/votes/downvote", applyDownvote);
+votingRouter.post("/votes/downvote", authMiddleware, applyDownvote);
 
 // Check user vote status
-votingRouter.get("/votes/checkvote", checkVoteStatus);
+votingRouter.get("/votes/checkvote", authMiddleware, checkVoteStatus);
 
 export default votingRouter;
