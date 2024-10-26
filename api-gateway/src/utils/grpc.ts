@@ -8,8 +8,8 @@ interface AuthOptions {
 export const getGrpcRequest = (client: any) => {
     // Helper function to handle gRPC requests with authorization
     const grpcRequest = (
-        method: string, 
-        requestData: any, 
+        method: string,
+        requestData: any,
         authOptions?: AuthOptions
     ) => {
         return new Promise<any>((resolve, reject) => {
