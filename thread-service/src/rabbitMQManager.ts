@@ -6,13 +6,15 @@ class RabbitMQManager {
   private channel: Channel | null = null;
   private readonly url: string;
   private readonly queue: string;
+  private readonly deadLetterExchange: string;
   private connecting: boolean = false;
   private connectionRetries: number = 0;
   private readonly maxRetries: number = 5;
 
   private constructor() {
-    this.url = process.env.RABBITMQ_URL || 'amqp://rabitmq:5672';
+    this.url = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
     this.queue = process.env.RABBITMQ_QUEUE || 'notification_queue';
+    this.deadLetterExchange = process.env.RABBITMQ_DLX || 'notification_dlx';
   }
 
   public static getInstance(): RabbitMQManager {
@@ -57,7 +59,13 @@ class RabbitMQManager {
           }
 
           this.channel = channel;
-          channel.assertQueue(this.queue, { durable: true });
+          channel.assertQueue(this.queue, { 
+            durable: true,
+            arguments: {
+              'x-dead-letter-exchange': this.deadLetterExchange,
+              'x-dead-letter-routing-key': ''
+            }
+          });
 
           channel.on('error', (err) => {
             console.error('🚫 Channel error:', err.message);
@@ -94,7 +102,7 @@ class RabbitMQManager {
         }
       }, delay);
     } else {
-      console.error('🚫 Max reconnection attempts reached');
+      console.error('❌ Max reconnection attempts reached');
     }
   }
 
@@ -108,7 +116,13 @@ class RabbitMQManager {
             return;
           }
           this.channel = channel;
-          channel.assertQueue(this.queue, { durable: true });
+          channel.assertQueue(this.queue, { 
+            durable: true,
+            arguments: {
+              'x-dead-letter-exchange': this.deadLetterExchange,
+              'x-dead-letter-routing-key': ''
+            }
+          });
         });
       } catch (error) {
         console.error('🚫 Error recreating channel:', error);

@@ -3,8 +3,10 @@ import mongoose from 'mongoose';
 import amqp, { Connection, Channel } from 'amqplib/callback_api';
 import { createNotificationService } from './services/notificationService';
 import { INotification } from './models/notification';
-import { getUsersWhoPinnedThread } from '../../user-service/src/server'
+import { getGrpcRequest } from "./utils/grpc";
+import userClient from './repositories/userRepository';
 
+const grpcRequest = getGrpcRequest(userClient);
 // Types
 interface ThreadMessage {
   threadId: string;
@@ -48,7 +50,7 @@ async function connectToDatabase(): Promise<void> {
 
 async function getPinnedThreadUsers(threadId: string): Promise <string[]> {
   try {
-    const usersWhoPinnedThread = await getUsersWhoPinnedThread(threadId)
+    const usersWhoPinnedThread = await grpcRequest("getUsersWhoPinnedThread", { threadId });
     return usersWhoPinnedThread.userIds
   } catch (error) {
     console.error("⛔️ Error getting users who pinned thread:", error);
@@ -56,9 +58,34 @@ async function getPinnedThreadUsers(threadId: string): Promise <string[]> {
   }
 }
 
-async function processMessage(message: ThreadMessage): Promise<void> {
+// async function parseReply(message: ThreadMessage, userId: string): Promise<void> {
+//   const notificationData: INotification = {
+//     senderId: message.authorId,
+//     receiverId: userId,
+//     targetId: message.threadId,
+//     isThread: true,
+//     isReply: false,
+//     isUser: false,
+//     isSeen: false,
+//     payload: message.title,
+//   } as INotification;
+
+//   try {
+//     const userIds = await getPinnedThreadUsers(message.threadId)
+//     console.log(userIds)
+
+//     const newNotification = await createNotificationService(notificationData);
+//     console.log("🔔 Notification created:", newNotification._id);
+//   } catch (error) {
+//     console.error("⛔️ Error creating notification:", error);
+//     throw error;
+//   }
+// } 
+
+async function parseThread(message: ThreadMessage, userId: string): Promise<INotification> {
   const notificationData: INotification = {
-    userId: message.authorId,
+    senderId: message.authorId,
+    receiverId: userId,
     targetId: message.threadId,
     isThread: true,
     isReply: false,
@@ -67,15 +94,18 @@ async function processMessage(message: ThreadMessage): Promise<void> {
     payload: message.title,
   } as INotification;
 
+  return notificationData;
+} 
+
+async function sendData (data: INotification): Promise<void> {
   try {
-    const userIds = await getPinnedThreadUsers(message.threadId)
-    const newNotification = await createNotificationService(notificationData);
+    const newNotification = await createNotificationService(data);
     console.log("🔔 Notification created:", newNotification._id);
   } catch (error) {
     console.error("⛔️ Error creating notification:", error);
     throw error;
   }
-} 
+}
 
 async function setupQueues(channel: Channel): Promise<void> {
   try {
@@ -151,14 +181,21 @@ function setupChannel(channel: Channel): void {
 
   channel.consume(QUEUE_CONFIG.name, async (msg) => {
     if (!msg) return;
-
     try {
-      const producerId = msg.properties.headers
-      console.log(producerId)
-      const message = JSON.parse(msg.content.toString()) as ThreadMessage;
-      console.log("📨 Received message for thread:", message.threadId);
- 
-      await processMessage(message);
+      const message = JSON.parse(msg.content.toString());
+      console.log("📨 Received message for thread:",message.threadId);
+      if (message.replyId) {
+        // reply
+      }
+      else {
+        const userIds = await getPinnedThreadUsers(message.threadId)
+        console.log(userIds)
+        const sendingPromise = userIds.map(async (userId) => {
+          const data = await parseThread(message, userId)
+          await sendData(data);
+        })
+        await Promise.all(sendingPromise);
+      }
       channel.ack(msg);
     } catch (error) {
       console.error("❌ Error processing message:", error);

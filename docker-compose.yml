@@ -56,6 +56,8 @@ services:
             RABBITMQ_QUEUE: "notification_queue"
             PORT: 5002
             JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+            USER_SERVICE_HOST: "user-service"
+            USER_SERVICE_PORT: "5005"
         depends_on:
             - rabbitmq
         networks:
