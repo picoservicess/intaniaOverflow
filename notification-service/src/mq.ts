@@ -236,9 +236,10 @@ export async function main(): Promise<void> {
   try {
     await connectToDatabase();
     await connectToRabbitMQ();
-    console.log('🚀 Application fully initialized and ready');
+    console.log('🚀 Rabbitmq on Notification Service fully initialized and ready');
+
   } catch (error) {
-    console.error("❌ Application startup error:", error);
+    console.error('❌ Rabbitmq on Notification Service startup error:', error);
     process.exit(1);
   }
 }

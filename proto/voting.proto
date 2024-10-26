@@ -3,18 +3,12 @@ syntax = "proto3";
 service VotingService {
   rpc ApplyUpVote (VoteRequest) returns (ActionResponse);
   rpc ApplyDownVote (VoteRequest) returns (ActionResponse);
-  rpc GetCountVote (CountVoteRequest) returns (CountVoteResponse);
+  rpc GetCountVote (VoteRequest) returns (CountVoteResponse);
   rpc IsUserVote (VoteRequest) returns (UserVoteResponse);
   rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
 }
 
 message VoteRequest {
-  bool isThread = 1;
-  string targetId = 2;
-  string studentId = 3;
-}
-
-message CountVoteRequest {
   bool isThread = 1;
   string targetId = 2;
 }
