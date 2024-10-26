@@ -12,3 +12,11 @@ TODO:
 - Getting Thread Notification
   - mock red dot on top of avatar
 - Voting on Thread/Reply (optional)
+
+
+***
+- blur modal
+- เปลี่ยนรูป เปลี่ยนชื่อ สำหรับ user
+- Font แบบเดิม
+- anonymous thread ทำที่ backend
+
