@@ -141,8 +141,6 @@ function setupChannel(channel: Channel): void {
     if (!msg) return;
 
     try {
-      const producerId = msg.properties.headers
-      console.log(producerId)
       const message = JSON.parse(msg.content.toString()) as ThreadMessage;
       console.log("✉️ Received message for thread:", message.threadId);
 
@@ -241,7 +239,7 @@ export async function main(): Promise<void> {
     console.log('🚀 Rabbitmq on Notification Service fully initialized and ready');
 
   } catch (error) {
-    console.error('🚩 Rabbitmq on Notification Service startup error:', error);
+    console.error('❌ Rabbitmq on Notification Service startup error:', error);
     process.exit(1);
   }
 }

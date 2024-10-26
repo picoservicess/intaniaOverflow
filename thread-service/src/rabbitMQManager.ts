@@ -94,7 +94,7 @@ class RabbitMQManager {
         }
       }, delay);
     } else {
-      console.error('🚫 Max reconnection attempts reached');
+      console.error('❌ Max reconnection attempts reached');
     }
   }
 

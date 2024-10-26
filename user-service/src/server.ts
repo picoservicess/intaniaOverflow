@@ -203,7 +203,7 @@ const getUserDetail: grpc.handleUnaryCall<any, any> = async (call, callback) => 
   }
 };
 
-export const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (call, callback) => {
+const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (call, callback) => {
   const { threadId } = call.request;
   if (!threadId) {
     return callback({
