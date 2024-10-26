@@ -5,7 +5,6 @@ import { getGrpcRequest } from "../utils/grpc";
 interface VoteRequest {
     isThread: boolean;
     targetId: string;
-    studentId?: string;
 }
 
 interface VoteCount {
@@ -54,18 +53,17 @@ export const getVotes = controllerWrapper(async (req: any, res: any) => {
 // Apply upvote
 export const applyUpvote = controllerWrapper(async (req: any, res: any) => {
     const token = validateAuth(req);
-    const { isThread, targetId, studentId }: VoteRequest = req.body;
+    const { isThread, targetId }: VoteRequest = req.body;
 
-    if (!targetId || !studentId) {
-        res.status(400).json({ error: "targetId and studentId are required" });
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
         return;
     }
 
     const result = await grpcRequest("ApplyUpVote",
         {
             isThread,
-            targetId,
-            studentId,
+            targetId
         },
         { token }
     );
@@ -81,18 +79,17 @@ export const applyUpvote = controllerWrapper(async (req: any, res: any) => {
 // Apply downvote
 export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
     const token = validateAuth(req);
-    const { isThread, targetId, studentId }: VoteRequest = req.body;
+    const { isThread, targetId }: VoteRequest = req.body;
 
-    if (!targetId || !studentId) {
-        res.status(400).json({ error: "targetId and studentId are required" });
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
         return;
     }
 
     const result = await grpcRequest("ApplyDownVote",
         {
             isThread,
-            targetId,
-            studentId,
+            targetId
         },
         { token }
     );
@@ -108,18 +105,17 @@ export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
 // Check user vote status
 export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     const token = validateAuth(req);
-    const { isThread, targetId, studentId }: VoteRequest = req.body;
+    const { isThread, targetId }: VoteRequest = req.body;
 
-    if (!targetId || !studentId) {
-        res.status(400).json({ error: "targetId and studentId are required" });
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
         return;
     }
 
     const voteStatus = await grpcRequest("IsUserVote",
         {
             isThread,
-            targetId,
-            studentId,
+            targetId
         },
         { token }
     );

@@ -10,7 +10,6 @@ service VotingService {
 message VoteRequest {
   bool isThread = 1;
   string targetId = 2;
-  string studentId = 3;
 }
 
 message CountVoteRequest {
