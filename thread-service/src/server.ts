@@ -1,34 +1,311 @@
-import express, { Request, Response, type Express } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import { pino } from "pino";
+import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
+import { PrismaClient, Thread } from "@prisma/client";
+import { Empty, ThreadList, SearchQuery, ThreadId } from "./models";
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
+import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
+import { z } from "zod";
+import { rabbitMQManager } from "./rabbitMQManager";
+import { getAuthenticatedUserId } from "../../user-service/src/libs/token"
 
-import { openAPIRouter } from "./api-docs/openAPIRouter";
-import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter";
-import { threadRouter } from "./api/thread/threadRouter";
+const PROTO_PATH = "../proto/thread.proto";
 
-import errorHandler from "./common/middleware/errorHandler";
+var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    arrays: true,
+});
 
-const logger = pino({ name: "server start" });
-const app: Express = express();
+var threadProto = grpc.loadPackageDefinition(packageDefinition) as any;
 
-// Set the application to trust the reverse proxy
-app.set("trust proxy", true);
+const prisma = new PrismaClient();
 
-// Middlewares
-app.use(express.json()); // parse json request body
-app.use(express.urlencoded({ extended: true })); // parse urlencoded request body
-app.use(cors()); // enable cors
-app.use(helmet()); // set security HTTP headers
+console.log("🥳 Database connected");
 
-// Routes
-app.use("/health-check", healthCheckRouter);
-app.use("/thread", threadRouter);
+const server = new grpc.Server();
 
-// Swagger UI
-app.use(openAPIRouter);
+const HOST = process.env.HOST || "0.0.0.0";
+const PORT = Number(process.env.PORT) || 5004;
+const address = `${HOST}:${PORT}`;
 
-// Error handlers
-app.use(errorHandler());
+server.addService(threadProto.ThreadService.service, {
+    getAllThreads: async (
+        call: ServerUnaryCall<Empty, ThreadList>,
+        callback: sendUnaryData<ThreadList>
+    ) => {
+        try {
+            const rawThreads = await prisma.thread.findMany({
+                where: {
+                    isDeleted: false,
+                },
+            });
+            const threads = rawThreads.map((thread) => applyAnonymity(thread));
+            callback(null, { threads });
+        } catch (error) {
+            console.error(`getAllThreads: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
 
-export { app, logger };
+    getThreadById: async (
+        call: ServerUnaryCall<ThreadId, Thread>,
+        callback: sendUnaryData<Thread>
+    ) => {
+        try {
+            const rawThread = await prisma.thread.findUnique({
+                where: {
+                    threadId: call.request.threadId,
+                    isDeleted: false,
+                },
+            });
+            if (rawThread) {
+                const thread = applyAnonymity(rawThread);
+                callback(null, thread);
+            } else {
+                callback({
+                    code: grpc.status.NOT_FOUND,
+                    details: "Not found",
+                });
+            }
+        } catch (error) {
+            console.error(`getThreadById: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    createThread: async (
+        call: ServerUnaryCall<Thread, Thread>,
+        callback: sendUnaryData<Thread>
+    ) => {
+        const userId = await getAuthenticatedUserId(call.metadata);
+        if (!userId) {
+            return callback({
+                code: grpc.status.UNAUTHENTICATED,
+                details: 'Authentication required',
+            });
+        }
+
+        try {
+            const threadSchema = z.object({
+                threadId: z.string().uuid().optional(),
+                title: z.string().min(1),
+                body: z.string().min(1),
+                assetUrls: z.array(z.string()).optional(),
+                tags: z.array(z.string()).optional(),
+                authorId: z.string().uuid(),
+                isAnonymous: z.boolean().optional(),
+                createdAt: z.date().optional(),
+                updatedAt: z.date().optional(),
+                isDeleted: z.boolean().optional(),
+            });
+
+            const sanitizedRequest = {
+                ...threadSchema
+                    .omit({
+                        threadId: true,
+                        updatedAt: true,
+                        createdAt: true,
+                        isDeleted: true,
+                    })
+                    .parse(call.request),
+                authorId: userId, // Enforce the authenticated user's ID
+            };
+
+            const thread = await prisma.thread.create({
+                data: sanitizedRequest,
+            });
+            callback(null, thread);
+        } catch (error) {
+            console.error(`createThread: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    updateThread: async (
+        call: ServerUnaryCall<Thread, Thread>,
+        callback: sendUnaryData<Thread>
+    ) => {
+        const userId = await getAuthenticatedUserId(call.metadata);
+        if (!userId) {
+            return callback({
+                code: grpc.status.UNAUTHENTICATED,
+                details: 'Authentication required',
+            });
+        }
+
+        try {
+            // First check if thread exists
+            const thread = await prisma.thread.findUnique({
+                where: {
+                    threadId: call.request.threadId,
+                    isDeleted: false,  // Only allow updates on non-deleted threads
+                },
+            });
+
+            if (!thread) {
+                return callback({
+                    code: grpc.status.NOT_FOUND,
+                    details: "Thread not found or has been deleted",
+                });
+            }
+
+            // Then check ownership
+            const isOwner = thread.authorId === userId;
+            if (!isOwner) {
+                return callback({
+                    code: grpc.status.PERMISSION_DENIED,
+                    details: "You don't have permission to update this thread",
+                });
+            }
+
+            const updatedThread = await prisma.thread.update({
+                where: {
+                    threadId: call.request.threadId,
+                },
+                data: sanitizeThreadRequest(call.request),
+            });
+
+            try {
+                await rabbitMQManager.publishMessage(updatedThread);
+            } catch (mqError) {
+                console.error('Failed to publish message to RabbitMQ:', mqError);
+            }
+
+            callback(null, updatedThread);
+        } catch (error) {
+            console.error(`updateThread: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    // TODO : deleteThread
+    deleteThread: async (
+        call: ServerUnaryCall<ThreadId, Empty>,
+        callback: sendUnaryData<Empty>
+    ) => {
+        const userId = await getAuthenticatedUserId(call.metadata);
+        if (!userId) {
+            return callback({
+                code: grpc.status.UNAUTHENTICATED,
+                details: 'Authentication required',
+            });
+        }
+
+        try {
+            // First check if thread exists
+            const thread = await prisma.thread.findUnique({
+                where: {
+                    threadId: call.request.threadId,
+                    isDeleted: false,  // Only allow deletion of non-deleted threads
+                },
+            });
+
+            if (!thread) {
+                return callback({
+                    code: grpc.status.NOT_FOUND,
+                    details: "Thread not found or has already been deleted",
+                });
+            }
+
+            // Then check ownership
+            const isOwner = thread.authorId === userId;
+            if (!isOwner) {
+                return callback({
+                    code: grpc.status.PERMISSION_DENIED,
+                    details: "You don't have permission to delete this thread",
+                });
+            }
+
+            await prisma.thread.update({
+                where: {
+                    threadId: call.request.threadId,
+                },
+                data: {
+                    isDeleted: true,
+                },
+            });
+            callback(null, {});
+        } catch (error) {
+            console.error(`deleteThread: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    // TODO : searchThread
+    searchThreads: async (
+        call: ServerUnaryCall<SearchQuery, ThreadList>,
+        callback: sendUnaryData<ThreadList>
+    ) => {
+        try {
+            const rawThreads = await prisma.thread.findMany({
+                where: {
+                    OR: [
+                        {
+                            title: {
+                                contains: call.request.query,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            body: {
+                                contains: call.request.query,
+                                mode: "insensitive",
+                            },
+                        },
+                    ],
+                    isDeleted: false,  // Only show non-deleted threads in search
+                },
+            });
+            const threads = rawThreads.map((thread) => applyAnonymity(thread));
+            callback(null, { threads });
+        } catch (error) {
+            console.error(`searchThreads: ${error}`);
+            callback({
+                code: grpc.status.INTERNAL,
+                details: "Interal Server Error",
+            });
+        }
+    },
+
+    // TODO : healthCheck
+    healthCheck: async (
+        _: ServerUnaryCall<Empty, Empty>,
+        callback: sendUnaryData<Empty>
+    ) => {
+        callback(null, {});
+    },
+});
+
+try {
+    server.bindAsync(
+        address,
+        grpc.ServerCredentials.createInsecure(),
+        (error, port) => {
+            if (error) {
+                console.error("🚨 Error binding server:", error);
+                return;
+            }
+            console.log(`💻 Thread service server is running on port ${port}`);
+            server.start();
+
+        }
+    );
+} catch (error) {
+    console.error(`Failed to bind server: ${error}`);
+}

@@ -1,24 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
-    "outDir": "dist",
+    "target": "es2016",
+    "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
   },
   "include": [
-    "src/**/*"
+    "src/**/*.ts",
+    "../user-service/src/libs/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "ts-node": {
+    "esm": true
+  }
 }

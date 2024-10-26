@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+service UserService {
+  rpc UpdateUserProfile (UpdateUserProfileRequest) returns (UserProfileResponse);
+  rpc GetUserProfile (GetUserProfileRequest) returns (UserProfileResponse);
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc ApplyPin (ApplyPinRequest) returns (ApplyPinResponse);
+  rpc ViewPinned (ViewPinnedRequest) returns (ViewPinnedResponse);
+  rpc GetUserDetail (GetUserDetailRequest) returns (GetUserDetailResponse);
+  rpc GetUsersWhoPinnedThread (GetUsersWhoPinnedThreadRequest) returns (GetUsersWhoPinnedThreadResponse);
+}
+
+message UpdateUserProfileRequest {
+  // JWT token will be handled in metadata/cookie
+  optional string displayname = 1;
+  optional string profileImage = 2;
+}
+
+message GetUserProfileRequest {
+  // Empty as JWT token will be handled in metadata/cookie
+}
+
+message UserProfileResponse {
+  string userId = 1;
+  string displayname = 2;
+  string firstname = 3;
+  string lastname = 4;
+  string firstnameth = 5;
+  string lastnameth = 6;
+  string profileImage = 7;
+  string email = 8;
+}
+
+message LoginRequest {
+  string ticket = 1;  // Ticket for server verification
+}
+
+message LoginResponse {
+  string message = 1;
+  string token = 2;  // JWT token for subsequent requests
+  string userId = 3;  // Added to return user data on login
+}
+
+message ApplyPinRequest {
+  // JWT token will be handled in metadata/cookie
+  string threadId = 1;
+}
+
+message ApplyPinResponse {
+  string message = 1;
+}
+
+message ViewPinnedRequest {
+  // JWT token will be handled in metadata/cookie
+}
+
+message ViewPinnedResponse {
+  repeated string threadIds = 1;
+}
+
+message GetUserDetailRequest {
+  string userId = 1;  // ID of the user to fetch details for
+}
+
+message GetUserDetailResponse {
+  string displayname = 1;
+  string profileImage = 2;
+}
+
+message GetUsersWhoPinnedThreadRequest {
+  string threadId = 1;
+}
+
+message GetUsersWhoPinnedThreadResponse {
+  repeated string userIds = 1;
+}

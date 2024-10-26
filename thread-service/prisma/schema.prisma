@@ -1,1 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+  binaryTargets   = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Thread {
+  threadId    String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  body        String
+  assetUrls   String[]
+  tags        String[]
+  authorId    String
+  isAnonymous Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  isDeleted   Boolean  @default(false)
+}

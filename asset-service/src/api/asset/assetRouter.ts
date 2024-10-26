@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders";
 import { AssetSchema } from "./assetModel";
 import { assetController } from "./assetController";
+import { authenticateToken } from "@/middleware/auth";
 
 export const assetRegistry = new OpenAPIRegistry();
 export const assetRouter: Router = express.Router();
@@ -34,4 +35,4 @@ assetRegistry.registerPath({
   responses: createApiResponse(z.array(AssetSchema), "Success"),
 });
 
-assetRouter.post("/upload", upload.single("file"), assetController.uploadFile);
+assetRouter.post("/upload", authenticateToken, upload.single("file"), assetController.uploadFile);

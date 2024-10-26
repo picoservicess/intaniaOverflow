@@ -1,17 +1,166 @@
-version: '3'
+version: "3.8"
 
-services:
+services:    
+    postgres:
+        image: postgres:latest
+        container_name: postgres
+        expose:
+            - "5432"
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: yourusername
+            POSTGRES_PASSWORD: yourpassword
+            POSTGRES_DB: userdatabase
+        volumes:
+            - ./postgres_data:/var/lib/postgresql/data
+        networks:
+            - intania-overflow-network
+
+    rabbitmq:
+        image: rabbitmq:4.0-management
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        restart: always
+        networks:
+            - intania-overflow-network
+
     asset-service:
-        build: ./asset-service
+        build:
+            context: ./
+            dockerfile: ./asset-service/Dockerfile
+        container_name: asset-service
         expose:
-            - '3000'
-    
+            - "5001"
+        ports:
+            - "5001:5001"
+        environment:
+            PORT: 5001
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
+
+    notification-service:
+        build:
+            context: ./
+            dockerfile: ./notification-service/Dockerfile
+        container_name: notification-service
+        expose:
+            - "5002"
+        ports:
+            - "5002:5002"
+        environment:
+            RABBITMQ_URL: "amqp://rabbitmq:5672"
+            RABBITMQ_QUEUE: "notification_queue"
+            PORT: 5002
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        depends_on:
+            - rabbitmq
+        networks:
+            - intania-overflow-network
+
+    reply-service:
+        build:
+            context: ./
+            dockerfile: ./reply-service/Dockerfile
+        container_name: reply-service
+        expose:
+            - "5003"
+        ports:
+            - "5003:5003"
+        environment:
+            PORT: 5003
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
+
     thread-service:
-        build: ./thread-service
+        build:
+            context: ./
+            dockerfile: ./thread-service/Dockerfile
+        container_name: thread-service
         expose:
-            - '3000'
+            - "5004"
+        ports:
+            - "5004:5004"
+        environment:
+            PORT: 5004
+            RABBITMQ_URL: "amqp://rabbitmq:5672"
+            RABBITMQ_QUEUE: "notification_queue"
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
     
-    voting-service:
-        build: ./voting-service
+    user-service:
+        build: 
+            context: ./
+            dockerfile: ./user-service/Dockerfile
+        container_name: user-service
         expose:
-            - '3000'
+            - "5005"
+        ports:
+            - "5005:5005"
+        environment:
+            PORT: 5005
+            DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        depends_on:
+            - postgres
+        networks:
+            - intania-overflow-network
+
+    voting-service:
+        build: 
+            context: ./
+            dockerfile: ./voting-service/Dockerfile
+        container_name: voting-service
+        expose:
+            - "5006"
+        ports:
+            - "5006:5006"
+        environment:
+            PORT: 5006
+            JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+        networks:
+            - intania-overflow-network
+
+    api-gateway:
+        build:
+            context: ./
+            dockerfile: ./api-gateway/Dockerfile
+        container_name: api-gateway
+        env_file:
+            - ./api-gateway/.env
+        expose:
+            - "80"
+        ports:
+            - "80:80"
+        environment:
+            - API_GATEWAY_PORT=80
+            - ASSET_SERVICE_HOST=asset-service
+            - ASSET_SERVICE_PORT=5001
+            - NOTIFICATION_SERVICE_HOST=notification-service
+            - NOTIFICATION_SERVICE_PORT=5002
+            - REPLY_SERVICE_HOST=reply-service
+            - REPLY_SERVICE_PORT=5003
+            - THREAD_SERVICE_HOST=thread-service
+            - THREAD_SERVICE_PORT=5004
+            - USER_SERVICE_HOST=user-service
+            - USER_SERVICE_PORT=5005
+            - VOTING_SERVICE_HOST=voting-service
+            - VOTING_SERVICE_PORT=5006
+        depends_on:
+            - asset-service
+            - notification-service
+            - reply-service
+            - thread-service
+            - user-service
+            - voting-service
+        networks:
+            - intania-overflow-network
+
+networks:
+    intania-overflow-network:
+        driver: bridge
