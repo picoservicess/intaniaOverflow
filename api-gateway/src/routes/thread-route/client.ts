@@ -6,8 +6,8 @@ const PROTO_PATH = "../proto/thread.proto";
 
 const threadProto = initiateGrpcProto(PROTO_PATH);
 
-const host = process.env.THREAD_HOST || "localhost";
-const port = process.env.PORT || "5004";
+const host = process.env.THREAD_SERVICE_HOST || "localhost";
+const port = process.env.THREAD_SERVICE_PORT || "5004";
 
 const threadClient = new threadProto.ThreadService(
     `${host}:${port}`,

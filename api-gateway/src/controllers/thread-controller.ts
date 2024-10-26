@@ -49,15 +49,32 @@ export const createThread = async (req: Request, res: Response) => {
 export const updateThread = async (req: Request, res: Response) => {
     try {
         const threadId = req.params.threadId;
-        const updatedThread: Thread = req.body;
-        const thread = await grpcRequest("updateThread", {
-            threadId,
-            updatedThread,
-        });
-        if (thread) {
-            res.status(200).json(thread);
-        } else {
-            res.status(404).send("Thread not found");
+        const updatedThread = req.body;
+        updatedThread.threadId = threadId
+        const auth = req.headers.authorization
+        if (!auth) {
+            res.status(401).send("Unauthorized")
+            return;
+        }
+        try {
+            const token = auth.split(" ")[1]
+            console.log(token)
+            const thread = await grpcRequest("updateThread",
+                {
+                    ...updatedThread,
+                }, {
+                token
+            });
+            console.log(thread)
+            if (thread) {
+                res.status(200).json(thread);
+            } else {
+                res.status(404).send("Thread not found");
+            }
+        }
+        catch (error) {
+            res.status(401).send("Unauthorized")
+            return;
         }
     } catch (error) {
         console.error("Error updating thread:", error);
