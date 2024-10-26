@@ -8,18 +8,18 @@ export interface Thread {
     createdAt: Date;
     updatedAt: Date;
     isDeleted: boolean;
-  }
-  
-  export interface ThreadList {
+}
+
+export interface ThreadList {
     threads: Thread[];
-  }
-  
-  export interface ThreadId {
+}
+
+export interface ThreadId {
     threadId: string;
-  }
-  
-  export interface Empty { }
-  
-  export interface SearchQuery {
+}
+
+export interface Empty {}
+
+export interface SearchQuery {
     query: string;
-  }
+}

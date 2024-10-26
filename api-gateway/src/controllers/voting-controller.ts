@@ -1,7 +1,7 @@
-import { controllerWrapper, validateAuth } from "../middleware/auth";
-import { VoteCount, VoteRequest, VoteStatus } from "../models/vote-model";
-import votingClient from "../routes/voting-route/client";
-import { getGrpcRequest } from "../utils/grpc";
+import { controllerWrapper, validateAuth } from '../middleware/auth';
+import { VoteCount, VoteRequest, VoteStatus } from '../models/vote-model';
+import votingClient from '../routes/voting-route/client';
+import { getGrpcRequest } from '../utils/grpc';
 
 const grpcRequest = getGrpcRequest(votingClient);
 
@@ -10,11 +10,11 @@ export const getVotes = controllerWrapper(async (req: any, res: any) => {
     const { isThread, targetId }: VoteRequest = req.body;
 
     if (!targetId) {
-        res.status(400).json({ error: "targetId is required" });
+        res.status(400).json({ error: 'targetId is required' });
         return;
     }
 
-    const countVote = await grpcRequest("GetCountVote", {
+    const countVote = await grpcRequest('GetCountVote', {
         isThread,
         targetId,
     });
@@ -34,23 +34,24 @@ export const applyUpvote = controllerWrapper(async (req: any, res: any) => {
     const { isThread, targetId }: VoteRequest = req.body;
 
     if (!targetId) {
-        res.status(400).json({ error: "targetId is required" });
+        res.status(400).json({ error: 'targetId is required' });
         return;
     }
 
-    const result = await grpcRequest("ApplyUpVote",
+    const result = await grpcRequest(
+        'ApplyUpVote',
         {
             isThread,
-            targetId
+            targetId,
         },
         { token }
     );
 
-    console.log("Upvote applied successfully", result);
+    console.log('Upvote applied successfully', result);
 
     res.status(200).json({
-        message: "Upvote applied successfully",
-        result
+        message: 'Upvote applied successfully',
+        result,
     });
 });
 
@@ -60,23 +61,24 @@ export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
     const { isThread, targetId }: VoteRequest = req.body;
 
     if (!targetId) {
-        res.status(400).json({ error: "targetId is required" });
+        res.status(400).json({ error: 'targetId is required' });
         return;
     }
 
-    const result = await grpcRequest("ApplyDownVote",
+    const result = await grpcRequest(
+        'ApplyDownVote',
         {
             isThread,
-            targetId
+            targetId,
         },
         { token }
     );
 
-    console.log("Downvote applied successfully", result);
+    console.log('Downvote applied successfully', result);
 
     res.status(200).json({
-        message: "Downvote applied successfully",
-        result
+        message: 'Downvote applied successfully',
+        result,
     });
 });
 
@@ -86,14 +88,15 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     const { isThread, targetId }: VoteRequest = req.body;
 
     if (!targetId) {
-        res.status(400).json({ error: "targetId is required" });
+        res.status(400).json({ error: 'targetId is required' });
         return;
     }
 
-    const voteStatus = await grpcRequest("IsUserVote",
+    const voteStatus = await grpcRequest(
+        'IsUserVote',
         {
             isThread,
-            targetId
+            targetId,
         },
         { token }
     );
@@ -101,8 +104,8 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     const response: VoteStatus = {
         voteStatus: {
             hasVoted: !!voteStatus.voteType,
-            voteType: voteStatus.voteType as 'up' | 'down'
-        }
+            voteType: voteStatus.voteType as 'up' | 'down',
+        },
     };
 
     res.status(200).json(response);

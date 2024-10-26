@@ -1,14 +1,15 @@
-import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
-import { PrismaClient, Thread } from "@prisma/client";
-import { Empty, ThreadList, SearchQuery, ThreadId } from "./models";
-import * as grpc from "@grpc/grpc-js";
-import * as protoLoader from "@grpc/proto-loader";
-import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { z } from "zod";
-import { rabbitMQManager } from "./rabbitMQManager";
-import { getAuthenticatedUserId } from "../../user-service/src/libs/token"
+import { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import { PrismaClient, Thread } from '@prisma/client';
+import { z } from 'zod';
 
-const PROTO_PATH = "../proto/thread.proto";
+import { getAuthenticatedUserId } from '../../user-service/src/libs/token';
+import { applyAnonymity, sanitizeThreadRequest } from './decorator';
+import { Empty, SearchQuery, ThreadId, ThreadList } from './models';
+import { rabbitMQManager } from './rabbitMQManager';
+
+const PROTO_PATH = '../proto/thread.proto';
 
 var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
     keepCase: true,
@@ -21,11 +22,11 @@ var threadProto = grpc.loadPackageDefinition(packageDefinition) as any;
 
 const prisma = new PrismaClient();
 
-console.log("🥳 Database connected");
+console.log('🥳 Database connected');
 
 const server = new grpc.Server();
 
-const HOST = process.env.HOST || "0.0.0.0";
+const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT) || 5004;
 const address = `${HOST}:${PORT}`;
 
@@ -46,7 +47,7 @@ server.addService(threadProto.ThreadService.service, {
             console.error(`getAllThreads: ${error}`);
             callback({
                 code: grpc.status.INTERNAL,
-                details: "Interal Server Error",
+                details: 'Interal Server Error',
             });
         }
     },
@@ -68,14 +69,14 @@ server.addService(threadProto.ThreadService.service, {
             } else {
                 callback({
                     code: grpc.status.NOT_FOUND,
-                    details: "Not found",
+                    details: 'Not found',
                 });
             }
         } catch (error) {
             console.error(`getThreadById: ${error}`);
             callback({
                 code: grpc.status.INTERNAL,
-                details: "Interal Server Error",
+                details: 'Interal Server Error',
             });
         }
     },
@@ -126,7 +127,7 @@ server.addService(threadProto.ThreadService.service, {
             console.error(`createThread: ${error}`);
             callback({
                 code: grpc.status.INTERNAL,
-                details: "Interal Server Error",
+                details: 'Interal Server Error',
             });
         }
     },
@@ -148,14 +149,14 @@ server.addService(threadProto.ThreadService.service, {
             const thread = await prisma.thread.findUnique({
                 where: {
                     threadId: call.request.threadId,
-                    isDeleted: false,  // Only allow updates on non-deleted threads
+                    isDeleted: false, // Only allow updates on non-deleted threads
                 },
             });
 
             if (!thread) {
                 return callback({
                     code: grpc.status.NOT_FOUND,
-                    details: "Thread not found or has been deleted",
+                    details: 'Thread not found or has been deleted',
                 });
             }
 
@@ -178,7 +179,10 @@ server.addService(threadProto.ThreadService.service, {
             try {
                 await rabbitMQManager.publishMessage(updatedThread);
             } catch (mqError) {
-                console.error('Failed to publish message to RabbitMQ:', mqError);
+                console.error(
+                    'Failed to publish message to RabbitMQ:',
+                    mqError
+                );
             }
 
             callback(null, updatedThread);
@@ -186,7 +190,7 @@ server.addService(threadProto.ThreadService.service, {
             console.error(`updateThread: ${error}`);
             callback({
                 code: grpc.status.INTERNAL,
-                details: "Interal Server Error",
+                details: 'Interal Server Error',
             });
         }
     },
@@ -209,14 +213,14 @@ server.addService(threadProto.ThreadService.service, {
             const thread = await prisma.thread.findUnique({
                 where: {
                     threadId: call.request.threadId,
-                    isDeleted: false,  // Only allow deletion of non-deleted threads
+                    isDeleted: false, // Only allow deletion of non-deleted threads
                 },
             });
 
             if (!thread) {
                 return callback({
                     code: grpc.status.NOT_FOUND,
-                    details: "Thread not found or has already been deleted",
+                    details: 'Thread not found or has already been deleted',
                 });
             }
 
@@ -242,7 +246,7 @@ server.addService(threadProto.ThreadService.service, {
             console.error(`deleteThread: ${error}`);
             callback({
                 code: grpc.status.INTERNAL,
-                details: "Interal Server Error",
+                details: 'Interal Server Error',
             });
         }
     },
@@ -259,17 +263,17 @@ server.addService(threadProto.ThreadService.service, {
                         {
                             title: {
                                 contains: call.request.query,
-                                mode: "insensitive",
+                                mode: 'insensitive',
                             },
                         },
                         {
                             body: {
                                 contains: call.request.query,
-                                mode: "insensitive",
+                                mode: 'insensitive',
                             },
                         },
                     ],
-                    isDeleted: false,  // Only show non-deleted threads in search
+                    isDeleted: false, // Only show non-deleted threads in search
                 },
             });
             const threads = rawThreads.map((thread) => applyAnonymity(thread));
@@ -278,7 +282,7 @@ server.addService(threadProto.ThreadService.service, {
             console.error(`searchThreads: ${error}`);
             callback({
                 code: grpc.status.INTERNAL,
-                details: "Interal Server Error",
+                details: 'Interal Server Error',
             });
         }
     },
@@ -298,12 +302,11 @@ try {
         grpc.ServerCredentials.createInsecure(),
         (error, port) => {
             if (error) {
-                console.error("🚨 Error binding server:", error);
+                console.error('🚨 Error binding server:', error);
                 return;
             }
             console.log(`💻 Thread service server is running on port ${port}`);
             server.start();
-
         }
     );
 } catch (error) {

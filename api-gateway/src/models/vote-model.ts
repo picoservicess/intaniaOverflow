@@ -1,17 +1,17 @@
 export interface VoteRequest {
-  isThread: boolean;
-  targetId: string;
+    isThread: boolean;
+    targetId: string;
 }
 
 export interface VoteCount {
-  upVotes: number;
-  downVotes: number;
-  netVotes: number;
+    upVotes: number;
+    downVotes: number;
+    netVotes: number;
 }
 
 export interface VoteStatus {
-  voteStatus: {
-    hasVoted: boolean;
-    voteType?: 'up' | 'down';
-  };
+    voteStatus: {
+        hasVoted: boolean;
+        voteType?: 'up' | 'down';
+    };
 }

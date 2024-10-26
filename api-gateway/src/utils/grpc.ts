@@ -1,5 +1,5 @@
-const protoLoader = require("@grpc/proto-loader");
-const grpc = require("@grpc/grpc-js");
+const protoLoader = require('@grpc/proto-loader');
+const grpc = require('@grpc/grpc-js');
 
 interface AuthOptions {
     token?: string;
@@ -19,7 +19,10 @@ export const getGrpcRequest = (client: any) => {
             if (authOptions) {
                 // Add Bearer token if provided
                 if (authOptions.token) {
-                    metadata.add('authorization', `Bearer ${authOptions.token}`);
+                    metadata.add(
+                        'authorization',
+                        `Bearer ${authOptions.token}`
+                    );
                 }
             }
             // Make the gRPC call with metadata
@@ -38,7 +41,6 @@ export const getGrpcRequest = (client: any) => {
     };
     return grpcRequest;
 };
-
 
 export const initiateGrpcProto = (protoPath: string) => {
     // Load protobuf file

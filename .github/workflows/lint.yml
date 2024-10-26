@@ -1,35 +1,33 @@
 name: Lint
 
 on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
 
 jobs:
-  run-linters:
-    name: Run linters
-    runs-on: ubuntu-latest
+    lint:
+        name: Run linters
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v4
+        steps:
+            - name: Check out Git repository
+              uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 20
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: 'npm'
 
-      # ESLint and Prettier must be in `package.json`
-      - name: Install Node.js dependencies
-        run: npm ci
+            - name: Install dependencies
+              run: npm ci
 
-      - name: Run linters
-        uses: wearerequired/lint-action@v2.3.0
-        with:
-          eslint: true
-          prettier: true
+            - name: Run ESLint
+              run: npx eslint . --config eslint.config.js
+
+            - name: Run Prettier check
+              run: npx prettier --write . --plugin=@trivago/prettier-plugin-sort-imports

@@ -1,8 +1,9 @@
-import applySecurityMiddleware from "./utils/sercurity";
-import express from "express";
-import assetRouter from "./routes/asset-route";
-import votingRouter from "./routes/voting-route";
-import threadRouter from "./routes/thread-route";
+import express from 'express';
+
+import assetRouter from './routes/asset-route';
+import threadRouter from './routes/thread-route';
+import votingRouter from './routes/voting-route';
+import applySecurityMiddleware from './utils/sercurity';
 
 const app = express();
 const PORT = Number(process.env.API_GATEWAY_PORT) || 80;

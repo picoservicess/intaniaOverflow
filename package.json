@@ -1,6 +1,17 @@
 {
-  "dependencies": {
-    "eslint": "^9.13.0",
-    "prettier": "^3.3.3"
-  }
+    "devDependencies": {
+        "@eslint/js": "^9.13.0",
+        "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.2.1",
+        "prettier": "^3.3.3",
+        "typescript-eslint": "^8.11.0"
+    },
+    "scripts": {
+        "lint": "eslint . --config eslint.config.js",
+        "lint:fix": "eslint . --config eslint.config.js --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "format:imports": "prettier --write . --plugin=@trivago/prettier-plugin-sort-imports"
+    }
 }

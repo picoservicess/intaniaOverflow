@@ -1,4 +1,4 @@
-import { Thread } from "@prisma/client";
+import { Thread } from '@prisma/client';
 
 export const sanitizeThreadRequest = (
     thread: Partial<Thread>
@@ -20,7 +20,7 @@ export const applyAnonymity = (thread: Thread): Thread => {
     const newThread = { ...thread };
     const isAnonymous = thread?.isAnonymous;
     if (isAnonymous) {
-        newThread.authorId = "";
+        newThread.authorId = '';
     }
     return newThread;
 };
