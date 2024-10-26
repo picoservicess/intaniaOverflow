@@ -64,4 +64,10 @@ export const votingService = {
     const result = await isUserVote(isThread, targetId, userId);
     callback(null, { voteStatus: result });
   },
+  HealthCheck: async (
+    call: ServerUnaryCall<any, any>,
+    callback: sendUnaryData<any>
+  ) => {
+    callback(null, { success: true, message: "Vote Service is healthy" });
+  },
 };

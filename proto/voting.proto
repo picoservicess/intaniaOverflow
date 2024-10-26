@@ -5,6 +5,7 @@ service VotingService {
   rpc ApplyDownVote (VoteRequest) returns (ActionResponse);
   rpc GetCountVote (CountVoteRequest) returns (CountVoteResponse);
   rpc IsUserVote (VoteRequest) returns (UserVoteResponse);
+  rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
 }
 
 message VoteRequest {
@@ -31,4 +32,11 @@ message UserVoteResponse {
 message ActionResponse {
   bool success = 1;   
   string message = 2;  
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool success = 1;
+  string message = 2;
 }

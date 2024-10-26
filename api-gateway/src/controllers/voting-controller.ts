@@ -73,3 +73,13 @@ export const checkVoteStatus = async (req: any, res: any) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+export const healthCheck = async (req: any, res: any) => {
+    try {
+        const result = await grpcRequest("HealthCheck", {});
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error checking health:", error);
+        res.status(500).send("Internal Server Error");
+    }
+}
