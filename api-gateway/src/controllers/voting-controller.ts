@@ -7,30 +7,25 @@ const grpcRequest = getGrpcRequest(votingClient);
 
 // Get current vote counts
 export const getVotes = controllerWrapper(async (req: any, res: any) => {
-    try {
-        const { isThread, targetId }: VoteRequest = req.body;
+    const { isThread, targetId }: VoteRequest = req.body;
 
-        if (!targetId) {
-            res.status(400).json({ error: "targetId is required" });
-            return;
-        }
-
-        const countVote = await grpcRequest("GetCountVote", {
-            isThread,
-            targetId,
-        });
-
-        const response: VoteCount = {
-            upVotes: countVote.upVotes,
-            downVotes: countVote.downVotes,
-            netVotes: countVote.netVotes,
-        };
-
-        res.status(200).json(response);
-    } catch (error) {
-        console.error("Error fetching vote counts:", error);
-        res.status(500).send("Internal Server Error");
+    if (!targetId) {
+        res.status(400).json({ error: "targetId is required" });
+        return;
     }
+
+    const countVote = await grpcRequest("GetCountVote", {
+        isThread,
+        targetId,
+    });
+
+    const response: VoteCount = {
+        upVotes: countVote.upVotes,
+        downVotes: countVote.downVotes,
+        netVotes: countVote.netVotes,
+    };
+
+    res.status(200).json(response);
 });
 
 // Apply upvote
