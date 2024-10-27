@@ -1,10 +1,11 @@
 import { Router } from "express";
 
 import {
-  applyDownvote,
-  applyUpvote,
-  checkVoteStatus,
-  getVotes,
+    applyDownvote,
+    applyUpvote,
+    checkVoteStatus,
+    getVotes,
+    healthCheck,
 } from "../../controllers/voting-controller";
 import { authMiddleware } from "../../middleware/auth";
 
@@ -21,5 +22,8 @@ votingRouter.post("/votes/downvote", authMiddleware, applyDownvote);
 
 // Check user vote status
 votingRouter.get("/votes/checkvote", authMiddleware, checkVoteStatus);
+
+// Check user vote status
+votingRouter.get("/health/votes", healthCheck);
 
 export default votingRouter;
