@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export interface AuthError extends Error {
   statusCode: number;
@@ -49,7 +49,7 @@ export const authMiddleware = (
   } catch (error) {
     const authError = error as AuthError;
     res.status(authError.statusCode || 401).json({
-      error: authError.message || "Unauthorized"
+      error: authError.message || "Unauthorized",
     });
   }
 };
@@ -71,7 +71,7 @@ export const controllerWrapper = (
       // Handle known error types
       if (error.statusCode) {
         res.status(error.statusCode).json({
-          error: error.message
+          error: error.message,
         });
         return;
       }
@@ -80,14 +80,14 @@ export const controllerWrapper = (
       if (error.code) {
         const statusCode = grpcToHttpStatus(error.code);
         res.status(statusCode).json({
-          error: error.details || error.message
+          error: error.details || error.message,
         });
         return;
       }
 
       // Default error response
       res.status(500).json({
-        error: "Internal Server Error"
+        error: "Internal Server Error",
       });
     }
   };
@@ -98,14 +98,14 @@ export const controllerWrapper = (
  */
 const grpcToHttpStatus = (grpcCode: number): number => {
   const statusMap: Record<number, number> = {
-    0: 200,  // OK
-    1: 499,  // CANCELLED
-    2: 500,  // UNKNOWN
-    3: 400,  // INVALID_ARGUMENT
-    4: 504,  // DEADLINE_EXCEEDED
-    5: 404,  // NOT_FOUND
-    6: 409,  // ALREADY_EXISTS
-    7: 403,  // PERMISSION_DENIED
+    0: 200, // OK
+    1: 499, // CANCELLED
+    2: 500, // UNKNOWN
+    3: 400, // INVALID_ARGUMENT
+    4: 504, // DEADLINE_EXCEEDED
+    5: 404, // NOT_FOUND
+    6: 409, // ALREADY_EXISTS
+    7: 403, // PERMISSION_DENIED
     16: 401, // UNAUTHENTICATED
     // Add more mappings as needed
   };

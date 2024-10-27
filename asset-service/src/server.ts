@@ -1,12 +1,11 @@
-import express, { Request, Response, type Express } from "express";
 import cors from "cors";
+import express, { type Express, Request, Response } from "express";
 import helmet from "helmet";
 import { pino } from "pino";
 
 import { openAPIRouter } from "./api-docs/openAPIRouter";
-import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter";
 import { assetRouter } from "./api/asset/assetRouter";
-
+import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter";
 import errorHandler from "./common/middleware/errorHandler";
 
 const logger = pino({ name: "server start" });

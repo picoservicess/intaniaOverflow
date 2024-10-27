@@ -1,10 +1,12 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from "react";
 
-import Icon from '../../assets/icon.svg';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+
+import Icon from "../../assets/icon.svg";
 
 const Header = () => {
   const router = useRouter();
@@ -37,7 +39,7 @@ const Header = () => {
 
       <div className="space-x-2">
         <Button variant="default">สร้างเธรด</Button>
-        <Button variant="outline" onClick={() => router.push('/login')}>
+        <Button variant="outline" onClick={() => router.push("/login")}>
           เข้าสู่ระบบ
         </Button>
       </div>

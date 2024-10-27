@@ -5,12 +5,9 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src/**/*.ts",
-    "../user-service/src/libs/*.ts"
-  ],
+  "include": ["src/**/*.ts", "../user-service/src/libs/*.ts"],
   "ts-node": {
     "esm": true
   }

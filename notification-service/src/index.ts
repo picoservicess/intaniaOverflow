@@ -1,8 +1,9 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 import express, { Application } from "express";
 import mongoose from "mongoose";
-import notificationRouter from './routes/notifications';
-import { main as startMQ } from './mq';
+
+import { main as startMQ } from "./mq";
+import notificationRouter from "./routes/notifications";
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ const port = process.env.PORT || 5002;
 app.listen(port, () => console.log(`Server started on port ${port}`));
 
 // Start RabbitMQ connection and message processing
-startMQ().catch(error => {
+startMQ().catch((error) => {
   console.error("❌ Failed to start RabbitMQ:", error);
   process.exit(1);
 });

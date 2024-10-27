@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
-import Header from './_components/layout/header';
-import PostList from './_components/home/postList';
-import Sidebar from './_components/home/sideBar';
+import PostList from "./_components/home/postList";
+import Sidebar from "./_components/home/sideBar";
+import Header from "./_components/layout/header";
 
 const Home = () => {
   return (

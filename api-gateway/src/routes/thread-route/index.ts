@@ -1,12 +1,13 @@
 import express from "express";
+
 import {
-    createThread,
-    deleteThread,
-    getAllThreads,
-    getThreadById,
-    healthCheck,
-    searchThreads,
-    updateThread,
+  createThread,
+  deleteThread,
+  getAllThreads,
+  getThreadById,
+  healthCheck,
+  searchThreads,
+  updateThread,
 } from "../../controllers/thread-controller";
 import { authMiddleware } from "../../middleware/auth";
 

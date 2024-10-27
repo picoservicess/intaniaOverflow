@@ -12,6 +12,6 @@ export interface VoteCount {
 export interface VoteStatus {
   voteStatus: {
     hasVoted: boolean;
-    voteType?: 'up' | 'down';
+    voteType?: "up" | "down";
   };
 }

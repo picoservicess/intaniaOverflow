@@ -1,7 +1,8 @@
-import { Noto_Sans_Thai } from 'next/font/google';
-import './globals.css';
+import { Noto_Sans_Thai } from "next/font/google";
 
-const noto = Noto_Sans_Thai({ subsets: ['thai'] });
+import "./globals.css";
+
+const noto = Noto_Sans_Thai({ subsets: ["thai"] });
 
 export default function RootLayout({
   children,
