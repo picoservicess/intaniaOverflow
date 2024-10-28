@@ -11,12 +11,16 @@ const PORT = Number(process.env.API_GATEWAY_PORT) || 80;
 // Apply security middleware
 applySecurityMiddleware(app);
 
+app.get('/', (req, res) => {
+    res.send("This is API gateway of intaniaOverflow");
+});
+
 // Routes
-app.use(threadRouter);
-app.use(assetRouter);
-app.use(votingRouter);
+app.use('/threads', threadRouter);
+app.use('/asset', assetRouter);
+app.use('/votes', votingRouter);
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`🥳 API gateway server is running on http://localhost:${PORT}`);
+    console.log(`🥳 API gateway server is running on http://localhost:${PORT}`);
 });
