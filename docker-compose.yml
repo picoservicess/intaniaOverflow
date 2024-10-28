@@ -11,11 +11,17 @@ services:
     environment:
       POSTGRES_USER: yourusername
       POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: userdatabase
+      POSTGRES_DB: postgres
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     networks:
       - intania-overflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yourusername"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -139,8 +145,30 @@ services:
       PORT: 5007
       RABBITMQ_URL: "amqp://rabbitmq:5672"
       RABBITMQ_QUEUE: "logging_queue"
+      DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/logdatabase"
     depends_on:
       - rabbitmq
+    networks:
+      - intania-overflow-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_POSTGRES_HOST: postgres
+      GF_POSTGRES_PORT: 5432
+      GF_POSTGRES_DB: logdatabase
+      GF_POSTGRES_USER: yourusername
+      GF_POSTGRES_PASSWORD: yourpassword
+    volumes:
+      - ./grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - postgres
     networks:
       - intania-overflow-network
 
