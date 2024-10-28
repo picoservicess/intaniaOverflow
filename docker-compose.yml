@@ -126,6 +126,24 @@ services:
     networks:
       - intania-overflow-network
 
+  logging-service:
+    build:
+      context: ./
+      dockerfile: ./logging-service/Dockerfile
+    container_name: logging-service
+    expose:
+      - "5007"
+    ports:
+      - "5007:5007"
+    environment:
+      PORT: 5007
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+      RABBITMQ_QUEUE: "logging_queue"
+    depends_on:
+      - rabbitmq
+    networks:
+      - intania-overflow-network
+
   api-gateway:
     build:
       context: ./
