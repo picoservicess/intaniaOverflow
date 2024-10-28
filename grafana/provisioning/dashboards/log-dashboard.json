@@ -60,7 +60,24 @@
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 3
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -72,15 +89,18 @@
         "legend": {
           "calcs": [
             "mean",
-            "max"
+            "max",
+            "sum"
           ],
           "displayMode": "table",
           "placement": "right",
-          "showLegend": true
+          "showLegend": true,
+          "sortBy": "max",
+          "sortDesc": true
         },
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "targets": [
@@ -92,7 +112,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  date_trunc('minute', datetime) AS time,\n  COUNT(*) as value,\n  'Total Requests' as metric\nFROM \"Log\"\nWHERE $__timeFilter(datetime)\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "-- Individual service lines\nSELECT\n  date_trunc('minute', datetime) AS time,\n  COUNT(*) as value,\n  \"serviceName\" as metric\nFROM \"Log\"\nWHERE $__timeFilter(datetime)\nGROUP BY 1, \"serviceName\"\nUNION ALL\n-- Total line\nSELECT\n  date_trunc('minute', datetime) AS time,\n  COUNT(*) as value,\n  'Total' as metric\nFROM \"Log\"\nWHERE $__timeFilter(datetime)\nGROUP BY 1\nORDER BY 1, 3",
           "refId": "A"
         }
       ],
