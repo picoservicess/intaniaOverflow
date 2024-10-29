@@ -18,7 +18,7 @@ services:
     networks:
       - intania-overflow-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U yourusername"]
+      test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,6 +44,9 @@ services:
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 3
 
   notification-service:
     build:
