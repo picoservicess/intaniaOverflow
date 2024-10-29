@@ -67,7 +67,7 @@ router.post(
       // Log any errors to the console
       console.error("Create reply error:", error);
       // Send a 500 Internal Server Error response
-      res.status(500).json({ error: "Failed to create reply" });
+      res.status(500).json({ error: "😭 Failed to create reply" });
     }
   }
 );
