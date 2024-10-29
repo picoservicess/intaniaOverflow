@@ -18,7 +18,8 @@ export default async function createThread(newThread: newThread) {
     author: newThread.authorId, // Assuming a default authorId for now
     createdAt: new Date(),
     replies: 0,
-    votes: 0,
+    upvotes: 0,
+    downvotes: 0,
   };
 
   threads.push(completeThread);

@@ -4,6 +4,7 @@ import PostList from "../components/postList";
 import getThreads from "@/lib/getThreads";
 import { useState, useEffect } from "react";
 import { Thread } from "@/lib/data";
+import CreateThreadButton from "@/components/createThreadButton";
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,6 +25,7 @@ const Home = () => {
   }, [searchTerm]);
   return (
     <div className="bg-gray-50 min-h-screen">
+      <CreateThreadButton />
       <div className="w-1/2 mx-auto pt-8 px-4 flex flex-col md:flex-row gap-4 justify-center">
         <input
           type="text"

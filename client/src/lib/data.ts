@@ -7,13 +7,14 @@ export type Thread = {
   author: string;
   createdAt: Date;
   replies: number;
-  votes: number;
+  upvotes: number;
+  downvotes: number;
 };
 
 export const threads: Thread[] = [
   {
     id: "1",
-    title: "The standard Lorem Ipsum passage, used since the 1500s",
+    title: "โย่ว! และนี่คือเสียงของเด็กวัด แข็งแรงเหมือนกับมึงเอาเหล็กงัด",
     body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     assetUrls: [
       "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_640.jpg",
@@ -23,7 +24,8 @@ export const threads: Thread[] = [
     author: "North Surapee",
     createdAt: new Date("2024-10-10"),
     replies: 2,
-    votes: -3,
+    upvotes: 3,
+    downvotes: 1,
   },
 ];
 
@@ -33,7 +35,8 @@ export type Reply = {
   assetUrls: string[];
   author: string;
   createdAt: Date;
-  votes: number;
+  upvotes: number;
+  downvotes: number;
 };
 
 export const replies: Reply[] = [
@@ -43,7 +46,8 @@ export const replies: Reply[] = [
     assetUrls: [],
     author: "NOrth Surapee",
     createdAt: new Date(),
-    votes: 2,
+    upvotes: 3,
+    downvotes: 1,
   },
   {
     id: "2",
@@ -51,6 +55,7 @@ export const replies: Reply[] = [
     assetUrls: [],
     author: "NOrth Surapee",
     createdAt: new Date(),
-    votes: 3,
+    upvotes: 3,
+    downvotes: 1,
   },
 ];

@@ -7,16 +7,16 @@ TODO:
 - Searching Thread /
   - Make PostList reusable /
   - By title and tags /
-- Pinning Thread
-  - PostList in profile
+- Pinning Thread /
+  - PostList in profile /
 - Getting Thread Notification
   - mock red dot on top of avatar
-- Voting on Thread/Reply (optional)
+- Voting on Thread/Reply /
+- Profile /
+  - Profile form /
 
+---
 
-***
 - blur modal
-- เปลี่ยนรูป เปลี่ยนชื่อ สำหรับ user
 - Font แบบเดิม
 - anonymous thread ทำที่ backend
-

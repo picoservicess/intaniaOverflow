@@ -10,7 +10,8 @@ export type Reply = {
   assetUrls: string[];
   author: string;
   createdAt: Date;
-  votes: number;
+  upvotes: number;
+  downvotes: number;
 };
 
 interface ReplyProps {
@@ -22,7 +23,7 @@ export default function Reply({ reply }: ReplyProps) {
     <Card className="mb-4 sm:mb-6">
       <CardContent className="pt-4 sm:pt-6">
         <div className="flex flex-col sm:flex-row">
-          <VoteSection initialVotes={reply.votes} />
+          <VoteSection initialVotes={reply.upvotes - reply.downvotes} />
           <div className="flex-grow flex flex-col gap-2">
             <div className="flex gap-2">
               <Avatar>

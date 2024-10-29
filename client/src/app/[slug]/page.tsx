@@ -6,6 +6,9 @@ import VoteSection from "@/components/voteSection";
 import Reply from "@/components/reply";
 import getReplies from "@/lib/getReplies";
 import { timeAgo } from "@/lib/utils";
+import PinButton from "@/components/PinButton";
+import EmblaCarousel from "@/components/EmblaCarousel";
+import FileList from "@/components/FileList";
 
 export default async function ThreadPage({
   params,
@@ -23,7 +26,8 @@ export default async function ThreadPage({
       <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col space-y-4 sm:space-y-6">
           <div className="flex-grow">
-            <Card className="p-4 sm:p-6 mb-4 sm:mb-6">
+            <Card className="p-4 sm:p-6 mb-4 sm:mb-6 relative">
+              <PinButton className={"absolute top-9 right-8"} size={24} />
               <h1 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">
                 {thread.title}
               </h1>
@@ -56,6 +60,14 @@ export default async function ThreadPage({
                   </p>
                 </div>
               </div>
+              <EmblaCarousel
+                slides={[
+                  "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce",
+                  "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
+                  "https://images.unsplash.com/photo-1507537297725-24a1c029d3ca",
+                ]}
+              />
+              <FileList />
             </Card>
             <CreateReplyButton />
             {/* Answers */}

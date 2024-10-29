@@ -13,7 +13,8 @@ export default async function createReply(newReply: newReply) {
     assetUrls: [],
     author: newReply.authorId, // Assuming a default authorId for now
     createdAt: new Date(),
-    votes: 0,
+    upvotes: 0,
+    downvotes: 0,
   };
 
   replies.push(completeReply);
