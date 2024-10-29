@@ -171,7 +171,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as count FROM \"Log\"",
+          "rawSql": "SELECT COUNT(*) as count FROM \"Log\" WHERE $__timeFilter(datetime)",
           "refId": "A"
         }
       ],
@@ -230,7 +230,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as count FROM \"Log\" WHERE \"statusCode\" < 400",
+          "rawSql": "SELECT COUNT(*) as count FROM \"Log\" WHERE $__timeFilter(datetime) AND \"statusCode\" < 400",
           "refId": "A"
         }
       ],
@@ -289,7 +289,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as count FROM \"Log\" WHERE \"statusCode\" >= 400",
+          "rawSql": "SELECT COUNT(*) as count FROM \"Log\" WHERE $__timeFilter(datetime) AND \"statusCode\" >= 400",
           "refId": "A"
         }
       ],
