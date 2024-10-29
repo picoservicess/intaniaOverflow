@@ -37,11 +37,8 @@ services:
     build:
       context: ./
       dockerfile: ./asset-service/Dockerfile
-    container_name: asset-service
     expose:
       - "5001"
-    ports:
-      - "5001:5001"
     environment:
       PORT: 5001
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
@@ -52,11 +49,8 @@ services:
     build:
       context: ./
       dockerfile: ./notification-service/Dockerfile
-    container_name: notification-service
     expose:
       - "5002"
-    ports:
-      - "5002:5002"
     environment:
       RABBITMQ_URL: "amqp://rabbitmq:5672"
       RABBITMQ_QUEUE: "notification_queue"
@@ -71,11 +65,8 @@ services:
     build:
       context: ./
       dockerfile: ./reply-service/Dockerfile
-    container_name: reply-service
     expose:
       - "5003"
-    ports:
-      - "5003:5003"
     environment:
       PORT: 5003
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
@@ -169,6 +160,22 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - postgres
+    networks:
+      - intania-overflow-network
+
+  load-balancer:
+    image: nginx:alpine
+    container_name: load-balancer
+    volumes:
+      - ./load-balancer/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - asset-service
+      - notification-service
+      - reply-service
+    ports:
+      - "5001:5001"
+      - "5002:5002"
+      - "5003:5003"
     networks:
       - intania-overflow-network
 
