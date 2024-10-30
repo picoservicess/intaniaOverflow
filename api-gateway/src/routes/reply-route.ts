@@ -1,6 +1,5 @@
 import axios from "axios";
 import express, { Request, Response } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import { createLogMiddleware } from "../middleware/log";
 
 const replyRouter = express.Router();
@@ -15,8 +14,8 @@ replyRouter.use(createLogMiddleware('reply-service'));
 replyRouter.get("/health", async (req: Request, res: Response) => {
     try {
         // Forward the request to the asset service health check
-        console.log(`${REPLY_SERVICE_URL}/health-check`);
-        const response = await axios.get(`${REPLY_SERVICE_URL}/health-check`);
+        console.log(`${REPLY_SERVICE_URL}/replies/health-check`);
+        const response = await axios.get(`${REPLY_SERVICE_URL}/replies/health-check`);
         res.status(response.status).json(response.data);
     } catch (error: any) {
         console.error("Error in /replies/health:", error.message);

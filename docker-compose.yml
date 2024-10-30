@@ -195,11 +195,11 @@ services:
       - "80:80"
     environment:
       - API_GATEWAY_PORT=80
-      - ASSET_SERVICE_HOST=asset-service
+      - ASSET_SERVICE_HOST=load-balancer
       - ASSET_SERVICE_PORT=5001
-      - NOTIFICATION_SERVICE_HOST=notification-service
+      - NOTIFICATION_SERVICE_HOST=load-balancer
       - NOTIFICATION_SERVICE_PORT=5002
-      - REPLY_SERVICE_HOST=reply-service
+      - REPLY_SERVICE_HOST=load-balancer
       - REPLY_SERVICE_PORT=5003
       - THREAD_SERVICE_HOST=thread-service
       - THREAD_SERVICE_PORT=5004
