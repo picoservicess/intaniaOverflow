@@ -22,6 +22,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -46,7 +47,8 @@ services:
       - intania-overflow-network
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 2
+    restart: always
 
   notification-service:
     build:
@@ -63,6 +65,10 @@ services:
       - rabbitmq
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: always
 
   reply-service:
     build:
@@ -75,6 +81,10 @@ services:
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: always
 
   thread-service:
     build:
@@ -92,6 +102,10 @@ services:
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: always
 
   user-service:
     build:
@@ -110,6 +124,10 @@ services:
       - postgres
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: always
 
   voting-service:
     build:
@@ -125,6 +143,10 @@ services:
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: always
 
   logging-service:
     build:
@@ -144,6 +166,7 @@ services:
       - rabbitmq
     networks:
       - intania-overflow-network
+    restart: always
 
   grafana:
     image: grafana/grafana:latest
@@ -165,6 +188,7 @@ services:
       - postgres
     networks:
       - intania-overflow-network
+    restart: always
 
   load-balancer:
     image: nginx:alpine
@@ -181,6 +205,7 @@ services:
       - "5003:5003"
     networks:
       - intania-overflow-network
+    restart: always
 
   api-gateway:
     build:
@@ -217,6 +242,7 @@ services:
       - logging-service
     networks:
       - intania-overflow-network
+    restart: always
 
 networks:
   intania-overflow-network:
