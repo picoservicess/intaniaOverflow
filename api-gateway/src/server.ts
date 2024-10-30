@@ -3,6 +3,7 @@ import express from "express";
 import assetRouter from "./routes/asset-route";
 import threadRouter from "./routes/thread-route";
 import votingRouter from "./routes/voting-route";
+import replyRouter from "./routes/reply-route";
 import applySecurityMiddleware from "./utils/sercurity";
 
 const app = express();
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 app.use('/threads', threadRouter);
 app.use('/asset', assetRouter);
 app.use('/votes', votingRouter);
+app.use('/replies', replyRouter);
 
 // Start the server
 app.listen(PORT, () => {
