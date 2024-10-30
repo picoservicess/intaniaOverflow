@@ -22,7 +22,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: always
+    restart: on-failure:3
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -30,7 +30,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    restart: always
+    restart: on-failure:3
     networks:
       - intania-overflow-network
 
@@ -48,7 +48,7 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    restart: always
+    restart: on-failure:3
 
   notification-service:
     build:
@@ -68,7 +68,7 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    restart: always
+    restart: on-failure:3
 
   reply-service:
     build:
@@ -84,7 +84,7 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    restart: always
+    restart: on-failure:3
 
   thread-service:
     build:
@@ -105,7 +105,7 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    restart: always
+    restart: on-failure:3
 
   user-service:
     build:
@@ -127,7 +127,7 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    restart: always
+    restart: on-failure:3
 
   voting-service:
     build:
@@ -146,7 +146,7 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    restart: always
+    restart: on-failure:3
 
   logging-service:
     build:
@@ -166,7 +166,7 @@ services:
       - rabbitmq
     networks:
       - intania-overflow-network
-    restart: always
+    restart: on-failure:3
 
   grafana:
     image: grafana/grafana:latest
@@ -188,7 +188,7 @@ services:
       - postgres
     networks:
       - intania-overflow-network
-    restart: always
+    restart: on-failure:3
 
   load-balancer:
     image: nginx:alpine
@@ -205,7 +205,7 @@ services:
       - "5003:5003"
     networks:
       - intania-overflow-network
-    restart: always
+    restart: on-failure:3
 
   api-gateway:
     build:
@@ -242,7 +242,7 @@ services:
       - logging-service
     networks:
       - intania-overflow-network
-    restart: always
+    restart: on-failure:3
 
 networks:
   intania-overflow-network:
