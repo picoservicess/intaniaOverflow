@@ -7,7 +7,7 @@ const replyRouter = express.Router();
 const REPLY_SERVICE_URL =
     `http://${process.env.REPLY_SERVICE_HOST}:${process.env.REPLY_SERVICE_PORT}` ||
     "http://reply-service:5003";
-console.log("REPLY_SERVICE_URL", REPLY_SERVICE_URL);
+console.log("💬 REPLY_SERVICE_URL", REPLY_SERVICE_URL);
 
 replyRouter.use(createLogMiddleware('reply-service'));
 

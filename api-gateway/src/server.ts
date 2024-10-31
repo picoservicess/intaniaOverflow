@@ -4,6 +4,7 @@ import assetRouter from "./routes/asset-route";
 import threadRouter from "./routes/thread-route";
 import votingRouter from "./routes/voting-route";
 import replyRouter from "./routes/reply-route";
+import notificationRouter from "./routes/notification-route";
 import applySecurityMiddleware from "./utils/sercurity";
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/threads', threadRouter);
 app.use('/asset', assetRouter);
 app.use('/votes', votingRouter);
 app.use('/replies', replyRouter);
+app.use('/notifications', notificationRouter);
 
 // Start the server
 app.listen(PORT, () => {
