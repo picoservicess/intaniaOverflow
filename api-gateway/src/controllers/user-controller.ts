@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import { controllerWrapper, validateAuth } from "../middleware/auth";
-import { UserProfileResponse } from "../models/user-model";
+import { UpdateUserProfileRequest, GetUserProfileRequest, UserProfileResponse, LoginRequest, LoginResponse, ApplyPinRequest, ApplyPinResponse, ViewPinnedRequest, ViewPinnedResponse, GetUserDetailRequest, GetUserDetailResponse, GetUsersWhoPinnedThreadRequest, GetUsersWhoPinnedThreadResponse, HealthCheckRequest, HealthCheckResponse } from "../models/user-model";
 import userClient from "../routes/user-route/client";
 import { getGrpcRequest } from "../utils/grpc";
 
@@ -10,9 +10,10 @@ const grpcRequest = getGrpcRequest(userClient);
 // Update user profile
 export const updateUserProfile = controllerWrapper(
     async (req: Request, res: Response) => {
+        const token = validateAuth(req);
         try {
             const userProfileUpdate = req.body;
-            const updatedProfile = await grpcRequest("UpdateUserProfile", userProfileUpdate);
+            const updatedProfile = await grpcRequest("UpdateUserProfile", userProfileUpdate, { token });
             res.status(200).json(updatedProfile);
         } catch (error) {
             res.status(500).json({ error: "Failed to update user profile" });
@@ -23,9 +24,9 @@ export const updateUserProfile = controllerWrapper(
 // Get user profile
 export const getUserProfile = controllerWrapper(
     async (req: Request, res: Response) => {
+        const token = validateAuth(req);
         try {
-            const userId = req.params.userId;
-            const userProfile = await grpcRequest("GetUserProfile", { userId });
+            const userProfile = await grpcRequest("GetUserProfile", {}, { token });
 
             if (!userProfile) {
                 res.status(404).json({ error: "User profile not found" });
@@ -55,9 +56,10 @@ export const login = controllerWrapper(
 // Apply a pin
 export const applyPin = controllerWrapper(
     async (req: Request, res: Response) => {
+        const token = validateAuth(req);
         try {
             const pinData = req.body;
-            const applyPinResponse = await grpcRequest("ApplyPin", pinData);
+            const applyPinResponse = await grpcRequest("ApplyPin", pinData, { token });
             res.status(200).json(applyPinResponse);
         } catch (error) {
             res.status(500).json({ error: "Failed to apply pin" });
@@ -68,9 +70,9 @@ export const applyPin = controllerWrapper(
 // View pinned items
 export const viewPinned = controllerWrapper(
     async (req: Request, res: Response) => {
+        const token = validateAuth(req);
         try {
-            const userId = req.params.userId;
-            const pinnedItems = await grpcRequest("ViewPinned", { userId });
+            const pinnedItems = await grpcRequest("ViewPinned", {}, { token });
             res.status(200).json(pinnedItems);
         } catch (error) {
             res.status(500).json({ error: "Failed to retrieve pinned items" });
@@ -81,9 +83,11 @@ export const viewPinned = controllerWrapper(
 // Get user details
 export const getUserDetail = controllerWrapper(
     async (req: Request, res: Response) => {
+        const token = validateAuth(req);
         try {
-            const userId = req.params.userId;
-            const userDetails = await grpcRequest("GetUserDetail", { userId });
+            const userDetail = req.body;
+
+            const userDetails = await grpcRequest("GetUserDetail", userDetail, { token });
 
             if (!userDetails) {
                 res.status(404).json({ error: "User details not found" });
@@ -100,9 +104,9 @@ export const getUserDetail = controllerWrapper(
 // Get users who pinned a thread
 export const getUsersWhoPinnedThread = controllerWrapper(
     async (req: Request, res: Response) => {
+        const token = validateAuth(req);
         try {
-            const { threadId } = req.params;
-            const pinnedUsers = await grpcRequest("GetUsersWhoPinnedThread", { threadId });
+            const pinnedUsers = await grpcRequest("GetUsersWhoPinnedThread", {}, { token });
             res.status(200).json({ userIds: pinnedUsers });
         } catch (error) {
             res.status(500).json({ error: "Failed to retrieve users who pinned the thread" });

@@ -6,8 +6,8 @@ const PROTO_PATH = "../proto/user.proto";
 
 const userProto = initiateGrpcProto(PROTO_PATH);
 
-// const host = process.env.NOTIFICATION_SERVICE_HOST || "localhost";
-// const port = process.env.NOTIFICATION_SERVICE_PORT || "5004";
+const host = process.env.USER_SERVICE_HOST || "localhost";
+const port = process.env.USER_SERVICE_PORT || "5005";
 
 const userClient = new userProto.UserService(
     `${host}:${port}`,
