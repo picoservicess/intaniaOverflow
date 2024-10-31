@@ -19,6 +19,11 @@ import {
 //     }
 // };
 
+export const getHealthCheck = async (req: Request, res: Response): Promise<void> => {
+  console.log("💛 Health check request received");
+  res.status(200).json({ status: "OK", message: "Notification-Service is healthy" });
+};
+
 export const getAllNotificationsByUserId = async (
   req: AuthenticatedRequest,
   res: Response
@@ -89,6 +94,7 @@ export const markNotificationsAsSeenByUserId = async (
   res: Response
 ): Promise<void> => {
   const userId = req.user?.userId;
+  console.log("mark!!")
   if (!userId) {
     res.status(401).json({ error: "No bearer token provided" });
     return;
