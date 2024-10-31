@@ -59,6 +59,7 @@ services:
       RABBITMQ_QUEUE: "notification_queue"
       PORT: 5002
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      DATABASE_URL: ${NOTI_DATABASE_URL}
     depends_on:
       - rabbitmq
     networks:
@@ -90,6 +91,7 @@ services:
       RABBITMQ_URL: "amqp://rabbitmq:5672"
       RABBITMQ_QUEUE: "notification_queue"
       JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      DATABASE_URL: ${THREAD_DATABASE_URL}
     networks:
       - intania-overflow-network
 
