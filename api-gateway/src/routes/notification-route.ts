@@ -14,7 +14,6 @@ notificationRouter.use(createLogMiddleware('notification-service'));
 notificationRouter.get('/health', async (req: Request, res: Response) => {
     try {
         // Forward the request to the notification service health check
-        console.log(`${NOTIFICATION_SERVICE_URL}/notifications/health-check`);
         const response = await axios.get(`${NOTIFICATION_SERVICE_URL}/notifications/health-check`,
             {
                 headers: {
@@ -34,7 +33,6 @@ notificationRouter.get('/health', async (req: Request, res: Response) => {
 notificationRouter.get("/", async (req: Request, res: Response) => {
     try {
         // Forward the request to the getAllNotificationsByUserId
-        console.log(`${NOTIFICATION_SERVICE_URL}/notifications`);
         const response = await axios.get(`${NOTIFICATION_SERVICE_URL}/notifications`,
             {
                 headers: {
@@ -54,7 +52,6 @@ notificationRouter.get("/", async (req: Request, res: Response) => {
 notificationRouter.get("/unread", async (req: Request, res: Response) => {
     try {
         // Forward the request to the getAllNotificationsByUserId
-        console.log(`${NOTIFICATION_SERVICE_URL}/notifications/unread`);
         const response = await axios.get(`${NOTIFICATION_SERVICE_URL}/notifications/unread`,
             {
                 headers: {
@@ -74,7 +71,6 @@ notificationRouter.get("/unread", async (req: Request, res: Response) => {
 notificationRouter.patch("/", async (req: Request, res: Response) => {
     try {
         // Forward the request to the markNotificationsAsSeenByUserId
-        console.log(`${NOTIFICATION_SERVICE_URL}/notifications`);
         const response = await axios.patch(`${NOTIFICATION_SERVICE_URL}/notifications`,
             req.body,
             {

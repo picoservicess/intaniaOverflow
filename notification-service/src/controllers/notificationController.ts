@@ -94,7 +94,6 @@ export const markNotificationsAsSeenByUserId = async (
   res: Response
 ): Promise<void> => {
   const userId = req.user?.userId;
-  console.log("mark!!")
   if (!userId) {
     res.status(401).json({ error: "No bearer token provided" });
     return;
