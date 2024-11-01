@@ -72,7 +72,7 @@ The architecture of the IntaniaOverflow application follows a microservices patt
 - Thread Service
 - User Service
 - Voting Service
-- MongoDB
+- RabbitMQ
 - PostgresQL
 - Grafana
 - Nginx Load Balancer
@@ -82,7 +82,7 @@ The architecture of the IntaniaOverflow application follows a microservices patt
 To get started with the IntaniaOverflow microservices, follow these steps:
 
 1. **Set up the environment:**
-    Ensure you have Docker installed and configured on your machine. And find your own ```.env``` files for each services.
+    Ensure you have Docker installed and configured on your machine. And find your own ```.env``` at root directory.
 
 2. **Build and run the services:**
     ```sh
