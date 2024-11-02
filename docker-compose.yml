@@ -95,7 +95,6 @@ services:
     build:
       context: ./
       dockerfile: ./thread-service/Dockerfile
-    container_name: thread-service
     expose:
       - "5004"
     environment:
@@ -115,7 +114,6 @@ services:
     build:
       context: ./
       dockerfile: ./user-service/Dockerfile
-    container_name: user-service
     expose:
       - "5005"
     environment:
@@ -138,7 +136,6 @@ services:
     build:
       context: ./
       dockerfile: ./voting-service/Dockerfile
-    container_name: voting-service
     expose:
       - "5006"
     environment:
