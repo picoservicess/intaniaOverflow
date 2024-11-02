@@ -3,6 +3,7 @@ import { Request, Response, Router } from "express";
 
 import { AuthenticatedRequest, authenticateToken } from "../middleware/auth";
 import { ReplySchema, UpdateReplySchema } from "../models";
+import { rabbitMQManager } from "../rabbitMQManager";
 
 // Initialize Prisma client and router
 const prisma = new PrismaClient();
@@ -57,6 +58,13 @@ router.post(
           replyAt: new Date(), // Set the reply time to the current date and time
         },
       });
+      console.log(reply)
+
+      // try {
+      //   await rabbitMQManager.publishMessage(reply);
+      // } catch (mqError) {
+      //   console.error("Failed to publish message to RabbitMQ: ", mqError)
+      // }
 
       // Send a 201 Created response with the new reply
       res.status(201).json({

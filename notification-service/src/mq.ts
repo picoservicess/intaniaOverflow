@@ -18,6 +18,13 @@ interface ThreadMessage {
   isDeleted: boolean;
 }
 
+interface ReplyMessage {
+  threadId: string,
+  text: string,
+  assetUrls: string[],
+  userId: string,
+  replyAt: Date
+}
 // Constants
 const RABBITMQ_CONFIG = {
   url: process.env.RABBITMQ_URL || "amqp://rabbitmq:5672",
@@ -159,7 +166,8 @@ function setupChannel(channel: Channel): void {
       if (!msg) return;
 
       try {
-        const message = JSON.parse(msg.content.toString()) as ThreadMessage;
+        const message = JSON.parse(msg.content.toString());
+
         console.log("✉️ Received message for thread:", message.threadId);
 
         await processMessage(message);
