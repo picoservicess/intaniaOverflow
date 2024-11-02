@@ -1,11 +1,12 @@
 import { ServerUnaryCall, sendUnaryData, status } from "@grpc/grpc-js";
+
+import { getAuthenticatedUserId } from "../../../user-service/src/libs/token";
 import {
-  applyUpVote,
   applyDownVote,
+  applyUpVote,
   getCountVote,
   isUserVote,
 } from "../repositorys/votingRepository";
-import { getAuthenticatedUserId } from "../../../user-service/src/libs/token"
 
 export const votingService = {
   ApplyUpVote: async (
@@ -16,7 +17,7 @@ export const votingService = {
     if (!userId) {
       return callback({
         code: status.UNAUTHENTICATED,
-        details: 'Authentication required',
+        details: "Authentication required",
       });
     }
 
@@ -32,7 +33,7 @@ export const votingService = {
     if (!userId) {
       return callback({
         code: status.UNAUTHENTICATED,
-        message: 'Authentication required',
+        message: "Authentication required",
       });
     }
 
@@ -56,12 +57,18 @@ export const votingService = {
     if (!userId) {
       return callback({
         code: status.UNAUTHENTICATED,
-        message: 'Authentication required',
+        message: "Authentication required",
       });
     }
 
     const { isThread, targetId } = call.request;
     const result = await isUserVote(isThread, targetId, userId);
     callback(null, { voteStatus: result });
+  },
+  HealthCheck: async (
+    call: ServerUnaryCall<any, any>,
+    callback: sendUnaryData<any>
+  ) => {
+    callback(null, { success: true, message: "Vote Service is healthy" });
   },
 };

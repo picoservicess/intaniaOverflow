@@ -1,7 +1,8 @@
 import grpc from "@grpc/grpc-js";
 import protoLoader from "@grpc/proto-loader";
-import { votingService } from "./services/votingService";
+
 import { connectDB } from "./db/database";
+import { votingService } from "./services/votingService";
 
 const PROTO_PATH = "../proto/voting.proto";
 console.log(`PROTO_PATH: ${PROTO_PATH}`);

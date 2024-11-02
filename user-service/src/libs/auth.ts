@@ -1,14 +1,13 @@
-import { PrismaClient } from '@prisma/client';
-import axios from 'axios';
+import { PrismaClient } from "@prisma/client";
+import axios from "axios";
 
 const prisma = new PrismaClient();
 
 const {
-  CU_AUTH_URL = 'https://account.it.chula.ac.th/serviceValidation',
-  CU_APP_ID = 'your-app-id',
-  CU_APP_SECRET = 'your-app-secret'
+  CU_AUTH_URL = "https://account.it.chula.ac.th/serviceValidation",
+  CU_APP_ID = "your-app-id",
+  CU_APP_SECRET = "your-app-secret",
 } = process.env;
-
 
 interface VerifiedUser {
   id: string;
@@ -30,7 +29,9 @@ interface CuAuthResponse {
   ouid: string;
 }
 
-export const verifyTicket = async (ticket: string): Promise<VerifiedUser | null> => {
+export const verifyTicket = async (
+  ticket: string
+): Promise<VerifiedUser | null> => {
   try {
     // console.log('Verifying ticket:', ticket);
     // console.log('CU_AUTH_URL:', CU_AUTH_URL);
@@ -39,10 +40,10 @@ export const verifyTicket = async (ticket: string): Promise<VerifiedUser | null>
 
     const response = await axios.get(CU_AUTH_URL, {
       headers: {
-        'DeeTicket': ticket,
-        'DeeAppId': CU_APP_ID,
-        'DeeAppSecret': CU_APP_SECRET
-      }
+        DeeTicket: ticket,
+        DeeAppId: CU_APP_ID,
+        DeeAppSecret: CU_APP_SECRET,
+      },
     });
 
     if (!response.data) {
@@ -54,7 +55,7 @@ export const verifyTicket = async (ticket: string): Promise<VerifiedUser | null>
     // Create or update user in your database
     const user = await prisma.user.upsert({
       where: {
-        studentId: cuData.username
+        studentId: cuData.username,
       },
       update: {
         email: cuData.email,
@@ -82,10 +83,10 @@ export const verifyTicket = async (ticket: string): Promise<VerifiedUser | null>
     return {
       id: user.id,
       displayname: user.displayname,
-      profileImage: user.profileImage ?? '',
+      profileImage: user.profileImage ?? "",
     };
   } catch (error) {
-    console.error('Ticket verification failed:', error);
+    console.error("Ticket verification failed:", error);
     return null;
   }
 };

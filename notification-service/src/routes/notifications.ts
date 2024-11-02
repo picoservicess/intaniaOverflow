@@ -1,8 +1,17 @@
 import express from "express";
-import { getAllNotificationsByUserId, getUnreadNotificationsByUserId, markNotificationsAsSeenByUserId } from "../controllers/notificationController";
+
+import {
+  getAllNotificationsByUserId,
+  getUnreadNotificationsByUserId,
+  markNotificationsAsSeenByUserId,
+  getHealthCheck
+
+} from "../controllers/notificationController";
 import { authenticateToken } from "../middlewares/auth";
 
 const router = express.Router();
+
+router.get("/health-check", getHealthCheck);
 
 router.use(authenticateToken);
 

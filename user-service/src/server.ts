@@ -1,14 +1,15 @@
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import { PrismaClient } from '@prisma/client';
-import { getAuthenticatedUserId, createAuthCookie } from './libs/token';
-import { verifyTicket } from './libs/auth';
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
+import { PrismaClient } from "@prisma/client";
+
+import { verifyTicket } from "./libs/auth";
+import { createAuthCookie, getAuthenticatedUserId } from "./libs/token";
 
 const prisma = new PrismaClient();
 
 console.log("Database connected");
 
-const PROTO_PATH = '../proto/user.proto';
+const PROTO_PATH = "../proto/user.proto";
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
@@ -21,12 +22,15 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any;
 const userService = protoDescriptor.UserService;
 
-const updateUserProfile: grpc.handleUnaryCall<any, any> = async (call, callback) => {
+const updateUserProfile: grpc.handleUnaryCall<any, any> = async (
+  call,
+  callback
+) => {
   const userId = await getAuthenticatedUserId(call.metadata);
   if (!userId) {
     return callback({
       code: grpc.status.UNAUTHENTICATED,
-      message: 'Authentication required',
+      message: "Authentication required",
     });
   }
 
@@ -53,17 +57,20 @@ const updateUserProfile: grpc.handleUnaryCall<any, any> = async (call, callback)
   } catch (error) {
     callback({
       code: grpc.status.INTERNAL,
-      message: 'Failed to update profile',
+      message: "Failed to update profile",
     });
   }
 };
 
-const getUserProfile: grpc.handleUnaryCall<any, any> = async (call, callback) => {
+const getUserProfile: grpc.handleUnaryCall<any, any> = async (
+  call,
+  callback
+) => {
   const userId = await getAuthenticatedUserId(call.metadata);
   if (!userId) {
     return callback({
       code: grpc.status.UNAUTHENTICATED,
-      message: 'Authentication required',
+      message: "Authentication required",
     });
   }
 
@@ -74,7 +81,7 @@ const getUserProfile: grpc.handleUnaryCall<any, any> = async (call, callback) =>
   if (!user) {
     return callback({
       code: grpc.status.NOT_FOUND,
-      message: 'User not found',
+      message: "User not found",
     });
   }
 
@@ -93,25 +100,33 @@ const getUserProfile: grpc.handleUnaryCall<any, any> = async (call, callback) =>
 const login: grpc.handleUnaryCall<any, any> = async (call, callback) => {
   const { ticket } = call.request;
 
-  console.log('Ticket:', ticket);
+  console.log("Ticket:", ticket);
 
   try {
     const verifiedUser = await verifyTicket(ticket);
     if (!verifiedUser) {
       return callback({
         code: grpc.status.UNAUTHENTICATED,
-        message: 'Invalid ticket',
+        message: "Invalid ticket",
       });
     }
 
     const cookieHeader = createAuthCookie(verifiedUser.id);
     const metadata = new grpc.Metadata();
-    metadata.set('Set-Cookie', cookieHeader);
-    callback(null, { message: 'Login successful', token: cookieHeader, userId: verifiedUser.id }, metadata);
+    metadata.set("Set-Cookie", cookieHeader);
+    callback(
+      null,
+      {
+        message: "Login successful",
+        token: cookieHeader,
+        userId: verifiedUser.id,
+      },
+      metadata
+    );
   } catch (error) {
     callback({
       code: grpc.status.INTERNAL,
-      message: 'Login failed',
+      message: "Login failed",
     });
   }
 };
@@ -121,7 +136,7 @@ const applyPin: grpc.handleUnaryCall<any, any> = async (call, callback) => {
   if (!userId) {
     return callback({
       code: grpc.status.UNAUTHENTICATED,
-      message: 'Authentication required',
+      message: "Authentication required",
     });
   }
 
@@ -135,11 +150,11 @@ const applyPin: grpc.handleUnaryCall<any, any> = async (call, callback) => {
         },
       },
     });
-    callback(null, { message: 'Thread pinned successfully' });
+    callback(null, { message: "Thread pinned successfully" });
   } catch (error) {
     callback({
       code: grpc.status.INTERNAL,
-      message: 'Failed to pin thread',
+      message: "Failed to pin thread",
     });
   }
 };
@@ -149,7 +164,7 @@ const viewPinned: grpc.handleUnaryCall<any, any> = async (call, callback) => {
   if (!userId) {
     return callback({
       code: grpc.status.UNAUTHENTICATED,
-      message: 'Authentication required',
+      message: "Authentication required",
     });
   }
 
@@ -160,19 +175,22 @@ const viewPinned: grpc.handleUnaryCall<any, any> = async (call, callback) => {
   if (!user) {
     return callback({
       code: grpc.status.NOT_FOUND,
-      message: 'User not found',
+      message: "User not found",
     });
   }
 
   callback(null, { threadIds: user.pinnedThreads || [] });
 };
 
-const getUserDetail: grpc.handleUnaryCall<any, any> = async (call, callback) => {
+const getUserDetail: grpc.handleUnaryCall<any, any> = async (
+  call,
+  callback
+) => {
   const authenticatedUserId = await getAuthenticatedUserId(call.metadata);
   if (!authenticatedUserId) {
     return callback({
       code: grpc.status.UNAUTHENTICATED,
-      message: 'Authentication required',
+      message: "Authentication required",
     });
   }
 
@@ -184,13 +202,13 @@ const getUserDetail: grpc.handleUnaryCall<any, any> = async (call, callback) => 
       select: {
         displayname: true,
         profileImage: true,
-      }
+      },
     });
 
     if (!user) {
       return callback({
         code: grpc.status.NOT_FOUND,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
@@ -198,17 +216,20 @@ const getUserDetail: grpc.handleUnaryCall<any, any> = async (call, callback) => 
   } catch (error) {
     callback({
       code: grpc.status.INTERNAL,
-      message: 'Failed to fetch user details',
+      message: "Failed to fetch user details",
     });
   }
 };
 
-const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (call, callback) => {
+const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (
+  call,
+  callback
+) => {
   const { threadId } = call.request;
   if (!threadId) {
     return callback({
       code: grpc.status.INVALID_ARGUMENT,
-      message: 'Thread ID is required',
+      message: "Thread ID is required",
     });
   }
 
@@ -216,19 +237,35 @@ const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (call, cal
     const users = await prisma.user.findMany({
       where: {
         pinnedThreads: {
-          has: threadId
-        }
+          has: threadId,
+        },
       },
       select: {
-        id: true
-      }
+        id: true,
+      },
     });
 
-    callback(null, { userIds: users.map(user => user.id) });
+    callback(null, { userIds: users.map((user) => user.id) });
   } catch (error) {
     callback({
       code: grpc.status.INTERNAL,
-      message: 'Failed to fetch users who pinned the thread',
+      message: "Failed to fetch users who pinned the thread",
+    });
+  }
+};
+
+const healthCheck: grpc.handleUnaryCall<any, any> = async (
+  call,
+  callback
+) => {
+  try {
+    console.log("💛 Health check request received");
+    callback(null, { success: true, message: "User Service is healthy" });
+  } catch (error) {
+    console.error("Error in healthCheck:", error);
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to perform User Service health check",
     });
   }
 };
@@ -243,10 +280,11 @@ function main() {
     ViewPinned: viewPinned,
     GetUserDetail: getUserDetail,
     GetUsersWhoPinnedThread: getUsersWhoPinnedThread,
+    HealthCheck: healthCheck
   });
 
-  const host = process.env.HOST || '0.0.0.0';
-  const port = process.env.PORT || '5005';
+  const host = process.env.HOST || "0.0.0.0";
+  const port = process.env.PORT || "5005";
 
   const address = `${host}:${port}`;
 
