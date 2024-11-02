@@ -19,6 +19,11 @@ import {
 //     }
 // };
 
+export const getHealthCheck = async (req: Request, res: Response): Promise<void> => {
+  console.log("💛 Health check request received");
+  res.status(200).json({ status: "OK", message: "Notification-Service is healthy" });
+};
+
 export const getAllNotificationsByUserId = async (
   req: AuthenticatedRequest,
   res: Response

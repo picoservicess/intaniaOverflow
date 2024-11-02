@@ -18,10 +18,11 @@ services:
     networks:
       - intania-overflow-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U yourusername -d postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U yourusername -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: on-failure:3
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -29,7 +30,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    restart: always
+    restart: on-failure:3
     networks:
       - intania-overflow-network
 
@@ -37,100 +38,115 @@ services:
     build:
       context: ./
       dockerfile: ./asset-service/Dockerfile
-    container_name: asset-service
     expose:
       - "5001"
-    ports:
-      - "5001:5001"
     environment:
       PORT: 5001
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   notification-service:
     build:
       context: ./
       dockerfile: ./notification-service/Dockerfile
-    container_name: notification-service
     expose:
       - "5002"
-    ports:
-      - "5002:5002"
     environment:
       RABBITMQ_URL: "amqp://rabbitmq:5672"
       RABBITMQ_QUEUE: "notification_queue"
       PORT: 5002
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: ${NOTI_DATABASE_URL}
     depends_on:
       - rabbitmq
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   reply-service:
     build:
       context: ./
       dockerfile: ./reply-service/Dockerfile
-    container_name: reply-service
     expose:
       - "5003"
-    ports:
-      - "5003:5003"
     environment:
       PORT: 5003
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   thread-service:
     build:
       context: ./
       dockerfile: ./thread-service/Dockerfile
-    container_name: thread-service
     expose:
       - "5004"
-    ports:
-      - "5004:5004"
     environment:
       PORT: 5004
       RABBITMQ_URL: "amqp://rabbitmq:5672"
       RABBITMQ_QUEUE: "notification_queue"
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: ${THREAD_DATABASE_URL}
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   user-service:
     build:
       context: ./
       dockerfile: ./user-service/Dockerfile
-    container_name: user-service
     expose:
       - "5005"
-    ports:
-      - "5005:5005"
     environment:
       PORT: 5005
       DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      CU_AUTH_URL: ${CU_AUTH_URL}
+      CU_APP_ID: ${CU_APP_ID}
+      CU_APP_SECRET: ${CU_APP_SECRET}
     depends_on:
       - postgres
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   voting-service:
     build:
       context: ./
       dockerfile: ./voting-service/Dockerfile
-    container_name: voting-service
     expose:
       - "5006"
-    ports:
-      - "5006:5006"
     environment:
       PORT: 5006
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   logging-service:
     build:
@@ -150,6 +166,7 @@ services:
       - rabbitmq
     networks:
       - intania-overflow-network
+    restart: on-failure:3
 
   grafana:
     image: grafana/grafana:latest
@@ -171,6 +188,30 @@ services:
       - postgres
     networks:
       - intania-overflow-network
+    restart: on-failure:3
+
+  load-balancer:
+    image: nginx:alpine
+    container_name: load-balancer
+    volumes:
+      - ./load-balancer/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - asset-service
+      - notification-service
+      - reply-service
+      - thread-service
+      - user-service
+      - voting-service
+    ports:
+      - "5001:5001"
+      - "5002:5002"
+      - "5003:5003"
+      - "5004:5004"
+      - "5005:5005"
+      - "5006:5006"
+    networks:
+      - intania-overflow-network
+    restart: on-failure:3
 
   api-gateway:
     build:
@@ -185,17 +226,17 @@ services:
       - "80:80"
     environment:
       - API_GATEWAY_PORT=80
-      - ASSET_SERVICE_HOST=asset-service
+      - ASSET_SERVICE_HOST=load-balancer
       - ASSET_SERVICE_PORT=5001
-      - NOTIFICATION_SERVICE_HOST=notification-service
+      - NOTIFICATION_SERVICE_HOST=load-balancer
       - NOTIFICATION_SERVICE_PORT=5002
-      - REPLY_SERVICE_HOST=reply-service
+      - REPLY_SERVICE_HOST=load-balancer
       - REPLY_SERVICE_PORT=5003
-      - THREAD_SERVICE_HOST=thread-service
+      - THREAD_SERVICE_HOST=load-balancer
       - THREAD_SERVICE_PORT=5004
-      - USER_SERVICE_HOST=user-service
+      - USER_SERVICE_HOST=load-balancer
       - USER_SERVICE_PORT=5005
-      - VOTING_SERVICE_HOST=voting-service
+      - VOTING_SERVICE_HOST=load-balancer
       - VOTING_SERVICE_PORT=5006
     depends_on:
       - asset-service
@@ -207,6 +248,7 @@ services:
       - logging-service
     networks:
       - intania-overflow-network
+    restart: on-failure:3
 
 networks:
   intania-overflow-network:

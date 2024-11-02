@@ -4,10 +4,14 @@ import {
   getAllNotificationsByUserId,
   getUnreadNotificationsByUserId,
   markNotificationsAsSeenByUserId,
+  getHealthCheck
+
 } from "../controllers/notificationController";
 import { authenticateToken } from "../middlewares/auth";
 
 const router = express.Router();
+
+router.get("/health-check", getHealthCheck);
 
 router.use(authenticateToken);
 

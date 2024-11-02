@@ -8,6 +8,7 @@ service UserService {
   rpc ViewPinned (ViewPinnedRequest) returns (ViewPinnedResponse);
   rpc GetUserDetail (GetUserDetailRequest) returns (GetUserDetailResponse);
   rpc GetUsersWhoPinnedThread (GetUsersWhoPinnedThreadRequest) returns (GetUsersWhoPinnedThreadResponse);
+  rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
 }
 
 message UpdateUserProfileRequest {
@@ -73,4 +74,11 @@ message GetUsersWhoPinnedThreadRequest {
 
 message GetUsersWhoPinnedThreadResponse {
   repeated string userIds = 1;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool success = 1;
+  string message = 2;
 }

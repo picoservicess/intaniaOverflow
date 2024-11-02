@@ -53,9 +53,6 @@ export const markNotificationsAsSeenByUserIdRepo = async (
       { isSeen: true }
     );
 
-    if (result.modifiedCount === 0) {
-      throw new Error("No notifications found to update");
-    }
   } catch (error) {
     console.error("Repository Error:", error);
     throw new Error("Error updating notifications");
