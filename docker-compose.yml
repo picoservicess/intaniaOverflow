@@ -84,6 +84,8 @@ services:
     environment:
       PORT: 5003
       JWT_SECRET: ${JWT_SECRET}
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+      RABBITMQ_QUEUE: "notification_queue"
     networks:
       - intania-overflow-network
     deploy:

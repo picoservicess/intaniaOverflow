@@ -11,7 +11,7 @@ class RabbitMQManager {
   private readonly maxRetries: number = 5;
 
   private constructor() {
-    this.url = process.env.RABBITMQ_URL || "amqp://rabitmq:5672";
+    this.url = process.env.RABBITMQ_URL || "amqp://rabbitmq:5672";
     this.queue = process.env.RABBITMQ_QUEUE || "notification_queue";
   }
 
@@ -57,7 +57,9 @@ class RabbitMQManager {
           }
 
           this.channel = channel;
-          channel.assertQueue(this.queue, { durable: true });
+          // channel.assertQueue(this.queue, {
+          //   durable: true
+          // });
 
           channel.on("error", (err) => {
             console.error("🚫 Channel error:", err.message);
@@ -113,7 +115,7 @@ class RabbitMQManager {
             return;
           }
           this.channel = channel;
-          channel.assertQueue(this.queue, { durable: true });
+          // channel.assertQueue(this.queue, { durable: true });
         });
       } catch (error) {
         console.error("🚫 Error recreating channel:", error);

@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 
 import { INotification } from "./models/notification";
 import { createNotificationService } from "./services/notificationService";
+import { resolve } from "path";
 
 // Types
 interface ThreadMessage {
@@ -19,12 +20,14 @@ interface ThreadMessage {
 }
 
 interface ReplyMessage {
+  replyId: string,
   threadId: string,
+  userId: string,
   text: string,
   assetUrls: string[],
-  userId: string,
   replyAt: Date
 }
+
 // Constants
 const RABBITMQ_CONFIG = {
   url: process.env.RABBITMQ_URL || "amqp://rabbitmq:5672",
@@ -34,6 +37,7 @@ const RABBITMQ_CONFIG = {
 
 const QUEUE_CONFIG = {
   name: "notification_queue",
+  exchangeName: "notification_exchange",
   deadLetterQueueName: "notification_queue_dead",
   deadLetterExchange: "notification_dlx",
 };
@@ -131,17 +135,61 @@ async function setupQueues(channel: Channel): Promise<void> {
       );
     }
 
+    // await new Promise<void>((resolve, reject) => {
+    //   channel.assertExchange(
+    //     QUEUE_CONFIG.exchangeName,'direct', { 
+    //       durable: true 
+    //     },
+    //     (error) => {
+    //       console.log("assert exchange error", error)
+
+    //       if (error) reject(error);
+    //       else resolve();
+    //     }
+    //   );
+    // });
+
     // 5. Create main queue with dead letter configuration
     await new Promise<void>((resolve, reject) => {
       channel.assertQueue(
         QUEUE_CONFIG.name,
         {
           durable: true,
-          arguments: {
-            "x-dead-letter-exchange": QUEUE_CONFIG.deadLetterExchange,
-            "x-dead-letter-routing-key": "",
-          },
+          // arguments: {
+          //   "x-dead-letter-exchange": QUEUE_CONFIG.deadLetterExchange,
+          //   "x-dead-letter-routing-key": "",
+          // },
+          deadLetterExchange: QUEUE_CONFIG.deadLetterExchange,
+          deadLetterRoutingKey: ""
         },
+        (error) => {
+          console.log("assert queue error", error)
+
+          if (error) reject(error);
+          else resolve();
+        }
+      );
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      channel.bindQueue(
+        QUEUE_CONFIG.deadLetterQueueName,
+        QUEUE_CONFIG.deadLetterExchange,
+        'reply', // routing key
+        {}, // arguments
+        (error) => {
+          if (error) reject(error);
+          else resolve();
+        }
+      );
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      channel.bindQueue(
+        QUEUE_CONFIG.deadLetterQueueName,
+        QUEUE_CONFIG.deadLetterExchange,
+        'thread', // routing key
+        {}, // arguments
         (error) => {
           if (error) reject(error);
           else resolve();
@@ -165,12 +213,17 @@ function setupChannel(channel: Channel): void {
     async (msg) => {
       if (!msg) return;
 
+      console.log(" [x] %s: '%s'", msg.fields.routingKey, msg.content.toString());
+
       try {
         const message = JSON.parse(msg.content.toString());
-
-        console.log("✉️ Received message for thread:", message.threadId);
-
-        await processMessage(message);
+        if (message.replyId) {
+          console.log("✉️ Received message for reply:", message.replyId);
+        }
+        else {
+          console.log("✉️ Received message for thread:", message.threadId);
+        }
+        // await processMessage(message);
         channel.ack(msg);
       } catch (error) {
         console.error("❌ Error processing message:", error);
