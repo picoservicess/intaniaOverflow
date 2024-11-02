@@ -1,9 +1,12 @@
 import axios from "axios";
 import express, { Request, Response } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import { createLogMiddleware } from "../middleware/log";
+import multer from "multer";
+import FormData from "form-data";
+import fs from "fs";
 
 const assetRouter = express.Router();
+const upload = multer({ dest: "uploads/" });
 
 // Asset Service URL (replace with your actual asset service URL)
 const ASSET_SERVICE_URL =
@@ -13,26 +16,36 @@ console.log("ASSET_SERVICE_URL", ASSET_SERVICE_URL);
 
 assetRouter.use(createLogMiddleware('asset-service'));
 
-assetRouter.post("/upload", async (req: Request, res: Response) => {
-    try {
-        // Forward the request to the asset service
-        const response = await axios.post(
-            `${ASSET_SERVICE_URL}/asset/upload`,
-            req.body,
-            {
-                headers: {
-                    ...req.headers,
-                },
+assetRouter.post("/upload", upload.single("file"),
+    async (req: Request, res: Response) => {
+        try {
+            if (!req.file) {
+                res.status(400).json({ message: "No file uploaded" });
+                return;
             }
-        );
-        res.status(response.status).json(response.data);
-    } catch (error: any) {
-        console.error("Error in /asset/upload:", error.message);
-        res.status(error.response?.status || 500).json({
-            message: "Error uploading asset",
-        });
-    }
-});
+
+            // Forward the request to the asset service
+            const formData = new FormData();
+            formData.append("file", fs.createReadStream(req.file.path), req.file.originalname);
+
+            const response = await axios.post(
+                `${ASSET_SERVICE_URL}/asset/upload`,
+                formData,
+                {
+                    headers: {
+                        ...formData.getHeaders(),
+                        'Authorization': `${req.headers.authorization}`, // Add the token to the request headers
+                    },
+                }
+            );
+            res.status(response.status).json(response.data);
+        } catch (error: any) {
+            console.error("Error in /asset/upload:", error.message);
+            res.status(error.response?.status || 500).json({
+                message: "Error uploading asset",
+            });
+        }
+    });
 
 assetRouter.get("/health", async (req: Request, res: Response) => {
     try {

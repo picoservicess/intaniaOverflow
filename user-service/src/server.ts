@@ -254,6 +254,22 @@ const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (
   }
 };
 
+const healthCheck: grpc.handleUnaryCall<any, any> = async (
+  call,
+  callback
+) => {
+  try {
+    console.log("💛 Health check request received");
+    callback(null, { success: true, message: "User Service is healthy" });
+  } catch (error) {
+    console.error("Error in healthCheck:", error);
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to perform User Service health check",
+    });
+  }
+};
+
 function main() {
   const server = new grpc.Server();
   server.addService(userService.service, {
@@ -264,6 +280,7 @@ function main() {
     ViewPinned: viewPinned,
     GetUserDetail: getUserDetail,
     GetUsersWhoPinnedThread: getUsersWhoPinnedThread,
+    HealthCheck: healthCheck
   });
 
   const host = process.env.HOST || "0.0.0.0";

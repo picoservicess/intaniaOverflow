@@ -10,6 +10,12 @@ const prisma = new PrismaClient();
 // Create a new Express router instance
 const router = Router();
 
+router.get("/health-check", async (_req: Request, res: Response) => {
+  console.log("💛 Health check request received");
+  res.status(200).json({ status: "OK", message: "Reply-Service is healthy" });
+});
+
+
 /**
  * Route to create a new reply
  * Method: POST

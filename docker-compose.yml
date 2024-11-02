@@ -41,7 +41,11 @@ services:
       - "5001"
     environment:
       PORT: 5001
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
     networks:
       - intania-overflow-network
     deploy:
@@ -58,7 +62,8 @@ services:
       RABBITMQ_URL: "amqp://rabbitmq:5672"
       RABBITMQ_QUEUE: "notification_queue"
       PORT: 5002
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: ${NOTI_DATABASE_URL}
     depends_on:
       - rabbitmq
     networks:
@@ -72,7 +77,7 @@ services:
       - "5003"
     environment:
       PORT: 5003
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - intania-overflow-network
 
@@ -89,7 +94,8 @@ services:
       PORT: 5004
       RABBITMQ_URL: "amqp://rabbitmq:5672"
       RABBITMQ_QUEUE: "notification_queue"
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: ${THREAD_DATABASE_URL}
     networks:
       - intania-overflow-network
 
@@ -105,7 +111,10 @@ services:
     environment:
       PORT: 5005
       DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
+      CU_AUTH_URL: ${CU_AUTH_URL}
+      CU_APP_ID: ${CU_APP_ID}
+      CU_APP_SECRET: ${CU_APP_SECRET}
     depends_on:
       - postgres
     networks:
@@ -122,7 +131,7 @@ services:
       - "5006:5006"
     environment:
       PORT: 5006
-      JWT_SECRET: "kw9p4Q8JbR9kF5J1NwFd"
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - intania-overflow-network
 
@@ -195,11 +204,11 @@ services:
       - "80:80"
     environment:
       - API_GATEWAY_PORT=80
-      - ASSET_SERVICE_HOST=asset-service
+      - ASSET_SERVICE_HOST=load-balancer
       - ASSET_SERVICE_PORT=5001
-      - NOTIFICATION_SERVICE_HOST=notification-service
+      - NOTIFICATION_SERVICE_HOST=load-balancer
       - NOTIFICATION_SERVICE_PORT=5002
-      - REPLY_SERVICE_HOST=reply-service
+      - REPLY_SERVICE_HOST=load-balancer
       - REPLY_SERVICE_PORT=5003
       - THREAD_SERVICE_HOST=thread-service
       - THREAD_SERVICE_PORT=5004
