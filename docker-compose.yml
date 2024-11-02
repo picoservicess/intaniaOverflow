@@ -18,7 +18,7 @@ services:
     networks:
       - intania-overflow-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U yourusername -d postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U yourusername -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -95,11 +95,8 @@ services:
     build:
       context: ./
       dockerfile: ./thread-service/Dockerfile
-    container_name: thread-service
     expose:
       - "5004"
-    ports:
-      - "5004:5004"
     environment:
       PORT: 5004
       RABBITMQ_URL: "amqp://rabbitmq:5672"
@@ -117,11 +114,8 @@ services:
     build:
       context: ./
       dockerfile: ./user-service/Dockerfile
-    container_name: user-service
     expose:
       - "5005"
-    ports:
-      - "5005:5005"
     environment:
       PORT: 5005
       DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
@@ -142,11 +136,8 @@ services:
     build:
       context: ./
       dockerfile: ./voting-service/Dockerfile
-    container_name: voting-service
     expose:
       - "5006"
-    ports:
-      - "5006:5006"
     environment:
       PORT: 5006
       JWT_SECRET: ${JWT_SECRET}
@@ -208,10 +199,16 @@ services:
       - asset-service
       - notification-service
       - reply-service
+      - thread-service
+      - user-service
+      - voting-service
     ports:
       - "5001:5001"
       - "5002:5002"
       - "5003:5003"
+      - "5004:5004"
+      - "5005:5005"
+      - "5006:5006"
     networks:
       - intania-overflow-network
     restart: on-failure:3
@@ -235,11 +232,11 @@ services:
       - NOTIFICATION_SERVICE_PORT=5002
       - REPLY_SERVICE_HOST=load-balancer
       - REPLY_SERVICE_PORT=5003
-      - THREAD_SERVICE_HOST=thread-service
+      - THREAD_SERVICE_HOST=load-balancer
       - THREAD_SERVICE_PORT=5004
-      - USER_SERVICE_HOST=user-service
+      - USER_SERVICE_HOST=load-balancer
       - USER_SERVICE_PORT=5005
-      - VOTING_SERVICE_HOST=voting-service
+      - VOTING_SERVICE_HOST=load-balancer
       - VOTING_SERVICE_PORT=5006
     depends_on:
       - asset-service
