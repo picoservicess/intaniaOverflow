@@ -17,11 +17,11 @@ import getReplies from "@/lib/getReplies";
 import getThread from "@/lib/getThread";
 import { timeAgo } from "@/lib/utils";
 
-import PinButton from "../_components/input/pinButton";
-import CreateReplyButton from "../_components/thread/createReplyButton";
-import FileList from "../_components/thread/fileList";
-import Reply from "../_components/thread/reply";
-import VoteSection from "../_components/thread/voteSection";
+import PinButton from "../../../_components/input/pinButton";
+import CreateReplyButton from "../../../_components/thread/createReplyButton";
+import FileList from "../../../_components/thread/fileList";
+import Reply from "../../../_components/thread/reply";
+import VoteSection from "../../../_components/thread/voteSection";
 
 export default function ThreadPage({ params }: { params: { slug: string } }) {
   const [thread, setThread] = useState<IThread | undefined>(undefined);
