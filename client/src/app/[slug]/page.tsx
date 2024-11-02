@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
 import CreateReplyButton from "../../components/createReplyButton";
 import getThread from "@/lib/getThread";
 import VoteSection from "@/components/voteSection";
@@ -93,7 +92,6 @@ export default async function ThreadPage({
   if (!thread) {
     return <div>Loading...</div>; // Show loading while data is being fetched
   }
-
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
