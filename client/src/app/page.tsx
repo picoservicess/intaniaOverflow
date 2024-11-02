@@ -17,30 +17,45 @@ const Home = () => {
       const allThreads = await getThreads();
       const filteredThreads = allThreads.filter(
         (thread) =>
-          thread.title.includes(searchTerm) ||
-          thread.tags.some((tag) => tag.includes(searchTerm))
+          thread.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          thread.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       );
       setThreads(filteredThreads);
     };
 
     fetchThreads();
   }, [searchTerm]);
+
   return (
     <div className="bg-gray-50 min-h-screen">
-      <CreateThreadButton />
-      <div className="w-1/2 mx-auto pt-8 px-4 flex flex-col md:flex-row gap-4 justify-center">
+      {/* Header Section */}
+      <div className="relative w-full px-4 py-4 flex justify-center items-center">
         <input
           type="text"
           placeholder="ค้นหาเลย!"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="absolute w-1/3 top-[14px] px-3 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full max-w-sm sm:max-w-md md:max-w-lg px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
         />
-        {threads?.length > 0 ? (
-          <PostList threads={threads} />
-        ) : (
-          <p>No Result</p>
-        )}
+      </div>
+
+      {/* Create Button and Content Section */}
+      <div className="w-full px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
+        <CreateThreadButton />
+
+        <div className="mt-6 space-y-4">
+          {threads?.length > 0 ? (
+            <PostList threads={threads} />
+          ) : (
+            <div className="w-full flex justify-center items-center p-8">
+              <p className="text-gray-500 text-center text-sm sm:text-base">
+                ไม่พบผลลัพธ์ที่ค้นหา
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
