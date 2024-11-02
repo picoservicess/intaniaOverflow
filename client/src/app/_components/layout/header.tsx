@@ -4,7 +4,7 @@ import { Bell, Bookmark, LogOut, User } from "lucide-react";
 
 import React from "react";
 
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -176,13 +176,20 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link
-                      href="/api/auth/signout"
+                    <div
+                      // href="/api/auth/signout"
                       className="w-full cursor-pointer"
+                      onClick={() =>
+                        signOut({
+                          callbackUrl:
+                            process.env.BASE_URL || "http://localhost:3001",
+                          redirect: false,
+                        })
+                      }
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>ออกจากระบบ</span>
-                    </Link>
+                    </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

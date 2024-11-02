@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import CUIcon from "../assets/account-link-logo-cu.svg";
+import CUIcon from "../../assets/account-link-logo-cu.svg";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -17,7 +17,7 @@ const LoginPage = () => {
   const handleChulaSSOSignIn = async () => {
     try {
       router.push(
-        "https://account.it.chula.ac.th/login?serviceName=app.vercel.sci-locker&service=http://localhost:3001/auth/signin"
+        `https://account.it.chula.ac.th/login?serviceName=app.vercel.sci-locker&service=${process.env.BASE_URL || "http://localhost:3001"}/auth/signin`
       );
     } catch (error) {
       console.error("Error signing in with Chula SSO:", error);
