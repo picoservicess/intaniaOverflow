@@ -9,9 +9,9 @@ import PostList from "@/app/_components/home/postList";
 import EditProfileButton from "@/app/_components/profile/editProfileButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { IThread } from "@/lib/data";
-import getPinnedThreads from "@/lib/getPinnedThreads";
-import getUserThreads from "@/lib/getUserThreads";
+import { IThread } from "@/lib/api/data";
+import getPinnedThreads from "@/lib/api/getPinnedThreads";
+import getUserThreads from "@/lib/api/getUserThreads";
 
 export default function Page() {
   const { data: session } = useSession();

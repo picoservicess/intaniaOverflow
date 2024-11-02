@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import { IThread } from "@/lib/data";
-import getThreads from "@/lib/getThreads";
+import { IThread } from "@/lib/api/data";
+import getThreads from "@/lib/api/getThreads";
 
 import CreateThreadButton from "./_components/home/createThreadButton";
 import PostList from "./_components/home/postList";

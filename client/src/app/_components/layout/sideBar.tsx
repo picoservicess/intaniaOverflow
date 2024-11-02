@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/card";
-import { Avatar, AvatarFallback } from "@/components/avatar";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Sidebar = () => {
   const creators = [

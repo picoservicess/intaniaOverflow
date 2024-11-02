@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { IThread } from "@/lib/data";
+import { IThread } from "@/lib/api/data";
 import { timeAgo } from "@/lib/utils";
 
 import PinButton from "../input/pinButton";

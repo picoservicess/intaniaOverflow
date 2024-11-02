@@ -12,9 +12,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { IReply, IThread } from "@/lib/data";
-import getReplies from "@/lib/getReplies";
-import getThread from "@/lib/getThread";
+import { IReply, IThread } from "@/lib/api/data";
+import getReplies from "@/lib/api/getReplies";
+import getThread from "@/lib/api/getThread";
 import { timeAgo } from "@/lib/utils";
 
 import PinButton from "../../../_components/input/pinButton";

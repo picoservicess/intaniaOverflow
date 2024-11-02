@@ -8,7 +8,7 @@ import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import createReply from "@/lib/createReply";
+import createReply from "@/lib/api/createReply";
 
 interface ReplyFormProps {
   onClose: () => void;
