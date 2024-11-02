@@ -1,14 +1,16 @@
 "use client";
 
-import PostList from "../components/postList";
+import { useEffect, useState } from "react";
+
+import { IThread } from "@/lib/data";
 import getThreads from "@/lib/getThreads";
-import { useState, useEffect } from "react";
-import { Thread } from "@/lib/data";
-import CreateThreadButton from "@/components/createThreadButton";
+
+import CreateThreadButton from "./_components/home/createThreadButton";
+import PostList from "./_components/home/postList";
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [threads, setThreads] = useState<Thread[]>([]);
+  const [threads, setThreads] = useState<IThread[]>([]);
 
   useEffect(() => {
     const fetchThreads = async () => {

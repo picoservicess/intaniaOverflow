@@ -1,5 +1,6 @@
 import React from "react";
-import FileLink from "./FileLink";
+
+import FileLink from "./fileLink";
 
 export default function FileList() {
   return (

@@ -1,11 +1,13 @@
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import React from "react";
-import { Avatar, AvatarFallback } from "./avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
-import { Bookmark, Dot } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Bookmark } from "lucide-react";
+
+import React from "react";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Notification {
-  isPinned: Boolean;
+  isPinned: boolean;
   userName: string;
   userProfile: string;
   threadTitle: string;

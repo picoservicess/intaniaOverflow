@@ -1,11 +1,13 @@
-import React from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Bell } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+
+import React from "react";
+
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import NotificationDropdownItem from "./notificationDropdownItem";
 
 interface Notification {
-  isPinned: Boolean;
+  isPinned: boolean;
   userName: string;
   userProfile: string;
   threadTitle: string;

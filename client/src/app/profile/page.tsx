@@ -1,20 +1,22 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
-import { Card, CardContent } from "@/components/card";
-import EditProfileButton from "@/components/editProfileButton";
-import PostList from "@/components/postList";
-import { Thread } from "@/lib/data";
+import React from "react";
+import { useEffect, useState } from "react";
+
+import { useSession } from "next-auth/react";
+
+import PostList from "@/app/_components/home/postList";
+import EditProfileButton from "@/app/_components/profile/editProfileButton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { IThread } from "@/lib/data";
 import getPinnedThreads from "@/lib/getPinnedThreads";
 import getUserThreads from "@/lib/getUserThreads";
-import { useSession } from "next-auth/react";
-import React from "react";
-import { useState, useEffect } from "react";
 
 export default function Page() {
   const { data: session } = useSession();
-  const [pinnedThreads, setPinnedThreads] = useState<Thread[]>([]);
-  const [userThreads, setUserThreads] = useState<Thread[]>([]);
+  const [pinnedThreads, setPinnedThreads] = useState<IThread[]>([]);
+  const [userThreads, setUserThreads] = useState<IThread[]>([]);
 
   const profilePicture =
     "https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80";

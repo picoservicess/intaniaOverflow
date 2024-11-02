@@ -95,11 +95,8 @@ services:
     build:
       context: ./
       dockerfile: ./thread-service/Dockerfile
-    container_name: thread-service
     expose:
       - "5004"
-    ports:
-      - "5004:5004"
     environment:
       PORT: 5004
       RABBITMQ_URL: "amqp://rabbitmq:5672"
@@ -117,11 +114,8 @@ services:
     build:
       context: ./
       dockerfile: ./user-service/Dockerfile
-    container_name: user-service
     expose:
       - "5005"
-    ports:
-      - "5005:5005"
     environment:
       PORT: 5005
       DATABASE_URL: "postgresql://yourusername:yourpassword@postgres:5432/userdatabase"
@@ -142,11 +136,8 @@ services:
     build:
       context: ./
       dockerfile: ./voting-service/Dockerfile
-    container_name: voting-service
     expose:
       - "5006"
-    ports:
-      - "5006:5006"
     environment:
       PORT: 5006
       JWT_SECRET: ${JWT_SECRET}
@@ -164,8 +155,6 @@ services:
     container_name: logging-service
     expose:
       - "5007"
-    ports:
-      - "5007:5007"
     environment:
       PORT: 5007
       RABBITMQ_URL: "amqp://rabbitmq:5672"

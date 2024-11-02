@@ -1,108 +1,81 @@
 "use client";
 
-import { ArrowBigDown, ArrowBigUp, MessageSquare, Share2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
-import React, { useState } from "react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import CreateReplyButton from "../../components/createReplyButton";
-import getThread from "@/lib/getThread";
-import VoteSection from "@/components/voteSection";
-import Reply from "@/components/reply";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { IReply, IThread } from "@/lib/data";
 import getReplies from "@/lib/getReplies";
+import getThread from "@/lib/getThread";
 import { timeAgo } from "@/lib/utils";
-import PinButton from "@/components/PinButton";
-import EmblaCarousel from "@/components/EmblaCarousel";
-import FileList from "@/components/FileList";
 
-interface VoteButtonProps {
-  // Fixed the icon prop type for TypeScript
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  onClick: () => void;
-  isActive: boolean;
-}
+import PinButton from "../_components/input/pinButton";
+import CreateReplyButton from "../_components/thread/createReplyButton";
+import FileList from "../_components/thread/fileList";
+import Reply from "../_components/thread/reply";
+import VoteSection from "../_components/thread/voteSection";
 
-const VoteButton: React.FC<VoteButtonProps> = ({
-  icon: Icon,
-  onClick,
-  isActive,
-}) => (
-  <Button
-    variant="ghost"
-    size="icon"
-    onClick={onClick}
-    className="rounded-full w-8 h-8 sm:w-10 sm:h-10 hover:bg-transparent"
-  >
-    <Icon
-      className={`w-4 h-4 sm:w-6 sm:h-6 transition-colors ${
-        isActive ? "text-[#8F2F2F] fill-[#8F2F2F]" : "hover:text-[#8F2F2F]"
-      }`}
-    />
-  </Button>
-);
+export default function ThreadPage({ params }: { params: { slug: string } }) {
+  const [thread, setThread] = useState<IThread | undefined>(undefined);
+  const [replies, setReplies] = useState<IReply[]>([]);
+  const [api, setApi] = React.useState<any>();
+  const [current, setCurrent] = React.useState(0);
 
-interface VoteSectionProps {
-  initialVotes: number;
-}
+  const images = [
+    "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce",
+    "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
+    "https://images.unsplash.com/photo-1507537297725-24a1c029d3ca",
+  ];
 
-const VoteSection: React.FC<VoteSectionProps> = ({ initialVotes }) => {
-  const [votes, setVotes] = useState<number>(initialVotes);
-  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log(params.slug);
+      const threadData = await getThread(params.slug);
+      const repliesData = await getReplies(params.slug);
+      setThread(threadData);
+      setReplies(repliesData);
+    };
 
-  const handleVote = (type: "up" | "down") => {
-    if (userVote === type) {
-      setUserVote(null);
-      setVotes(initialVotes);
-    } else {
-      setUserVote(type);
-      setVotes((prevVotes) => (type === "up" ? prevVotes + 1 : prevVotes - 1));
+    fetchData();
+  }, [params.slug]);
+
+  useEffect(() => {
+    if (!api) {
+      return;
     }
-  };
 
-  return (
-    <div className="flex flex-col items-center mr-2 sm:mr-4 mb-4 sm:mb-0">
-      <VoteButton
-        icon={ArrowBigUp}
-        onClick={() => handleVote("up")}
-        isActive={userVote === "up"}
-      />
-      <span className="text-sm sm:text-base font-bold my-1 sm:my-2">
-        {votes}
-      </span>
-      <VoteButton
-        icon={ArrowBigDown}
-        onClick={() => handleVote("down")}
-        isActive={userVote === "down"}
-      />
-    </div>
-  );
-};
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
 
-export default async function ThreadPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  console.log(params.slug);
-  const thread = getThread(params.slug);
-  const replies = getReplies(params.slug);
   if (!thread) {
-    return <div>Loading...</div>; // Show loading while data is being fetched
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
+
   return (
     <div className="bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col space-y-4 sm:space-y-6">
           <div className="flex-grow">
-            <Card className="p-4 sm:p-6 mb-4 sm:mb-6 relative">
-              <PinButton className={"absolute top-9 right-8"} size={24} />
+            <Card className="p-4 sm:p-6 mb-4 sm:mb-6 relative max-w-4xl mx-auto">
+              <PinButton className="absolute top-9 right-8" size={24} />
               <h1 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">
                 {thread.title}
               </h1>
-              <div className="flex gap-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-3">
                 {thread.tags.map((tag) => (
                   <span
                     key={tag}
@@ -123,7 +96,7 @@ export default async function ThreadPage({
                 </div>
               </div>
               <div className="w-full bg-gray-300 my-4 rounded-full h-[2px]" />
-              <div className="flex flex-col sm:flex-row">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <VoteSection initialVotes={2838} />
                 <div className="flex-grow">
                   <p className="mb-2 sm:mb-4 text-sm sm:text-base">
@@ -131,23 +104,56 @@ export default async function ThreadPage({
                   </p>
                 </div>
               </div>
-              <EmblaCarousel
-                slides={[
-                  "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce",
-                  "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
-                  "https://images.unsplash.com/photo-1507537297725-24a1c029d3ca",
-                ]}
-              />
+
+              {/* Carousel Section */}
+              <div className="my-6 flex justify-center">
+                <div className="w-full sm:w-4/5">
+                  <Carousel setApi={setApi} className="w-full">
+                    <CarouselContent>
+                      {images.map((image, index) => (
+                        <CarouselItem key={index}>
+                          <AspectRatio ratio={16 / 9}>
+                            <img
+                              src={image}
+                              alt={`Slide ${index + 1}`}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          </AspectRatio>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="-left-12 sm:-left-16" />
+                    <CarouselNext className="-right-12 sm:-right-16" />
+                    <div className="py-2 text-center">
+                      <div className="flex items-center justify-center gap-2 mt-4">
+                        {images.map((_, index) => (
+                          <button
+                            key={index}
+                            className={`h-2 rounded-full transition-all ${
+                              current === index
+                                ? "w-8 bg-primary"
+                                : "w-2 bg-primary/30"
+                            }`}
+                            onClick={() => api?.scrollTo(index)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </Carousel>
+                </div>
+              </div>
+
               <FileList />
             </Card>
-            <CreateReplyButton />
-            {/* Answers */}
-            <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4">
-              {thread.replies} Answers
-            </h2>
-            {replies.map((reply) => (
-              <Reply key={reply.id} reply={reply} />
-            ))}
+            <div className="max-w-4xl mx-auto">
+              <CreateReplyButton />
+              <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4">
+                {thread.replies} Answers
+              </h2>
+              {replies.map((reply) => (
+                <Reply key={reply.id} reply={reply} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

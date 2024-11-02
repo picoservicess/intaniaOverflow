@@ -1,10 +1,12 @@
-import { Bai_Jamjuree, Anuphan } from "next/font/google";
-import "./globals.css";
-import { cn } from "@/lib/utils";
-import Header from "../components/header";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/authOptions";
+import { Anuphan, Bai_Jamjuree } from "next/font/google";
+
+import { cn } from "@/lib/utils";
 import NextAuthProvider from "@/providers/NextAuthProvider";
+
+import Header from "./_components/layout/header";
+import { authOptions } from "./api/auth/[...nextauth]/authOptions";
+import "./globals.css";
 
 const bai_jamjuree = Bai_Jamjuree({
   subsets: ["latin", "thai"],

@@ -1,43 +1,73 @@
+// pages/api/auth/[...nextauth].js
+
 import { AuthOptions } from "next-auth";
+import axios from "axios";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
-      // The name to display on the sign in form (e.g. "Sign in with...")
-      name: "Credentials",
-      // `credentials` is used to generate a form on the sign in page.
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
-      // You can pass any HTML attribute to the <input> tag through the object.
+      id: "ticket",
+      name: "Ticket",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" },
+        ticket: { label: "Ticket", type: "text" },
       },
-      async authorize(credentials, req) {
-        // Add logic here to look up the user from the credentials supplied
-        const user = { id: "99", name: "J Smith", email: "jsmith@example.com" };
+      async authorize(credentials) {
+        const ticket = credentials?.ticket;
 
-        if (user) {
-          // Any object returned will be saved in `user` property of the JWT
-          return user;
-        } else {
-          // If you return null then an error will be displayed advising the user to check their details.
+        if (!ticket) {
+          console.log("No ticket found");
           return null;
+        }
 
-          // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
+        try {
+          // Validate the ticket with your SSO
+          const response = await axios.post("http://localhost:80/users/login", {
+            ticket,
+          });
+
+          const { token, userId } = response.data;
+
+          if (response.data) {
+            return {
+              id: userId,
+              accessToken: token,
+            };
+          }
+
+          return null;
+        } catch (error) {
+          console.error("Ticket authentication error:", error);
+          return null;
         }
       },
     }),
   ],
-  session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
-      return { ...token, ...user };
+      if (user) {
+        token.accessToken = user.accessToken;
+        token.id = user.id;
+      }
+      return token;
     },
-    async session({ session, token, user }) {
-      session.user = token as any;
+    async session({ session, token }) {
+      if (token) {
+        session.user = {
+          ...session.user,
+          id: token.id,
+        };
+        session.accessToken = token.accessToken;
+      }
       return session;
     },
+  },
+  pages: {
+    signIn: "/auth/signin",
+    error: "/error",
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60, // 1 hour
   },
 };

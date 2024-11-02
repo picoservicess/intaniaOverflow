@@ -1,8 +1,10 @@
 import React from "react";
-import { Card, CardContent } from "./card";
-import VoteSection from "./voteSection";
-import { Avatar, AvatarFallback } from "@/components/avatar";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 import { timeAgo } from "@/lib/utils";
+
+import VoteSection from "./voteSection";
 
 export type Reply = {
   id: string;

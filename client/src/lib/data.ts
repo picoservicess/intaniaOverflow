@@ -1,4 +1,4 @@
-export type Thread = {
+export interface IThread {
   id: string;
   title: string;
   body: string;
@@ -11,7 +11,7 @@ export type Thread = {
   downvotes: number;
 };
 
-export const threads: Thread[] = [
+export const threads: IThread[] = [
   {
     id: "1",
     title: "โย่ว! และนี่คือเสียงของเด็กวัด แข็งแรงเหมือนกับมึงเอาเหล็กงัด",
@@ -29,7 +29,7 @@ export const threads: Thread[] = [
   },
 ];
 
-export type Reply = {
+export interface IReply {
   id: string;
   body: string;
   assetUrls: string[];
@@ -39,7 +39,7 @@ export type Reply = {
   downvotes: number;
 };
 
-export const replies: Reply[] = [
+export const replies: IReply[] = [
   {
     id: "1",
     body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor",
