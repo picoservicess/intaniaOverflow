@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
     createThread,
     deleteThread,
@@ -8,28 +9,33 @@ import {
     searchThreads,
     updateThread,
 } from "../../controllers/thread-controller";
+import { authMiddleware } from "../../middleware/auth";
+import { createLogMiddleware } from "../../middleware/log";
 
 const threadRouter = express.Router();
 
-// Get all threads
-threadRouter.get("/threads", getAllThreads);
-
-// Get thread by ID
-threadRouter.get("/threads/:threadId", getThreadById);
-
-// Create a new thread
-threadRouter.post("/threads", createThread);
-
-// Update existing thread
-threadRouter.put("/threads/:threadId", updateThread);
-
-// Delete thread
-threadRouter.delete("/threads/:threadId", deleteThread);
-
-// Search threads
-threadRouter.get("/threads/search", searchThreads);
+// Register a middleware to log all requests
+threadRouter.use(createLogMiddleware('thread-service'));
 
 // Health check
-threadRouter.get("/health/threads", healthCheck);
+threadRouter.get("/health", healthCheck);
+
+// Get all threads
+threadRouter.get("/", getAllThreads);
+
+// Get thread by ID
+threadRouter.get("/:threadId", getThreadById);
+
+// Create a new thread
+threadRouter.post("", authMiddleware, createThread);
+
+// Update existing thread
+threadRouter.put("/:threadId", authMiddleware, updateThread);
+
+// Delete thread
+threadRouter.delete("/:threadId", authMiddleware, deleteThread);
+
+// Search threads
+threadRouter.get("/search", searchThreads);
 
 export default threadRouter;

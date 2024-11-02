@@ -1,5 +1,14 @@
-import { Card } from "@/components/card";
-import { Avatar, AvatarFallback } from "@/components/avatar";
+"use client";
+
+import { ArrowBigDown, ArrowBigUp, MessageSquare, Share2 } from "lucide-react";
+
+import React, { useState } from "react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
 import CreateReplyButton from "../../components/createReplyButton";
 import getThread from "@/lib/getThread";
 import VoteSection from "@/components/voteSection";
@@ -9,6 +18,69 @@ import { timeAgo } from "@/lib/utils";
 import PinButton from "@/components/PinButton";
 import EmblaCarousel from "@/components/EmblaCarousel";
 import FileList from "@/components/FileList";
+
+interface VoteButtonProps {
+  // Fixed the icon prop type for TypeScript
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  onClick: () => void;
+  isActive: boolean;
+}
+
+const VoteButton: React.FC<VoteButtonProps> = ({
+  icon: Icon,
+  onClick,
+  isActive,
+}) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={onClick}
+    className="rounded-full w-8 h-8 sm:w-10 sm:h-10 hover:bg-transparent"
+  >
+    <Icon
+      className={`w-4 h-4 sm:w-6 sm:h-6 transition-colors ${
+        isActive ? "text-[#8F2F2F] fill-[#8F2F2F]" : "hover:text-[#8F2F2F]"
+      }`}
+    />
+  </Button>
+);
+
+interface VoteSectionProps {
+  initialVotes: number;
+}
+
+const VoteSection: React.FC<VoteSectionProps> = ({ initialVotes }) => {
+  const [votes, setVotes] = useState<number>(initialVotes);
+  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
+
+  const handleVote = (type: "up" | "down") => {
+    if (userVote === type) {
+      setUserVote(null);
+      setVotes(initialVotes);
+    } else {
+      setUserVote(type);
+      setVotes((prevVotes) => (type === "up" ? prevVotes + 1 : prevVotes - 1));
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center mr-2 sm:mr-4 mb-4 sm:mb-0">
+      <VoteButton
+        icon={ArrowBigUp}
+        onClick={() => handleVote("up")}
+        isActive={userVote === "up"}
+      />
+      <span className="text-sm sm:text-base font-bold my-1 sm:my-2">
+        {votes}
+      </span>
+      <VoteButton
+        icon={ArrowBigDown}
+        onClick={() => handleVote("down")}
+        isActive={userVote === "down"}
+      />
+    </div>
+  );
+};
 
 export default async function ThreadPage({
   params,
@@ -21,6 +93,7 @@ export default async function ThreadPage({
   if (!thread) {
     return <div>Loading...</div>; // Show loading while data is being fetched
   }
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">

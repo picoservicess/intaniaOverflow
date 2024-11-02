@@ -19,7 +19,7 @@ export interface ThreadId {
   threadId: string;
 }
 
-export interface Empty { }
+export interface Empty {}
 
 export interface SearchQuery {
   query: string;

@@ -1,23 +1,33 @@
 import { Router } from "express";
+
 import {
     applyDownvote,
     applyUpvote,
     checkVoteStatus,
     getVotes,
+    healthCheck,
 } from "../../controllers/voting-controller";
+import { authMiddleware } from "../../middleware/auth";
+import { createLogMiddleware } from "../../middleware/log";
 
 const votingRouter = Router();
 
-// Render the voting page with current vote counts
-votingRouter.get("/votes/", getVotes);
-
-// Apply upvote
-votingRouter.post("/votes/upvote", applyUpvote);
-
-// Apply downvote
-votingRouter.post("/votes/downvote", applyDownvote);
+// Register a middleware to log all requests
+votingRouter.use(createLogMiddleware('voting-service'));
 
 // Check user vote status
-votingRouter.get("/votes/checkvote", checkVoteStatus);
+votingRouter.get("/health", healthCheck);
+
+// Render the voting page with current vote counts
+votingRouter.get("/", getVotes);
+
+// Apply upvote
+votingRouter.post("/upvote", authMiddleware, applyUpvote);
+
+// Apply downvote
+votingRouter.post("/downvote", authMiddleware, applyDownvote);
+
+// Check user vote status
+votingRouter.get("/checkvote", authMiddleware, checkVoteStatus);
 
 export default votingRouter;

@@ -1,10 +1,9 @@
+import { S3 } from "aws-sdk";
 import { StatusCodes } from "http-status-codes";
 
-import type { Asset } from "./assetModel";
 import { ServiceResponse } from "../../common/models/serviceResponse";
 import { logger } from "../../server";
-
-import { S3 } from "aws-sdk";
+import type { Asset } from "./assetModel";
 
 export class AssetService {
   private s3: S3;
@@ -17,10 +16,15 @@ export class AssetService {
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<ServiceResponse<Asset | null>> {
+  async uploadFile(
+    file: Express.Multer.File
+  ): Promise<ServiceResponse<Asset | null>> {
     // Get the current date and time
     const now = new Date();
-    const formattedDate = now.toISOString().replace(/[:\-T]/g, '').split('.')[0]; // Format as YYYYMMDDHHMMSS
+    const formattedDate = now
+      .toISOString()
+      .replace(/[:\-T]/g, "")
+      .split(".")[0]; // Format as YYYYMMDDHHMMSS
 
     // Create the new file name
     const newFileName = `${formattedDate}_${file.originalname}`;
@@ -30,19 +34,21 @@ export class AssetService {
       Key: newFileName,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read',
+      ACL: "public-read",
     };
 
     try {
       const data = await this.s3.upload(params).promise();
-      return ServiceResponse.success<Asset>("File uploaded successfully", { "assetUrl": data.Location });
+      return ServiceResponse.success<Asset>("File uploaded successfully", {
+        assetUrl: data.Location,
+      });
     } catch (error) {
       const errorMessage = `Error uploading file to S3: ${(error as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
         "An error occurred while uploading the file.",
         null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
   }

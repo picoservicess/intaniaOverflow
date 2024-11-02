@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "prettier": "^3.3.3"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:imports": "prettier --write . --plugin=@trivago/prettier-plugin-sort-imports"
+  }
+}

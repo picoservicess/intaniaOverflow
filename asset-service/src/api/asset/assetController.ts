@@ -1,7 +1,7 @@
 import type { Request, RequestHandler, Response } from "express";
 
-import { assetService } from "./assetService";
 import { handleServiceResponse } from "../../common/utils/httpHandlers";
+import { assetService } from "./assetService";
 
 class AssetController {
   public uploadFile: RequestHandler = async (req: Request, res: Response) => {
