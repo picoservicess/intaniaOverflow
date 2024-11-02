@@ -22,6 +22,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: on-failure:3
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -29,7 +30,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    restart: always
+    restart: on-failure:3
     networks:
       - intania-overflow-network
 
@@ -50,7 +51,8 @@ services:
       - intania-overflow-network
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 2
+    restart: on-failure:3
 
   notification-service:
     build:
@@ -68,6 +70,10 @@ services:
       - rabbitmq
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   reply-service:
     build:
@@ -80,6 +86,10 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   thread-service:
     build:
@@ -98,6 +108,10 @@ services:
       DATABASE_URL: ${THREAD_DATABASE_URL}
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   user-service:
     build:
@@ -119,6 +133,10 @@ services:
       - postgres
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   voting-service:
     build:
@@ -134,6 +152,10 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     networks:
       - intania-overflow-network
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: on-failure:3
 
   logging-service:
     build:
@@ -153,6 +175,7 @@ services:
       - rabbitmq
     networks:
       - intania-overflow-network
+    restart: on-failure:3
 
   grafana:
     image: grafana/grafana:latest
@@ -174,6 +197,7 @@ services:
       - postgres
     networks:
       - intania-overflow-network
+    restart: on-failure:3
 
   load-balancer:
     image: nginx:alpine
@@ -190,6 +214,7 @@ services:
       - "5003:5003"
     networks:
       - intania-overflow-network
+    restart: on-failure:3
 
   api-gateway:
     build:
@@ -226,6 +251,7 @@ services:
       - logging-service
     networks:
       - intania-overflow-network
+    restart: on-failure:3
 
 networks:
   intania-overflow-network:
