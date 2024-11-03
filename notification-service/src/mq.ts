@@ -7,6 +7,10 @@ import { createNotificationService } from "./services/notificationService";
 import { resolve } from "path";
 import { getGrpcRequest } from "./utils/grpc";
 import userClient from './repositories/userRepository';
+import threadClient from './repositories/threadRepository'
+
+const grpcUserRequest = getGrpcRequest(userClient);
+const grpcThreadRequest = getGrpcRequest(threadClient);
 
 // Types
 interface ThreadMessage {
@@ -47,7 +51,6 @@ const QUEUE_CONFIG = {
   deadLetterExchange: "notification_dlx",
 };
 
-const grpcRequest = getGrpcRequest(userClient);
 
 // Configuration
 dotenv.config();
@@ -66,8 +69,18 @@ async function connectToDatabase(): Promise<void> {
 
 async function getPinnedThreadUsers(threadId: string): Promise <string[]> {
   try {
-    const usersWhoPinnedThread = await grpcRequest("getUsersWhoPinnedThread", { threadId });
+    const usersWhoPinnedThread = await grpcUserRequest("getUsersWhoPinnedThread", { threadId });
     return usersWhoPinnedThread.userIds
+  } catch (error) {
+    console.error("⛔️ Error getting users who pinned thread:", error);
+    throw error;
+  }
+}
+
+async function getAuthorThreadUsers(threadId: string): Promise <string> {
+  try {
+    const usersWhoAuthorThread = await grpcUserRequest("getThreadById", { threadId });
+    return usersWhoAuthorThread.authorId
   } catch (error) {
     console.error("⛔️ Error getting users who pinned thread:", error);
     throw error;
@@ -78,6 +91,7 @@ async function parseThread(message: ThreadMessage, userId: string): Promise<INot
   const notificationData: INotification = {
     senderId: message.authorId,
     receiverId: userId,
+    targetId: message.threadId,
     isThread: true,
     isReply: false,
     isUser: false,
@@ -91,13 +105,24 @@ async function parseReply(message: ReplyMessage, userId: string): Promise<INotif
   const notificationData: INotification = {
     senderId: message.userId,
     receiverId: userId,
-    isThread: true,
-    isReply: false,
+    targetId: message.replyId,
+    isThread: false,
+    isReply: true,
     isUser: false,
     isSeen: false,
     payload: message.text,
   } as INotification;
   return notificationData;
+}
+
+async function createNotification (notiMessage: INotification): Promise<void> {
+  try {
+    const newNotification = await createNotificationService(notiMessage);
+    console.log("🔔 Notification created:", newNotification._id);
+  } catch (error) {
+    console.error("⛔️ Error creating notification:", error);
+    throw error;
+  }
 }
 
 async function setupQueues(channel: Channel): Promise<void> {
@@ -227,6 +252,8 @@ async function setupQueues(channel: Channel): Promise<void> {
   }
 }
 
+
+
 function setupChannel(channel: Channel): void {
   channel.prefetch(1);
   console.log("⏱️ Waiting for messages in queue:", QUEUE_CONFIG.name);
@@ -236,22 +263,39 @@ function setupChannel(channel: Channel): void {
     async (msg) => {
       if (!msg) return;
 
-      // console.log("🧭 %s: '%s'", msg.fields.routingKey, msg.content.toString());
-
-      try {
+      try{
         const message = JSON.parse(msg.content.toString());
+        const threadId=message.threadId as string
+         const userIds = await getPinnedThreadUsers(threadId)
+        // console.log(userIds)
+        console.log(msg.fields.routingKey)
         if (msg.fields.routingKey == 'reply') {
           console.log("✉️ Received message for reply:", message.replyId);
-          await processReplyMessage(message);
+          try {
+            const sendingPromise = userIds.map(async (userId) => {
+              const notiMessage = await parseReply(message, userId)
+              await createNotification(notiMessage);
+            });
+            await Promise.all(sendingPromise);
+          } catch (error) {
+            console.log("Fail to create notification from reply: ", error)
+          }
         }
-
         if (msg.fields.routingKey == 'thread') {
           console.log("✉️ Received message for thread:", message.threadId);
-          await processThreadMessage(message);
+          try {
+            const sendingPromise = userIds.map(async (userId) => {
+              const notiMessage = await parseThread(message, userId)
+              await createNotification(notiMessage);
+            });
+            await Promise.all(sendingPromise);
+          } catch (error) {
+            console.log("Fail to create notification from thread: ", error)
+          }
         }
         channel.ack(msg);
       } catch (error) {
-        console.error("❌ Error processing message:", error);
+        console.log("Processing data failed:", error);
         channel.nack(msg, false, false);
       }
     },
@@ -259,6 +303,27 @@ function setupChannel(channel: Channel): void {
       noAck: false,
     }
   );
+}
+
+function createChannel(connection: Connection): Promise<Channel> {
+  return new Promise((resolve, reject) => {
+    connection.createChannel((error, channel) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      channel.on('error', (err) => {
+        console.error('⛔️ Channel error:', err.message);
+      });
+
+      channel.on('close', () => {
+        console.log('📡 Channel closed');
+      });
+
+      resolve(channel);
+    });
+  });
 }
 
 function connectWithRetry(retryCount = 0): Promise<Connection> {
@@ -286,8 +351,8 @@ function connectWithRetry(retryCount = 0): Promise<Connection> {
         return;
       }
 
-      connection.on("error", (err) => {
-        console.error("❌ RabbitMQ connection error:", err.message);
+      connection.on('error', (err) => {
+        console.error('⛔️ RabbitMQ connection error:', err.message);
       });
 
       connection.on("close", () => {
@@ -295,27 +360,6 @@ function connectWithRetry(retryCount = 0): Promise<Connection> {
       });
 
       resolve(connection);
-    });
-  });
-}
-
-function createChannel(connection: Connection): Promise<Channel> {
-  return new Promise((resolve, reject) => {
-    connection.createChannel((error, channel) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      channel.on("error", (err) => {
-        console.error("❌ Channel error:", err.message);
-      });
-
-      channel.on("close", () => {
-        console.log("📡 Channel closed");
-      });
-
-      resolve(channel);
     });
   });
 }
@@ -346,11 +390,10 @@ export async function main(): Promise<void> {
   try {
     await connectToDatabase();
     await connectToRabbitMQ();
-    console.log(
-      "🚀 Rabbitmq on Notification Service fully initialized and ready"
-    );
+    console.log('🚀 Rabbitmq fully initialized and ready');
+
   } catch (error) {
-    console.error("❌ Rabbitmq on Notification Service startup error:", error);
+    console.error('🚩 Rabbitmq startup error:', error);
     process.exit(1);
   }
 }
