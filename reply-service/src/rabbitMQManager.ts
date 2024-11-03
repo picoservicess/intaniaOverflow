@@ -62,7 +62,9 @@ class RabbitMQManager {
           channel.assertExchange(this.exchange, 'direct', {
             durable: true
           });
-          // channel.assertQueue(this.queue, { durable: true });
+          // channel.assertQueue(this.queue, { 
+          //   durable: true 
+          // });
 
           channel.on("error", (err) => {
             console.error("🚫 Channel error:", err.message);
