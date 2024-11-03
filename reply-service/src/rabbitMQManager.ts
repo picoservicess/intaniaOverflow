@@ -59,9 +59,9 @@ class RabbitMQManager {
           }
 
           this.channel = channel;
-          // channel.assertExchange(this.exchange, 'direct', {
-          //   durable: false
-          // });
+          channel.assertExchange(this.exchange, 'direct', {
+            durable: true
+          });
           // channel.assertQueue(this.queue, { durable: true });
 
           channel.on("error", (err) => {
@@ -136,18 +136,18 @@ class RabbitMQManager {
         throw new Error("No channel available");
       }
 
-      // this.channel.publish(
-      //   this.exchange,
-      //   'reply',
-      //   Buffer.from(JSON.stringify(message)),
-      //   { persistent: true }
-      // );
-
-      this.channel.sendToQueue(
-        this.queue,
+      this.channel.publish(
+        this.exchange,
+        'reply',
         Buffer.from(JSON.stringify(message)),
         { persistent: true }
       );
+
+      // this.channel.sendToQueue(
+      //   this.queue,
+      //   Buffer.from(JSON.stringify(message)),
+      //   { persistent: true }
+      // );
 
       console.log("✅ Successfully published message:", message);
     } catch (error) {

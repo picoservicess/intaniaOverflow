@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 import { INotification } from "./models/notification";
 import { createNotificationService } from "./services/notificationService";
 import { resolve } from "path";
+import { getGrpcRequest } from "./utils/grpc";
+import userClient from './repositories/userRepository';
 
 // Types
 interface ThreadMessage {
@@ -20,12 +22,15 @@ interface ThreadMessage {
 }
 
 interface ReplyMessage {
-  replyId: string,
-  threadId: string,
-  userId: string,
-  text: string,
-  assetUrls: string[],
-  replyAt: Date
+  threadId: string;
+  text: string;
+  assetUrls: string[];
+  replyId: string;
+  userId: string;
+  replyAt: Date;
+  editAt: Date | null;
+  edited: boolean;
+  isDeleted: boolean;
 }
 
 // Constants
@@ -42,6 +47,8 @@ const QUEUE_CONFIG = {
   deadLetterExchange: "notification_dlx",
 };
 
+const grpcRequest = getGrpcRequest(userClient);
+
 // Configuration
 dotenv.config();
 
@@ -57,24 +64,40 @@ async function connectToDatabase(): Promise<void> {
   }
 }
 
-async function processMessage(message: ThreadMessage): Promise<void> {
+async function getPinnedThreadUsers(threadId: string): Promise <string[]> {
+  try {
+    const usersWhoPinnedThread = await grpcRequest("getUsersWhoPinnedThread", { threadId });
+    return usersWhoPinnedThread.userIds
+  } catch (error) {
+    console.error("⛔️ Error getting users who pinned thread:", error);
+    throw error;
+  }
+}
+
+async function parseThread(message: ThreadMessage, userId: string): Promise<INotification> {
   const notificationData: INotification = {
-    userId: message.authorId,
-    targetId: message.threadId,
+    senderId: message.authorId,
+    receiverId: userId,
     isThread: true,
     isReply: false,
     isUser: false,
     isSeen: false,
     payload: message.title,
   } as INotification;
+  return notificationData;
+}
 
-  try {
-    const newNotification = await createNotificationService(notificationData);
-    console.log("🔔 Notification created:", newNotification._id);
-  } catch (error) {
-    console.error("❌ Error creating notification:", error);
-    throw error;
-  }
+async function parseReply(message: ReplyMessage, userId: string): Promise<INotification> {
+  const notificationData: INotification = {
+    senderId: message.userId,
+    receiverId: userId,
+    isThread: true,
+    isReply: false,
+    isUser: false,
+    isSeen: false,
+    payload: message.text,
+  } as INotification;
+  return notificationData;
 }
 
 async function setupQueues(channel: Channel): Promise<void> {
@@ -135,19 +158,19 @@ async function setupQueues(channel: Channel): Promise<void> {
       );
     }
 
-    // await new Promise<void>((resolve, reject) => {
-    //   channel.assertExchange(
-    //     QUEUE_CONFIG.exchangeName,'direct', { 
-    //       durable: true 
-    //     },
-    //     (error) => {
-    //       console.log("assert exchange error", error)
+    await new Promise<void>((resolve, reject) => {
+      channel.assertExchange(
+        QUEUE_CONFIG.exchangeName,'direct', { 
+          durable: true 
+        },
+        (error) => {
+          console.log("assert exchange error", error)
 
-    //       if (error) reject(error);
-    //       else resolve();
-    //     }
-    //   );
-    // });
+          if (error) reject(error);
+          else resolve();
+        }
+      );
+    });
 
     // 5. Create main queue with dead letter configuration
     await new Promise<void>((resolve, reject) => {
@@ -173,8 +196,8 @@ async function setupQueues(channel: Channel): Promise<void> {
 
     await new Promise<void>((resolve, reject) => {
       channel.bindQueue(
-        QUEUE_CONFIG.deadLetterQueueName,
-        QUEUE_CONFIG.deadLetterExchange,
+        QUEUE_CONFIG.name,
+        QUEUE_CONFIG.exchangeName,
         'reply', // routing key
         {}, // arguments
         (error) => {
@@ -186,8 +209,8 @@ async function setupQueues(channel: Channel): Promise<void> {
 
     await new Promise<void>((resolve, reject) => {
       channel.bindQueue(
-        QUEUE_CONFIG.deadLetterQueueName,
-        QUEUE_CONFIG.deadLetterExchange,
+        QUEUE_CONFIG.name,
+        QUEUE_CONFIG.exchangeName,    
         'thread', // routing key
         {}, // arguments
         (error) => {
@@ -213,17 +236,19 @@ function setupChannel(channel: Channel): void {
     async (msg) => {
       if (!msg) return;
 
-      console.log(" [x] %s: '%s'", msg.fields.routingKey, msg.content.toString());
+      // console.log("🧭 %s: '%s'", msg.fields.routingKey, msg.content.toString());
 
       try {
         const message = JSON.parse(msg.content.toString());
-        if (message.replyId) {
+        if (msg.fields.routingKey == 'reply') {
           console.log("✉️ Received message for reply:", message.replyId);
+          await processReplyMessage(message);
         }
-        else {
+
+        if (msg.fields.routingKey == 'thread') {
           console.log("✉️ Received message for thread:", message.threadId);
+          await processThreadMessage(message);
         }
-        // await processMessage(message);
         channel.ack(msg);
       } catch (error) {
         console.error("❌ Error processing message:", error);
