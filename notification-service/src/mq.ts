@@ -51,7 +51,6 @@ const QUEUE_CONFIG = {
   deadLetterExchange: "notification_dlx",
 };
 
-
 // Configuration
 dotenv.config();
 
@@ -203,10 +202,6 @@ async function setupQueues(channel: Channel): Promise<void> {
         QUEUE_CONFIG.name,
         {
           durable: true,
-          // arguments: {
-          //   "x-dead-letter-exchange": QUEUE_CONFIG.deadLetterExchange,
-          //   "x-dead-letter-routing-key": "",
-          // },
           deadLetterExchange: QUEUE_CONFIG.deadLetterExchange,
           deadLetterRoutingKey: ""
         },
@@ -224,7 +219,7 @@ async function setupQueues(channel: Channel): Promise<void> {
         QUEUE_CONFIG.name,
         QUEUE_CONFIG.exchangeName,
         'reply', // routing key
-        {}, // arguments
+        {},
         (error) => {
           if (error) reject(error);
           else resolve();
@@ -237,7 +232,7 @@ async function setupQueues(channel: Channel): Promise<void> {
         QUEUE_CONFIG.name,
         QUEUE_CONFIG.exchangeName,    
         'thread', // routing key
-        {}, // arguments
+        {},
         (error) => {
           if (error) reject(error);
           else resolve();
@@ -266,8 +261,7 @@ function setupChannel(channel: Channel): void {
       try{
         const message = JSON.parse(msg.content.toString());
         const threadId=message.threadId as string
-         const userIds = await getPinnedThreadUsers(threadId)
-        // console.log(userIds)
+        const userIds = await getPinnedThreadUsers(threadId)
         console.log(msg.fields.routingKey)
         if (msg.fields.routingKey == 'reply') {
           console.log("✉️ Received message for reply:", message.replyId);

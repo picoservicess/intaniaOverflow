@@ -62,9 +62,6 @@ class RabbitMQManager {
           channel.assertExchange(this.exchange, 'direct', {
             durable: true
           });
-          // channel.assertQueue(this.queue, { 
-          //   durable: true 
-          // });
 
           channel.on("error", (err) => {
             console.error("🚫 Channel error:", err.message);
@@ -120,7 +117,9 @@ class RabbitMQManager {
             return;
           }
           this.channel = channel;
-          // channel.assertQueue(this.queue, { durable: true });
+          channel.assertExchange(this.exchange, 'direct', {
+            durable: true
+          });
         });
       } catch (error) {
         console.error("🚫 Error recreating channel:", error);
@@ -144,13 +143,7 @@ class RabbitMQManager {
         Buffer.from(JSON.stringify(message)),
         { persistent: true }
       );
-
-      // this.channel.sendToQueue(
-      //   this.queue,
-      //   Buffer.from(JSON.stringify(message)),
-      //   { persistent: true }
-      // );
-
+      
       console.log("✅ Successfully published message:", message);
     } catch (error) {
       console.error("🚫 Error publishing message:", error);
