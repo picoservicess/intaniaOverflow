@@ -6,13 +6,17 @@ class RabbitMQManager {
   private channel: Channel | null = null;
   private readonly url: string;
   private readonly queue: string;
+  private readonly exchange: string;
+  private readonly deadLetterExchange: string;
   private connecting: boolean = false;
   private connectionRetries: number = 0;
   private readonly maxRetries: number = 5;
 
   private constructor() {
-    this.url = process.env.RABBITMQ_URL || "amqp://rabbitmq:5672";
-    this.queue = process.env.RABBITMQ_QUEUE || "notification_queue";
+    this.url = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
+    this.queue = process.env.RABBITMQ_QUEUE || 'notification_queue';
+    this.deadLetterExchange = process.env.RABBITMQ_DLX || 'notification_dlx';
+    this.exchange = process.env.RABBITMQ_EXCHANGE || "notification_exchange"; 
   }
 
   public static getInstance(): RabbitMQManager {
@@ -57,6 +61,9 @@ class RabbitMQManager {
           }
 
           this.channel = channel;
+          channel.assertExchange(this.exchange, 'direct', {
+            durable: true
+          });
           // channel.assertQueue(this.queue, {
           //   durable: true
           // });
@@ -133,11 +140,19 @@ class RabbitMQManager {
         throw new Error("No channel available");
       }
 
-      this.channel.sendToQueue(
-        this.queue,
+      this.channel.publish(
+        this.exchange,
+        'thread',
         Buffer.from(JSON.stringify(message)),
         { persistent: true }
       );
+
+      // this.channel.sendToQueue(
+      //   this.queue,
+      //   Buffer.from(JSON.stringify(message)),
+      //   { persistent: true }
+      // );
+
       console.log("✅ Successfully published message:", message);
     } catch (error) {
       console.error("🚫 Error publishing message:", error);
