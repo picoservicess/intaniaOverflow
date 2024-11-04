@@ -4,6 +4,13 @@ import mongoose from "mongoose";
 
 import { INotification } from "./models/notification";
 import { createNotificationService } from "./services/notificationService";
+import { resolve } from "path";
+import { getGrpcRequest } from "./utils/grpc";
+import userClient from './repositories/userRepository';
+import threadClient from './repositories/threadRepository'
+
+const grpcUserRequest = getGrpcRequest(userClient);
+const grpcThreadRequest = getGrpcRequest(threadClient);
 
 // Types
 interface ThreadMessage {
@@ -18,6 +25,18 @@ interface ThreadMessage {
   isDeleted: boolean;
 }
 
+interface ReplyMessage {
+  threadId: string;
+  text: string;
+  assetUrls: string[];
+  replyId: string;
+  userId: string;
+  replyAt: Date;
+  editAt: Date | null;
+  edited: boolean;
+  isDeleted: boolean;
+}
+
 // Constants
 const RABBITMQ_CONFIG = {
   url: process.env.RABBITMQ_URL || "amqp://rabbitmq:5672",
@@ -27,6 +46,7 @@ const RABBITMQ_CONFIG = {
 
 const QUEUE_CONFIG = {
   name: "notification_queue",
+  exchangeName: "notification_exchange",
   deadLetterQueueName: "notification_queue_dead",
   deadLetterExchange: "notification_dlx",
 };
@@ -46,9 +66,30 @@ async function connectToDatabase(): Promise<void> {
   }
 }
 
-async function processMessage(message: ThreadMessage): Promise<void> {
+async function getPinnedThreadUsers(threadId: string): Promise <string[]> {
+  try {
+    const usersWhoPinnedThread = await grpcUserRequest("getUsersWhoPinnedThread", { threadId });
+    return usersWhoPinnedThread.userIds
+  } catch (error) {
+    console.error("⛔️ Error getting users who pinned thread:", error);
+    throw error;
+  }
+}
+
+async function getAuthorThreadUsers(threadId: string): Promise <string> {
+  try {
+    const usersWhoAuthorThread = await grpcUserRequest("getThreadById", { threadId });
+    return usersWhoAuthorThread.authorId
+  } catch (error) {
+    console.error("⛔️ Error getting users who pinned thread:", error);
+    throw error;
+  }
+}
+
+async function parseThread(message: ThreadMessage, userId: string): Promise<INotification> {
   const notificationData: INotification = {
-    userId: message.authorId,
+    senderId: message.authorId,
+    receiverId: userId,
     targetId: message.threadId,
     isThread: true,
     isReply: false,
@@ -56,12 +97,29 @@ async function processMessage(message: ThreadMessage): Promise<void> {
     isSeen: false,
     payload: message.title,
   } as INotification;
+  return notificationData;
+}
 
+async function parseReply(message: ReplyMessage, userId: string): Promise<INotification> {
+  const notificationData: INotification = {
+    senderId: message.userId,
+    receiverId: userId,
+    targetId: message.replyId,
+    isThread: false,
+    isReply: true,
+    isUser: false,
+    isSeen: false,
+    payload: message.text,
+  } as INotification;
+  return notificationData;
+}
+
+async function createNotification (notiMessage: INotification): Promise<void> {
   try {
-    const newNotification = await createNotificationService(notificationData);
+    const newNotification = await createNotificationService(notiMessage);
     console.log("🔔 Notification created:", newNotification._id);
   } catch (error) {
-    console.error("❌ Error creating notification:", error);
+    console.error("⛔️ Error creating notification:", error);
     throw error;
   }
 }
@@ -124,17 +182,57 @@ async function setupQueues(channel: Channel): Promise<void> {
       );
     }
 
+    await new Promise<void>((resolve, reject) => {
+      channel.assertExchange(
+        QUEUE_CONFIG.exchangeName,'direct', { 
+          durable: true 
+        },
+        (error) => {
+          console.log("assert exchange error", error)
+
+          if (error) reject(error);
+          else resolve();
+        }
+      );
+    });
+
     // 5. Create main queue with dead letter configuration
     await new Promise<void>((resolve, reject) => {
       channel.assertQueue(
         QUEUE_CONFIG.name,
         {
           durable: true,
-          arguments: {
-            "x-dead-letter-exchange": QUEUE_CONFIG.deadLetterExchange,
-            "x-dead-letter-routing-key": "",
-          },
+          deadLetterExchange: QUEUE_CONFIG.deadLetterExchange,
+          deadLetterRoutingKey: ""
         },
+        (error) => {
+          console.log("assert queue error", error)
+
+          if (error) reject(error);
+          else resolve();
+        }
+      );
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      channel.bindQueue(
+        QUEUE_CONFIG.name,
+        QUEUE_CONFIG.exchangeName,
+        'reply', // routing key
+        {},
+        (error) => {
+          if (error) reject(error);
+          else resolve();
+        }
+      );
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      channel.bindQueue(
+        QUEUE_CONFIG.name,
+        QUEUE_CONFIG.exchangeName,    
+        'thread', // routing key
+        {},
         (error) => {
           if (error) reject(error);
           else resolve();
@@ -149,6 +247,8 @@ async function setupQueues(channel: Channel): Promise<void> {
   }
 }
 
+
+
 function setupChannel(channel: Channel): void {
   channel.prefetch(1);
   console.log("⏱️ Waiting for messages in queue:", QUEUE_CONFIG.name);
@@ -158,14 +258,38 @@ function setupChannel(channel: Channel): void {
     async (msg) => {
       if (!msg) return;
 
-      try {
-        const message = JSON.parse(msg.content.toString()) as ThreadMessage;
-        console.log("✉️ Received message for thread:", message.threadId);
-
-        await processMessage(message);
+      try{
+        const message = JSON.parse(msg.content.toString());
+        const threadId=message.threadId as string
+        const userIds = await getPinnedThreadUsers(threadId)
+        console.log(msg.fields.routingKey)
+        if (msg.fields.routingKey == 'reply') {
+          console.log("✉️ Received message for reply:", message.replyId);
+          try {
+            const sendingPromise = userIds.map(async (userId) => {
+              const notiMessage = await parseReply(message, userId)
+              await createNotification(notiMessage);
+            });
+            await Promise.all(sendingPromise);
+          } catch (error) {
+            console.log("Fail to create notification from reply: ", error)
+          }
+        }
+        if (msg.fields.routingKey == 'thread') {
+          console.log("✉️ Received message for thread:", message.threadId);
+          try {
+            const sendingPromise = userIds.map(async (userId) => {
+              const notiMessage = await parseThread(message, userId)
+              await createNotification(notiMessage);
+            });
+            await Promise.all(sendingPromise);
+          } catch (error) {
+            console.log("Fail to create notification from thread: ", error)
+          }
+        }
         channel.ack(msg);
       } catch (error) {
-        console.error("❌ Error processing message:", error);
+        console.log("Processing data failed:", error);
         channel.nack(msg, false, false);
       }
     },
@@ -173,6 +297,27 @@ function setupChannel(channel: Channel): void {
       noAck: false,
     }
   );
+}
+
+function createChannel(connection: Connection): Promise<Channel> {
+  return new Promise((resolve, reject) => {
+    connection.createChannel((error, channel) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      channel.on('error', (err) => {
+        console.error('⛔️ Channel error:', err.message);
+      });
+
+      channel.on('close', () => {
+        console.log('📡 Channel closed');
+      });
+
+      resolve(channel);
+    });
+  });
 }
 
 function connectWithRetry(retryCount = 0): Promise<Connection> {
@@ -200,8 +345,8 @@ function connectWithRetry(retryCount = 0): Promise<Connection> {
         return;
       }
 
-      connection.on("error", (err) => {
-        console.error("❌ RabbitMQ connection error:", err.message);
+      connection.on('error', (err) => {
+        console.error('⛔️ RabbitMQ connection error:', err.message);
       });
 
       connection.on("close", () => {
@@ -209,27 +354,6 @@ function connectWithRetry(retryCount = 0): Promise<Connection> {
       });
 
       resolve(connection);
-    });
-  });
-}
-
-function createChannel(connection: Connection): Promise<Channel> {
-  return new Promise((resolve, reject) => {
-    connection.createChannel((error, channel) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      channel.on("error", (err) => {
-        console.error("❌ Channel error:", err.message);
-      });
-
-      channel.on("close", () => {
-        console.log("📡 Channel closed");
-      });
-
-      resolve(channel);
     });
   });
 }
@@ -260,11 +384,10 @@ export async function main(): Promise<void> {
   try {
     await connectToDatabase();
     await connectToRabbitMQ();
-    console.log(
-      "🚀 Rabbitmq on Notification Service fully initialized and ready"
-    );
+    console.log('🚀 Rabbitmq fully initialized and ready');
+
   } catch (error) {
-    console.error("❌ Rabbitmq on Notification Service startup error:", error);
+    console.error('🚩 Rabbitmq startup error:', error);
     process.exit(1);
   }
 }

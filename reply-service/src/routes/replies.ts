@@ -3,6 +3,7 @@ import { Request, Response, Router } from "express";
 
 import { AuthenticatedRequest, authenticateToken } from "../middleware/auth";
 import { ReplySchema, UpdateReplySchema } from "../models";
+import { rabbitMQManager } from "../rabbitMQManager";
 
 // Initialize Prisma client and router
 const prisma = new PrismaClient();
@@ -52,9 +53,8 @@ router.post(
         res.status(401).json({ error: "User ID is required" });
         return;
       }
-
       // Create new reply in database
-      const reply = await prisma.reply.create({
+      const newReply = await prisma.reply.create({
         data: {
           threadId,
           text,
@@ -63,11 +63,17 @@ router.post(
           replyAt: new Date(), // Set the reply time to the current date and time
         },
       });
+      
+      try {
+        await rabbitMQManager.publishMessage(newReply);
+      } catch (mqError) {
+        console.error("Failed to publish message to RabbitMQ: ", mqError)
+      }
 
       // Send a 201 Created response with the new reply
       res.status(201).json({
         message: "Reply created successfully",
-        reply,
+        newReply,
       });
     } catch (error) {
       // Log any errors to the console
