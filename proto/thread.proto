@@ -35,6 +35,8 @@ message Empty{}
 
 message SearchQuery {
     string query = 1;
+    optional int32 page = 2;
+    optional int32 pageSize = 3;
 }
 
 message Thread {

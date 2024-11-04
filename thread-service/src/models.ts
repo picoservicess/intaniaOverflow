@@ -23,6 +23,8 @@ export interface Empty {}
 
 export interface SearchQuery {
   query: string;
+  page: number;
+  pageSize: number;
 }
 
 export interface GetAllThreadsParams {

@@ -36,15 +36,17 @@ server.addService(threadProto.ThreadService.service, {
     callback: sendUnaryData<ThreadList>
   ) => {
     try {
-      console.log(call.request);
-      let page = call.request.page || 0;
-      let pageSize = call.request?.pageSize || 25;
+      const page = call.request?.page || 0;
+      const pageSize = call.request?.pageSize || 25;
       const rawThreads = await prisma.thread.findMany({
         where: {
           isDeleted: false,
         },
         skip: page * pageSize,
         take: pageSize,
+        orderBy: {
+          updatedAt: "desc",
+        },
       });
       const threads = rawThreads.map((thread) => applyAnonymity(thread));
       callback(null, { threads });
@@ -259,6 +261,8 @@ server.addService(threadProto.ThreadService.service, {
     callback: sendUnaryData<ThreadList>
   ) => {
     try {
+      const page = call.request?.page || 0;
+      const pageSize = call.request?.pageSize || 25;
       const rawThreads = await prisma.thread.findMany({
         where: {
           OR: [
@@ -277,6 +281,8 @@ server.addService(threadProto.ThreadService.service, {
           ],
           isDeleted: false, // Only show non-deleted threads in search
         },
+        skip: page * pageSize,
+        take: pageSize,
       });
       const threads = rawThreads.map((thread) => applyAnonymity(thread));
       callback(null, { threads });
