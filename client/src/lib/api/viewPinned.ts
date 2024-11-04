@@ -1,8 +1,6 @@
 "use server";
 
 export default async function viewPinned(token: string) {
-  console.log(">>>");
-  console.log(token);
   const response = await fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/users/viewPinned`, {
     method: 'GET',
     headers: {

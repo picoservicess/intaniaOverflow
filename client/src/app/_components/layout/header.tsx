@@ -1,5 +1,3 @@
-// "use client";
-
 import { Bell, Bookmark, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -79,23 +77,8 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
 };
 
 export default async function Header() {
-  // const { data: session } = useSession();
-  // const [userProfile, setUserProfile] = useState<UserProfile>();
   const session = await  getServerSession(authOptions);
   const userProfile = await getUserProfile(session?.user.accessToken as string);
-
-  // useEffect(() => {
-  //   async function fetchProfile() {
-  //     try {
-  //       const profile = await getUserProfile(session?.user.accessToken as string);
-  //       setUserProfile(profile);
-  //     } catch (error) {
-  //       console.error("Failed to fetch user profile:", error);
-  //     }
-  //   }
-
-  //   fetchProfile();
-  // }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

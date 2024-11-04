@@ -14,10 +14,15 @@ interface PostProps {
   post: Thread;
 }
 
+const ANONYMOUS_USER: User = {
+  displayname: "Anonymous",
+  profileImage: "",
+};
+
 export default function Post({ post }: PostProps) {
   const { data: session } = useSession();
   const router = useRouter();
-  const [userDetail, setUserDetail] = useState<User>();
+  const [userDetail, setUserDetail] = useState<User>(ANONYMOUS_USER);
   
   useEffect(() => {
     const fetchUserDetail = async () => {
@@ -30,10 +35,7 @@ export default function Post({ post }: PostProps) {
 
     // If user not authenticated or post is anonymous, set user detail to anonymous
     if (post.isAnonymous || !session?.user.accessToken) {
-      setUserDetail({
-        displayname: "Anonymous",
-        profileImage: "",
-      });
+      setUserDetail(ANONYMOUS_USER);
     } 
     fetchUserDetail();
   }, [post, session]);

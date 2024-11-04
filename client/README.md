@@ -1,6 +1,12 @@
 # Frontend of Intania Overflow
 
-## DONE
+## Manual Setup
+1. create ```.env.local``` in this root directory.
+2. Fill it with environment variable in discord.
+3. run ```npm install``` to install all dependencies.
+4. run ```npm run dev``` to run website.
+
+## Completed Funtionality
 
 #### HOME Page
 - Explore all threads
@@ -21,6 +27,6 @@
 #### LOGIN Page
 - Login
 
-## TODO
+## TODO Functionality
 - Apply Voting Service
 - Apply Notification Service
