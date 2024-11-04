@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { getAuthenticatedUserId } from "../../user-service/src/libs/token";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { Empty, SearchQuery, ThreadId, ThreadList } from "./models";
+import { Empty, GetAllThreadsParams, SearchQuery, ThreadId, ThreadList } from "./models";
 import { rabbitMQManager } from "./rabbitMQManager";
 
 const PROTO_PATH = "../proto/thread.proto";
@@ -32,14 +32,19 @@ const address = `${HOST}:${PORT}`;
 
 server.addService(threadProto.ThreadService.service, {
   getAllThreads: async (
-    call: ServerUnaryCall<Empty, ThreadList>,
+    call: ServerUnaryCall<GetAllThreadsParams, ThreadList>,
     callback: sendUnaryData<ThreadList>
   ) => {
     try {
+      console.log(call.request);
+      let page = call.request.page || 0;
+      let pageSize = call.request?.pageSize || 25;
       const rawThreads = await prisma.thread.findMany({
         where: {
           isDeleted: false,
         },
+        skip: page * pageSize,
+        take: pageSize,
       });
       const threads = rawThreads.map((thread) => applyAnonymity(thread));
       callback(null, { threads });
