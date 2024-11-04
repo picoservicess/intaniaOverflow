@@ -1,22 +1,26 @@
-TODO:
+# Frontend of Intania Overflow
 
-- Creating Thread /
-  - Fix Single Thread Page /
-- Replying Thread /
-  - See reply schema /
-- Searching Thread /
-  - Make PostList reusable /
-  - By title and tags /
-- Pinning Thread /
-  - PostList in profile /
-- Getting Thread Notification
-  - mock red dot on top of avatar
-- Voting on Thread/Reply /
-- Profile /
-  - Profile form /
+## DONE
 
----
+#### HOME Page
+- Explore all threads
+- Pin thread
+- Search thread
 
-- blur modal
-- Font แบบเดิม
-- anonymous thread ทำที่ backend
+#### THREAD Page
+- See thread details
+- See thread's replies
+- Pin thread
+- Create Reply
+
+#### PROFILE Page
+- See user profile
+- Edit profile
+- See pinned threads
+
+#### LOGIN Page
+- Login
+
+## TODO
+- Apply Voting Service
+- Apply Notification Service

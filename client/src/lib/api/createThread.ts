@@ -1,26 +1,18 @@
-import { threads } from "./data";
+"use server";
 
-export interface newThread {
-  title: string;
-  body: string;
-  assetUrls: string[];
-  tags: string[];
-  authorId: string;
-}
+export default async function createThread(token: string, threadData: ThreadRequest) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/threads`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(threadData),
+  });
 
-export default async function createThread(newThread: newThread) {
-  const completeThread = {
-    id: (threads.length + 1).toString(),
-    title: newThread.title,
-    body: newThread.body,
-    assetUrls: [],
-    tags: newThread.tags,
-    author: newThread.authorId, // Assuming a default authorId for now
-    createdAt: new Date(),
-    replies: 0,
-    upvotes: 0,
-    downvotes: 0,
-  };
+  if (!response.ok) {
+    throw new Error("Failed to create thread");
+  }
 
-  threads.push(completeThread);
+  return await response.json();
 }

@@ -1,21 +1,22 @@
-import { replies } from "./data";
+"use server";
 
-export interface newReply {
-  body: string;
-  assetUrls: string[];
-  authorId: string;
-}
+import { revalidateTag } from "next/cache";
 
-export default async function createReply(newReply: newReply) {
-  const completeReply = {
-    id: (replies.length + 1).toString(),
-    body: newReply.body,
-    assetUrls: [],
-    author: newReply.authorId, // Assuming a default authorId for now
-    createdAt: new Date(),
-    upvotes: 0,
-    downvotes: 0,
-  };
+export default async function createReply(token: string, threadId: string, replyData:ReplyRequest) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/replies/${threadId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(replyData),
+  });
 
-  replies.push(completeReply);
+  if (!response.ok) {
+    throw new Error("Failed to create reply");
+  }
+
+  revalidateTag("Replies");
+
+  return await response.json();
 }

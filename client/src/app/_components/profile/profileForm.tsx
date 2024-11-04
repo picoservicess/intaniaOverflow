@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 
+import updateUserProfile from "@/lib/api/updateUserProfile";
+import uploadFiles from "@/lib/api/uploadFiles"; // Updated import
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
@@ -13,29 +16,38 @@ interface ProfileFormProps {
   onClose: () => void;
 }
 
-interface Profile {
-  displayName: string;
-  picture: File[];
-}
-
 const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
+  const { data: session } = useSession();
   const [displayName, setDisplayName] = useState("");
-  const [picture, setPicture] = useState<File[]>([]);
+  const [picture, setPicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setPicture(Array.from(e.target.files));
-      const fileUrl = URL.createObjectURL(e.target.files[0]);
-      setPreviewUrl(fileUrl);
+      const file = e.target.files[0];
+      setPicture(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newProfile: Profile = { displayName, picture };
-    console.log(newProfile);
-    onClose();
+    setLoading(true);
+    try {
+      let profileImageUrl: string | undefined;
+
+      if (picture) {
+        const [response] = await uploadFiles(session?.user?.accessToken, [picture]);
+        profileImageUrl = response?.responseObject.assetUrl;
+      }
+
+      await updateUserProfile(session?.user.accessToken, displayName, profileImageUrl);
+
+      onClose();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   return (
@@ -45,9 +57,13 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
           {/* Profile Picture Section */}
           <div className="flex flex-col items-center gap-4">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={previewUrl || ""} alt="Profile preview" />
+              <AvatarImage
+                src={previewUrl || ""}
+                alt="Profile preview"
+                className="size-full rounded-[inherit] object-cover"
+              />
               <AvatarFallback>
-                {displayName ? displayName[0].toUpperCase() : "U"}
+                {displayName ? displayName[0].toUpperCase() : "?"}
               </AvatarFallback>
             </Avatar>
 
@@ -61,13 +77,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
               <Input
                 id="picture"
                 type="file"
-                accept="image/*"
-                className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                accept="image/jpeg, image/png"
+                className="cursor-pointer file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                 onChange={handleFileChange}
+                multiple={false}
               />
-              {picture.length > 0 && (
+              {picture && (
                 <p className="mt-2 text-sm text-muted-foreground">
-                  ไฟล์ที่เลือก: {picture[0].name}
+                  ไฟล์ที่เลือก: {picture.name}
                 </p>
               )}
             </div>
@@ -85,7 +102,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="w-full"
-              required
             />
           </div>
         </div>
@@ -97,8 +113,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
             ยกเลิก
           </Button>
         </DialogClose>
-        <Button type="submit" className="w-full sm:w-auto">
-          ยืนยัน
+        <Button type="submit" className="bg-primary">
+          {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : "ยืนยัน"}
         </Button>
       </DialogFooter>
     </form>

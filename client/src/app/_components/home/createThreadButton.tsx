@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import {
 
 import ThreadForm from "./threadForm";
 
-export default function CreateThreadButton() {
+export default function CreateThreadButton({setThread}: {setThread: React.Dispatch<SetStateAction<Thread[]>>}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,7 +23,7 @@ export default function CreateThreadButton() {
       <DialogTrigger asChild>
         <Button
           variant="default"
-          className="fixed bottom-8 right-8 h-14 w-32 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600"
+          className="z-50 fixed bottom-8 right-8 h-14 w-32 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600"
         >
           <div className="flex items-center justify-center gap-1 animate-pulse">
             <Plus strokeWidth={2} />
@@ -35,7 +35,7 @@ export default function CreateThreadButton() {
         <DialogHeader>
           <DialogTitle>สร้างเธรด</DialogTitle>
         </DialogHeader>
-        <ThreadForm onClose={() => setOpen(false)} />
+        <ThreadForm onClose={() => setOpen(false)} setThread={setThread} />
       </DialogContent>
     </Dialog>
   );

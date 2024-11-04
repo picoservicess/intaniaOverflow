@@ -45,20 +45,10 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.accessToken = user.accessToken;
-        token.id = user.id;
-      }
-      return token;
+      return { ...token, ...user };
     },
-    async session({ session, token }) {
-      if (token) {
-        session.user = {
-          ...session.user,
-          id: token.id,
-        };
-        session.accessToken = token.accessToken;
-      }
+    async session({ session, token, user }) {
+      session.user = token as any;
       return session;
     },
   },

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import CUIcon from "../../assets/account-link-logo-cu.svg";
+import CUIcon from "@/app/assets/account-link-logo-cu.svg";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -25,7 +25,7 @@ const LoginPage = () => {
   };
 
   const handleReturnHome = () => {
-    router.push("/");
+    router.push("/home");
   };
 
   if (status === "loading") {

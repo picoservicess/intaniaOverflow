@@ -1,25 +1,22 @@
 import React from "react";
-
 import FileLink from "./fileLink";
 
-export default function FileList() {
+interface FileListProps {
+  assetUrls: string[];
+}
+
+export default function FileList({ assetUrls }: FileListProps) {
   return (
-    // <div className="flex flex-col gap-5 w-min px-[60px] py-[20px]">
-    //   <h3>ไฟล์แนบ</h3>
-    //   <div className="flex flex-col gap-2">
-    //     <FileLink asset={{ url: "#", name: "surapee_resume.pdf" }} />
-    //     <FileLink asset={{ url: "#", name: "surapee_transcript.pdf" }} />
-    //     <FileLink asset={{ url: "#", name: "surapee_certification.pdf" }} />
-    //   </div>
-    // </div>
-    <div className="flex justify-start gap-3 flex-wrap px-[60px] py-[20px]">
-      <FileLink asset={{ url: "#", name: "surapee_resume.pdf" }} />
-      <FileLink asset={{ url: "#", name: "surapee_transcript.pdf" }} />
-      <FileLink asset={{ url: "#", name: "surapee_certification.pdf" }} />
-      <FileLink asset={{ url: "#", name: "surapee_certification.pdf" }} />
-      <FileLink asset={{ url: "#", name: "surapee_certification.pdf" }} />
-      <FileLink asset={{ url: "#", name: "surapee_certification.pdf" }} />
-      <FileLink asset={{ url: "#", name: "surapee_certification.pdf" }} />
+    <div className="flex justify-start gap-3 flex-wrap px-[80px]">
+      {assetUrls.map((url) => {
+        // Extract the filename from the URL
+        const fileName = url.split('/').pop()!; // Get the last part of the URL
+        const nameWithoutPrefix = fileName.split('_').slice(1).join('_'); // Remove everything before the first "_"
+        
+        return (
+          <FileLink key={url} asset={{ url, name: nameWithoutPrefix }} />
+        );
+      })}
     </div>
   );
 }

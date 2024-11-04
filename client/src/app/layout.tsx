@@ -4,7 +4,6 @@ import { Anuphan, Bai_Jamjuree } from "next/font/google";
 import { cn } from "@/lib/utils";
 import NextAuthProvider from "@/providers/NextAuthProvider";
 
-import Header from "./_components/layout/header";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
 import "./globals.css";
 
@@ -30,7 +29,6 @@ export default async function RootLayout({
     <html lang="en">
       <body className={cn(anuphan.variable, bai_jamjuree.variable)}>
         <NextAuthProvider session={session}>
-          <Header />
           {children}
         </NextAuthProvider>
       </body>

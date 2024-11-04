@@ -1,29 +1,27 @@
 "use client";
 
 import { useState } from "react";
-
+import { useParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSession } from "next-auth/react";
 import createReply from "@/lib/api/createReply";
+import uploadFiles from "@/lib/api/uploadFiles";
 
 interface ReplyFormProps {
   onClose: () => void;
 }
 
-interface Reply {
-  body: string;
-  assets: File[];
-  authorId: string;
-}
-
 const ReplyForm: React.FC<ReplyFormProps> = ({ onClose }) => {
+  const { slug } = useParams();
+  const { data: session } = useSession();
   const [body, setBody] = useState("");
   const [assets, setAssets] = useState<File[]>([]);
-  const [authorId, setAuthorId] = useState("1");
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -31,15 +29,34 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onClose }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newReply: Reply = { body, assets, authorId };
-    createReply({
-      body: newReply.body,
-      assetUrls: [],
-      authorId: newReply.authorId,
-    });
-    onClose();
+    setLoading(true);
+    try {
+      // Upload files and get their URLs
+      const assetUrls: string[] = [];
+      if (assets.length > 0) {
+        const responses = await uploadFiles(session?.user?.accessToken, assets);
+        assetUrls.push(...responses.map((res) => res.responseObject.assetUrl));
+      }
+
+      // Prepare data according to ReplyRequest interface
+      const replyData: ReplyRequest = {
+        text: body,
+        assetUrls,
+      };
+
+      // Call createReply with threadId and authorId from session
+      if (typeof slug === 'string') {
+        await createReply(session?.user?.accessToken, slug, replyData);
+      } else {
+        console.error("Invalid threadId:", slug);
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error creating reply:", error);
+    }
   };
 
   return (
@@ -82,7 +99,9 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ onClose }) => {
             ยกเลิก
           </Button>
         </DialogClose>
-        <Button type="submit">ตอบกลับ</Button>
+        <Button type="submit" className="bg-primary">
+          {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : "ตอบกลับ"}
+        </Button>
       </DialogFooter>
     </form>
   );

@@ -30,6 +30,9 @@ router.post(
       // Extract threadId from the URL parameters
       const { threadId } = req.params;
 
+      // Add threadId to the request body
+      req.body.threadId = threadId;
+
       // Validate request body against the ReplySchema using Zod
       const validatedData = ReplySchema.safeParse(req.body);
       if (!validatedData.success) {
@@ -43,24 +46,22 @@ router.post(
 
       // Destructure validated data
       const { text, assetUrls } = validatedData.data;
-      // Get userId from authenticated request
       const userId = req.user?.userId;
 
       // Ensure user is authenticated
       if (!userId) {
-        // If userId is not present, send a 401 Unauthorized error
         res.status(401).json({ error: "User ID is required" });
         return;
       }
 
-      // Create new reply in database
+      // Create new reply in the database
       const reply = await prisma.reply.create({
         data: {
           threadId,
           text,
           assetUrls,
           userId,
-          replyAt: new Date(), // Set the reply time to the current date and time
+          replyAt: new Date(),
         },
       });
 
@@ -70,13 +71,12 @@ router.post(
         reply,
       });
     } catch (error) {
-      // Log any errors to the console
       console.error("Create reply error:", error);
-      // Send a 500 Internal Server Error response
       res.status(500).json({ error: "Failed to create reply" });
     }
   }
 );
+
 
 /**
  * Route to get all replies for a specific thread
