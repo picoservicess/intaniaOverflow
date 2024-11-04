@@ -103,8 +103,14 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
 
   const response: VoteStatus = {
     voteStatus: {
-      hasVoted: !!voteStatus.voteType,
-      voteType: voteStatus.voteType as "up" | "down",
+      // Check if `voteStatus` is 1 or -1 for `hasVoted`, otherwise false
+      hasVoted: voteStatus.voteStatus === 1 || voteStatus.voteStatus === -1,
+      // Map `voteType`: 1 -> "up", -1 -> "down", and undefined for other values
+      voteType: voteStatus.voteStatus === 1
+        ? "up"
+        : voteStatus.voteStatus === -1
+          ? "down"
+          : undefined,
     },
   };
 
@@ -113,11 +119,11 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
 
 // Health check
 export const healthCheck = controllerWrapper(async (req: any, res: any) => {
-    try {
-        const result = await grpcRequest("HealthCheck", {});
-        res.status(200).send(result);
-    } catch (error) {
-        console.error("Error checking health:", error);
-        res.status(500).send("Internal Server Error");
-    }
+  try {
+    const result = await grpcRequest("HealthCheck", {});
+    res.status(200).send(result);
+  } catch (error) {
+    console.error("Error checking health:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
