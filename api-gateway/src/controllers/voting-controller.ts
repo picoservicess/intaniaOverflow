@@ -103,9 +103,7 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
 
   const response: VoteStatus = {
     voteStatus: {
-      // Check if `voteStatus` is 1 or -1 for `hasVoted`, otherwise false
       hasVoted: voteStatus.voteStatus === 1 || voteStatus.voteStatus === -1,
-      // Map `voteType`: 1 -> "up", -1 -> "down", and undefined for other values
       voteType: voteStatus.voteStatus === 1
         ? "up"
         : voteStatus.voteStatus === -1
