@@ -1,9 +1,15 @@
 import { controllerWrapper, validateAuth } from "../middleware/auth";
-import { VoteCount, VoteRequest, VoteStatus } from "../models/vote-model";
+import { VoteCount, VoteRequest } from "../models/vote-model";
 import votingClient from "../routes/voting-route/client";
 import { getGrpcRequest } from "../utils/grpc";
 
 const grpcRequest = getGrpcRequest(votingClient);
+
+enum VoteStatus {
+  UPVOTE = 1,
+  DOWNVOTE = -1,
+  NO_VOTE = 0
+}
 
 // Get current vote counts
 export const getVotes = controllerWrapper(async (req: any, res: any) => {
@@ -92,7 +98,7 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     return;
   }
 
-  const voteStatus = await grpcRequest(
+  const { voteStatus } = await grpcRequest(
     "IsUserVote",
     {
       isThread,
@@ -101,15 +107,12 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     { token }
   );
 
-  const response: VoteStatus = {
-    voteStatus: {
-      hasVoted: voteStatus.voteStatus === 1 || voteStatus.voteStatus === -1,
-      voteType: voteStatus.voteStatus === 1
-        ? "up"
-        : voteStatus.voteStatus === -1
-          ? "down"
-          : undefined,
-    },
+  const response = {
+    voteStatus: voteStatus === VoteStatus.UPVOTE
+      ? "UPVOTE"
+      : voteStatus === VoteStatus.DOWNVOTE
+        ? "DOWNVOTE"
+        : "NO_VOTE",
   };
 
   res.status(200).json(response);
