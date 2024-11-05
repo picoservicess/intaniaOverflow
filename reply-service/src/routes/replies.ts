@@ -64,7 +64,7 @@ router.post(
           replyAt: new Date(),
         },
       });
-      
+
       try {
         await rabbitMQManager.publishMessage(newReply);
       } catch (mqError) {
