@@ -6,8 +6,9 @@ import { z } from "zod";
 
 import { getAuthenticatedUserId } from "../../user-service/src/libs/token";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { Empty, SearchQuery, ThreadId, ThreadList } from "./models";
+import { Empty, GetAllThreadsParams, SearchQuery, ThreadId, ThreadList } from "./models";
 import { rabbitMQManager } from "./rabbitMQManager";
+import { RequestPage, RequestPageSize } from "./enums/request-enum";
 
 const PROTO_PATH = "../proto/thread.proto";
 
@@ -32,13 +33,23 @@ const address = `${HOST}:${PORT}`;
 
 server.addService(threadProto.ThreadService.service, {
   getAllThreads: async (
-    call: ServerUnaryCall<Empty, ThreadList>,
+    call: ServerUnaryCall<GetAllThreadsParams, ThreadList>,
     callback: sendUnaryData<ThreadList>
   ) => {
     try {
+      const page = call.request?.page || RequestPage.DEFAULT;
+
+      let pageSize = call.request?.pageSize || RequestPageSize.DEFAULT;
+      pageSize = Math.min(pageSize, RequestPageSize.MAX);
+
       const rawThreads = await prisma.thread.findMany({
         where: {
           isDeleted: false,
+        },
+        skip: page * pageSize,
+        take: pageSize,
+        orderBy: {
+          updatedAt: "desc",
         },
       });
       const threads = rawThreads.map((thread) => applyAnonymity(thread));
@@ -254,6 +265,11 @@ server.addService(threadProto.ThreadService.service, {
     callback: sendUnaryData<ThreadList>
   ) => {
     try {
+      const page = call.request?.page || RequestPage.DEFAULT;
+
+      let pageSize = call.request?.pageSize || RequestPageSize.DEFAULT;
+      pageSize = Math.min(pageSize, RequestPageSize.MAX);
+
       const rawThreads = await prisma.thread.findMany({
         where: {
           OR: [
@@ -272,6 +288,8 @@ server.addService(threadProto.ThreadService.service, {
           ],
           isDeleted: false, // Only show non-deleted threads in search
         },
+        skip: page * pageSize,
+        take: pageSize,
       });
       const threads = rawThreads.map((thread) => applyAnonymity(thread));
       callback(null, { threads });

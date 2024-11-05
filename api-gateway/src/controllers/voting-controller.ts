@@ -1,5 +1,5 @@
 import { controllerWrapper, validateAuth } from "../middleware/auth";
-import { VoteCount, VoteRequest, VoteStatus } from "../models/vote-model";
+import { VoteCount, VoteRequest } from "../models/vote-model";
 import votingClient from "../routes/voting-route/client";
 import { getGrpcRequest } from "../utils/grpc";
 
@@ -7,7 +7,7 @@ const grpcRequest = getGrpcRequest(votingClient);
 
 // Get current vote counts
 export const getVotes = controllerWrapper(async (req: any, res: any) => {
-  const { isThread, targetId }: VoteRequest = req.body;
+  const { isThread, targetId } = req.query;
 
   if (!targetId) {
     res.status(400).json({ error: "targetId is required" });
@@ -85,14 +85,14 @@ export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
 // Check user vote status
 export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
   const token = validateAuth(req);
-  const { isThread, targetId }: VoteRequest = req.body;
+  const { isThread, targetId } = req.query;
 
   if (!targetId) {
     res.status(400).json({ error: "targetId is required" });
     return;
   }
 
-  const voteStatus = await grpcRequest(
+  const response = await grpcRequest(
     "IsUserVote",
     {
       isThread,
@@ -101,23 +101,16 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     { token }
   );
 
-  const response: VoteStatus = {
-    voteStatus: {
-      hasVoted: !!voteStatus.voteType,
-      voteType: voteStatus.voteType as "up" | "down",
-    },
-  };
-
   res.status(200).json(response);
 });
 
 // Health check
 export const healthCheck = controllerWrapper(async (req: any, res: any) => {
-    try {
-        const result = await grpcRequest("HealthCheck", {});
-        res.status(200).send(result);
-    } catch (error) {
-        console.error("Error checking health:", error);
-        res.status(500).send("Internal Server Error");
-    }
+  try {
+    const result = await grpcRequest("HealthCheck", {});
+    res.status(200).send(result);
+  } catch (error) {
+    console.error("Error checking health:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
