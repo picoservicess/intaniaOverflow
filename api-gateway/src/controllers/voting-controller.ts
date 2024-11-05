@@ -5,12 +5,6 @@ import { getGrpcRequest } from "../utils/grpc";
 
 const grpcRequest = getGrpcRequest(votingClient);
 
-enum VoteStatus {
-  UPVOTE = 1,
-  DOWNVOTE = -1,
-  NO_VOTE = 0
-}
-
 // Get current vote counts
 export const getVotes = controllerWrapper(async (req: any, res: any) => {
   const { isThread, targetId } = req.query;
@@ -98,7 +92,7 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     return;
   }
 
-  const { voteStatus } = await grpcRequest(
+  const response = await grpcRequest(
     "IsUserVote",
     {
       isThread,
@@ -106,14 +100,6 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
     },
     { token }
   );
-
-  const response = {
-    voteStatus: voteStatus === VoteStatus.UPVOTE
-      ? VoteStatus.UPVOTE
-      : voteStatus === VoteStatus.DOWNVOTE
-        ? VoteStatus.DOWNVOTE
-        : VoteStatus.NO_VOTE,
-  };
 
   res.status(200).json(response);
 });
