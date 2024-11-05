@@ -109,10 +109,10 @@ export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
 
   const response = {
     voteStatus: voteStatus === VoteStatus.UPVOTE
-      ? "UPVOTE"
+      ? VoteStatus.UPVOTE
       : voteStatus === VoteStatus.DOWNVOTE
-        ? "DOWNVOTE"
-        : "NO_VOTE",
+        ? VoteStatus.DOWNVOTE
+        : VoteStatus.NO_VOTE,
   };
 
   res.status(200).json(response);
