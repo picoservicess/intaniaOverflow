@@ -91,7 +91,7 @@ export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
 // Check user vote status
 export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
   const token = validateAuth(req);
-  const { isThread, targetId }: VoteRequest = req.body;
+  const { isThread, targetId } = req.query;
 
   if (!targetId) {
     res.status(400).json({ error: "targetId is required" });

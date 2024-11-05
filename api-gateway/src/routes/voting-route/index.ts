@@ -28,6 +28,6 @@ votingRouter.post("/upvote", authMiddleware, applyUpvote);
 votingRouter.post("/downvote", authMiddleware, applyDownvote);
 
 // Check user vote status
-votingRouter.post("/checkvote", authMiddleware, checkVoteStatus);
+votingRouter.get("/checkvote", authMiddleware, checkVoteStatus);
 
 export default votingRouter;
