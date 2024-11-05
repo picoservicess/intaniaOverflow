@@ -13,7 +13,7 @@ enum VoteStatus {
 
 // Get current vote counts
 export const getVotes = controllerWrapper(async (req: any, res: any) => {
-  const { isThread, targetId }: VoteRequest = req.body;
+  const { isThread, targetId } = req.query;
 
   if (!targetId) {
     res.status(400).json({ error: "targetId is required" });
