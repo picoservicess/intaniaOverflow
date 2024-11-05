@@ -9,9 +9,3 @@ export interface VoteCount {
   netVotes: number;
 }
 
-export interface VoteStatus {
-  voteStatus: {
-    hasVoted: boolean;
-    voteType?: "up" | "down";
-  };
-}

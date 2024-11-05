@@ -7,15 +7,13 @@ class RabbitMQManager {
   private readonly url: string;
   private readonly queue: string;
   private readonly exchange: string;
-  private readonly deadLetterExchange: string;
   private connecting: boolean = false;
   private connectionRetries: number = 0;
   private readonly maxRetries: number = 5;
 
   private constructor() {
-    this.url = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
-    this.queue = process.env.RABBITMQ_QUEUE || 'notification_queue';
-    this.deadLetterExchange = process.env.RABBITMQ_DLX || 'notification_dlx';
+    this.url = process.env.RABBITMQ_URL || "amqp://rabbitmq:5673";
+    this.queue = process.env.RABBITMQ_QUEUE || "notification_queue";
     this.exchange = process.env.RABBITMQ_EXCHANGE || "notification_exchange"; 
   }
 
@@ -141,11 +139,11 @@ class RabbitMQManager {
 
       this.channel.publish(
         this.exchange,
-        'thread',
+        'reply',
         Buffer.from(JSON.stringify(message)),
         { persistent: true }
       );
-
+      
       console.log("✅ Successfully published message:", message);
     } catch (error) {
       console.error("🚫 Error publishing message:", error);
