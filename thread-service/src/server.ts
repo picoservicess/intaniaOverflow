@@ -6,9 +6,15 @@ import { z } from "zod";
 
 import { getAuthenticatedUserId } from "../../user-service/src/libs/token";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { Empty, GetAllThreadsParams, SearchQuery, ThreadId, ThreadList } from "./models";
-import { rabbitMQManager } from "./rabbitMQManager";
 import { RequestPage, RequestPageSize } from "./enums/request-enum";
+import {
+  Empty,
+  GetAllThreadsParams,
+  SearchQuery,
+  ThreadId,
+  ThreadList,
+} from "./models";
+import { rabbitMQManager } from "./rabbitMQManager";
 
 const PROTO_PATH = "../proto/thread.proto";
 

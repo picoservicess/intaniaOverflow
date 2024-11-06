@@ -8,4 +8,3 @@ export interface VoteCount {
   downVotes: number;
   netVotes: number;
 }
-
