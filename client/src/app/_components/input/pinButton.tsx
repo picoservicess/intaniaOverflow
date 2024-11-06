@@ -3,9 +3,9 @@
 import { Bookmark } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import applyPin from "@/lib/api/applyPin";
+import applyPin from "@/lib/api/user/applyPin";
 import { useSession } from "next-auth/react";
-import viewPinned from "@/lib/api/viewPinned";
+import viewPinned from "@/lib/api/user/viewPinned";
 
 export default function PinButton({
   className = "",

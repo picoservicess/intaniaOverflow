@@ -3,10 +3,10 @@ import ProfileThreads from "@/app/_components/profile/profileThread";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import getUserProfile from "@/lib/api/getUserProfile";
-import viewPinned from "@/lib/api/viewPinned";
+import getUserProfile from "@/lib/api/user/getUserProfile";
+import viewPinned from "@/lib/api/user/viewPinned";
 import { getServerSession } from "next-auth";
-import getThread from "@/lib/api/getThread";
+import getThread from "@/lib/api/thread/getThread";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);

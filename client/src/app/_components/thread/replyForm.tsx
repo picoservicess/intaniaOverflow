@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "next-auth/react";
-import createReply from "@/lib/api/createReply";
-import uploadFiles from "@/lib/api/uploadFiles";
+import createReply from "@/lib/api/reply/createReply";
+import uploadFiles from "@/lib/api/asset/uploadFiles";
 
 interface ReplyFormProps {
   onClose: () => void;

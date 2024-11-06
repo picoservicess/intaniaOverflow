@@ -1,17 +1,17 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import getThread from "@/lib/api/getThread";
+import getThread from "@/lib/api/thread/getThread";
 import { timeAgo } from "@/lib/utils";
 import ImageGallery from "@/app/_components/thread/imageGallery";
 import PinButton from "@/app/_components/input/pinButton";
 import CreateReplyButton from "@/app/_components/thread/createReplyButton";
 import FileList from "@/app/_components/thread/fileList";
 import VoteSection from "@/app/_components/thread/voteSection";
-import getUserDetail from "@/lib/api/getUserDetail";
+import getUserDetail from "@/lib/api/user/getUserDetail";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
-import getRepliesByThread from "@/lib/api/getRepliesByThread";
+import getRepliesByThread from "@/lib/api/reply/getRepliesByThread";
 import Reply from "@/app/_components/thread/reply";
 
 export default async function ThreadPage({ params }: { params: { slug: string } }) {

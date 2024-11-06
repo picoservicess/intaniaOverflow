@@ -7,7 +7,7 @@ import { timeAgo } from "@/lib/utils";
 import VoteSection from "./voteSection";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
-import getUserDetail from "@/lib/api/getUserDetail";
+import getUserDetail from "@/lib/api/user/getUserDetail";
 import ImageGallery from "./imageGallery";
 import FileList from "./fileList";
 

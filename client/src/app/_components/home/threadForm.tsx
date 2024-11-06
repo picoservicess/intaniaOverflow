@@ -6,9 +6,9 @@ import { DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import createThread from "@/lib/api/createThread";
+import createThread from "@/lib/api/thread/createThread";
 import { useSession } from "next-auth/react";
-import uploadFiles from "@/lib/api/uploadFiles";
+import uploadFiles from "@/lib/api/asset/uploadFiles";
 
 interface ThreadFormProps {
   onClose: () => void;

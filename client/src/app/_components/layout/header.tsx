@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import Icon from "@/app/assets/icon.svg";
-import getUserProfile from "@/lib/api/getUserProfile";
+import getUserProfile from "@/lib/api/user/getUserProfile";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 

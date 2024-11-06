@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowBigDown, ArrowBigUp, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import PinButton from "../input/pinButton";
-import getUserDetail from "@/lib/api/getUserDetail";
+import getUserDetail from "@/lib/api/user/getUserDetail";
 import { timeAgo } from "@/lib/utils";
 import { useSession } from "next-auth/react";
-
+import VoteButton from "../input/voteButton";
+import getRepliesByThread from "@/lib/api/reply/getRepliesByThread";
 interface PostProps {
   post: Thread;
 }
@@ -23,22 +24,31 @@ export default function Post({ post }: PostProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [userDetail, setUserDetail] = useState<User>(ANONYMOUS_USER);
+  const [replyCount, setReplyCount] = useState<number>(0);
   
   useEffect(() => {
-    const fetchUserDetail = async () => {
-      if (post.authorId && session?.user.accessToken) {
-        const accessToken = session.user.accessToken as string;
-        const detail = await getUserDetail(accessToken, post.authorId);
+    const fetchData = async () => {
+      if (post.isAnonymous || !session?.user.accessToken) {
+        setUserDetail(ANONYMOUS_USER);
+        return;
+      }
+  
+      const accessToken = session.user.accessToken as string;
+      try {
+        const [detail, replies] = await Promise.all([
+          getUserDetail(accessToken, post.authorId),
+          getRepliesByThread(accessToken, post.threadId),
+        ]);
+  
         setUserDetail(detail);
+        setReplyCount(replies.length);
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
     };
-
-    // If user not authenticated or post is anonymous, set user detail to anonymous
-    if (post.isAnonymous || !session?.user.accessToken) {
-      setUserDetail(ANONYMOUS_USER);
-    } 
-    fetchUserDetail();
-  }, [post, session]);
+  
+    fetchData();
+  }, []);  
 
   return (
     <div
@@ -65,17 +75,13 @@ export default function Post({ post }: PostProps) {
             {post.title}
           </p>
           <div className="flex items-center flex-wrap gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-600">
-            <Button variant="ghost" size="sm" className="h-auto p-1">
-              <ArrowBigUp className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-              <span className="ml-1">{0}</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="h-auto p-1">
-              <ArrowBigDown className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-              <span className="ml-1">{0}</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="h-auto p-1">
+            <VoteButton 
+              isThread={true} 
+              targetId={post.threadId}
+            />
+            <Button variant="ghost" size="sm" className="h-auto p-1 gap-1">
               <MessageSquare className="w-4 h-4 sm:w-4 sm:h-4" />
-              <span className="ml-1">{0}</span>
+              <span className="ml-1 text-xs sm:text-sm">{replyCount}</span> {/* Displaying the reply count */}
             </Button>
             <div className="ml-auto sm:ml-0">
               <PinButton threadId={post.threadId} size={16} />

@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 
-import updateUserProfile from "@/lib/api/updateUserProfile";
-import uploadFiles from "@/lib/api/uploadFiles"; // Updated import
+import updateUserProfile from "@/lib/api/user/updateUserProfile";
+import uploadFiles from "@/lib/api/asset/uploadFiles"; // Updated import
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";

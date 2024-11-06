@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import getAllThreads from "@/lib/api/getAllThreads";
+import getAllThreads from "@/lib/api/thread/getAllThreads";
 
 import CreateThreadButton from "@/app/_components/home/createThreadButton";
 import PostList from "@/app/_components/home/postList";

@@ -50,7 +50,6 @@ interface Reply {
     isDeleted: boolean;
 }
 
-
 interface User {
     displayname: string;
     profileImage: string;
@@ -58,4 +57,30 @@ interface User {
 
 interface ViewPinned {
     threadIds: string[];
+}
+
+interface VoteCounts {
+    upVotes: number;
+    downVotes: number;
+    netVotes: number;
+}
+
+interface VoteStatus {
+    voteStatus: number;
+}
+
+interface ApplyUpVote {
+    message: string;
+    result: {
+        success: boolean;
+        message: string;
+    };
+}
+
+interface ApplyDownVote {
+    message: string;
+    result: {
+        success: boolean;
+        message: string;
+    };
 }
