@@ -23,6 +23,9 @@ threadRouter.get("/health", healthCheck);
 // Get all threads
 threadRouter.get("/", getAllThreads);
 
+// Search threads
+threadRouter.get("/search", searchThreads);
+
 // Get thread by ID
 threadRouter.get("/:threadId", getThreadById);
 
@@ -34,8 +37,5 @@ threadRouter.put("/:threadId", authMiddleware, updateThread);
 
 // Delete thread
 threadRouter.delete("/:threadId", authMiddleware, deleteThread);
-
-// Search threads
-threadRouter.get("/search", searchThreads);
 
 export default threadRouter;
