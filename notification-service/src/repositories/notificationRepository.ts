@@ -52,7 +52,6 @@ export const markNotificationsAsSeenByUserIdRepo = async (
       { userId, createdAt: { $lt: timestamp }, isSeen: false },
       { isSeen: true }
     );
-
   } catch (error) {
     console.error("Repository Error:", error);
     throw new Error("Error updating notifications");
