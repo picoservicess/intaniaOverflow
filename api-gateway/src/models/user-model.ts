@@ -1,66 +1,65 @@
 export interface UpdateUserProfileRequest {
-    displayName: string,
-    profileImage: string
+    displayName: string;
+    profileImage: string;
 }
 
-export interface GetUserProfileRequest { }
+export interface GetUserProfileRequest {}
 
 export interface UserProfileResponse {
-    userId: string,
-    displayName: string,
-    firstName: string,
-    lastName: string,
-    firstNameth: string,
-    lastNameth: string,
-    profileImage: string,
-    email: string,
+    userId: string;
+    displayName: string;
+    firstName: string;
+    lastName: string;
+    firstNameth: string;
+    lastNameth: string;
+    profileImage: string;
+    email: string;
 }
 
 export interface LoginRequest {
-    ticket: string
+    ticket: string;
 }
 
 export interface LoginResponse {
-    message: string,
-    token: string,
-    userId: string
+    message: string;
+    token: string;
+    userId: string;
 }
 
 export interface ApplyPinRequest {
-    threadId: string
+    threadId: string;
 }
 
 export interface ApplyPinResponse {
-    message: string
+    message: string;
 }
 
-export interface ViewPinnedRequest { }
-
+export interface ViewPinnedRequest {}
 
 export interface ViewPinnedResponse {
-    threadIds: string[]
+    threadIds: string[];
 }
 
 export interface GetUserDetailRequest {
-    userId: string
+    userId: string;
 }
 
 export interface GetUserDetailResponse {
-    displayName: string,
-    profileImage: string,
+    displayName: string;
+    profileImage: string;
 }
 
 export interface GetUsersWhoPinnedThreadRequest {
-    threadId: string
+    threadId: string;
 }
 
 export interface GetUsersWhoPinnedThreadResponse {
-    userIds: string[]
+    userIds: string[];
 }
 
-export interface HealthCheckRequest { }
+export interface HealthCheckRequest {}
 
 export interface HealthCheckResponse {
-    success: boolean,
-    message: string
+    success: boolean;
+    message: string;
 }

@@ -1,13 +1,22 @@
 import { Router } from "express";
 
-import { updateUserProfile, getUserProfile, login, applyPin, viewPinned, getUserDetail, getUsersWhoPinnedThread, healthCheck } from "../../controllers/user-controller";
+import {
+    applyPin,
+    getUserDetail,
+    getUserProfile,
+    getUsersWhoPinnedThread,
+    healthCheck,
+    login,
+    updateUserProfile,
+    viewPinned,
+} from "../../controllers/user-controller";
 import { authMiddleware } from "../../middleware/auth";
 import { createLogMiddleware } from "../../middleware/log";
 
 const userRouter = Router();
 
 // Register a middleware to log all requests
-userRouter.use(createLogMiddleware('user-service'));
+userRouter.use(createLogMiddleware("user-service"));
 
 // Health check
 userRouter.get("/health", healthCheck);

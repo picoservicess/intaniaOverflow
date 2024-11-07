@@ -1,5 +1,6 @@
 import axios from "axios";
 import express, { Request, Response } from "express";
+
 import { createLogMiddleware } from "../middleware/log";
 
 const notificationRouter = express.Router();
@@ -9,15 +10,16 @@ const NOTIFICATION_SERVICE_URL =
     "http://notification-service:5002";
 console.log("📢 NOTIFICATION_SERVICE_URL", NOTIFICATION_SERVICE_URL);
 
-notificationRouter.use(createLogMiddleware('notification-service'));
+notificationRouter.use(createLogMiddleware("notification-service"));
 
-notificationRouter.get('/health', async (req: Request, res: Response) => {
+notificationRouter.get("/health", async (req: Request, res: Response) => {
     try {
         // Forward the request to the notification service health check
-        const response = await axios.get(`${NOTIFICATION_SERVICE_URL}/notifications/health-check`,
+        const response = await axios.get(
+            `${NOTIFICATION_SERVICE_URL}/notifications/health-check`,
             {
                 headers: {
-                    'Authorization': req.headers.authorization,
+                    Authorization: req.headers.authorization,
                 },
             }
         );
@@ -28,15 +30,16 @@ notificationRouter.get('/health', async (req: Request, res: Response) => {
             message: "Error checking notification service health",
         });
     }
-})
+});
 
 notificationRouter.get("/", async (req: Request, res: Response) => {
     try {
         // Forward the request to the getAllNotificationsByUserId
-        const response = await axios.get(`${NOTIFICATION_SERVICE_URL}/notifications`,
+        const response = await axios.get(
+            `${NOTIFICATION_SERVICE_URL}/notifications`,
             {
                 headers: {
-                    'Authorization': req.headers.authorization,
+                    Authorization: req.headers.authorization,
                 },
             }
         );
@@ -47,15 +50,16 @@ notificationRouter.get("/", async (req: Request, res: Response) => {
             message: "Error to getAllNotificationsByUserId from api-gateway",
         });
     }
-})
+});
 
 notificationRouter.get("/unread", async (req: Request, res: Response) => {
     try {
         // Forward the request to the getAllNotificationsByUserId
-        const response = await axios.get(`${NOTIFICATION_SERVICE_URL}/notifications/unread`,
+        const response = await axios.get(
+            `${NOTIFICATION_SERVICE_URL}/notifications/unread`,
             {
                 headers: {
-                    'Authorization': req.headers.authorization,
+                    Authorization: req.headers.authorization,
                 },
             }
         );
@@ -66,16 +70,17 @@ notificationRouter.get("/unread", async (req: Request, res: Response) => {
             message: "Error to getAllNotificationsByUserId from api-gateway",
         });
     }
-})
+});
 
 notificationRouter.patch("/", async (req: Request, res: Response) => {
     try {
         // Forward the request to the markNotificationsAsSeenByUserId
-        const response = await axios.patch(`${NOTIFICATION_SERVICE_URL}/notifications`,
+        const response = await axios.patch(
+            `${NOTIFICATION_SERVICE_URL}/notifications`,
             req.body,
             {
                 headers: {
-                    'Authorization': req.headers.authorization,
+                    Authorization: req.headers.authorization,
                 },
             }
         );
@@ -83,9 +88,10 @@ notificationRouter.patch("/", async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error("Error in /notifications:", error.message);
         res.status(error.response?.status || 500).json({
-            message: "Error to markNotificationsAsSeenByUserId from api-gateway",
+            message:
+                "Error to markNotificationsAsSeenByUserId from api-gateway",
         });
     }
-})
+});
 
-export default notificationRouter
+export default notificationRouter;

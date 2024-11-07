@@ -13,7 +13,7 @@ import { createLogMiddleware } from "../../middleware/log";
 const votingRouter = Router();
 
 // Register a middleware to log all requests
-votingRouter.use(createLogMiddleware('voting-service'));
+votingRouter.use(createLogMiddleware("voting-service"));
 
 // Check user vote status
 votingRouter.get("/health", healthCheck);
