@@ -1,13 +1,13 @@
 import amqp, { Channel, Connection } from "amqplib/callback_api";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import { resolve } from "path";
 
 import { INotification } from "./models/notification";
+import threadClient from "./repositories/threadRepository";
+import userClient from "./repositories/userRepository";
 import { createNotificationService } from "./services/notificationService";
-import { resolve } from "path";
 import { getGrpcRequest } from "./utils/grpc";
-import userClient from './repositories/userRepository';
-import threadClient from './repositories/threadRepository'
 
 const grpcUserRequest = getGrpcRequest(userClient);
 const grpcThreadRequest = getGrpcRequest(threadClient);
@@ -66,27 +66,35 @@ async function connectToDatabase(): Promise<void> {
   }
 }
 
-async function getPinnedThreadUsers(threadId: string): Promise <string[]> {
+async function getPinnedThreadUsers(threadId: string): Promise<string[]> {
   try {
-    const usersWhoPinnedThread = await grpcUserRequest("getUsersWhoPinnedThread", { threadId });
-    return usersWhoPinnedThread.userIds
+    const usersWhoPinnedThread = await grpcUserRequest(
+      "getUsersWhoPinnedThread",
+      { threadId }
+    );
+    return usersWhoPinnedThread.userIds;
   } catch (error) {
     console.error("⛔️ Error getting users who pinned thread:", error);
     throw error;
   }
 }
 
-async function getAuthorThreadUsers(threadId: string): Promise <string> {
+async function getAuthorThreadUsers(threadId: string): Promise<string> {
   try {
-    const usersWhoAuthorThread = await grpcUserRequest("getThreadById", { threadId });
-    return usersWhoAuthorThread.authorId
+    const usersWhoAuthorThread = await grpcUserRequest("getThreadById", {
+      threadId,
+    });
+    return usersWhoAuthorThread.authorId;
   } catch (error) {
     console.error("⛔️ Error getting users who pinned thread:", error);
     throw error;
   }
 }
 
-async function parseThread(message: ThreadMessage, userId: string): Promise<INotification> {
+async function parseThread(
+  message: ThreadMessage,
+  userId: string
+): Promise<INotification> {
   const notificationData: INotification = {
     senderId: message.authorId,
     receiverId: userId,
@@ -100,7 +108,10 @@ async function parseThread(message: ThreadMessage, userId: string): Promise<INot
   return notificationData;
 }
 
-async function parseReply(message: ReplyMessage, userId: string): Promise<INotification> {
+async function parseReply(
+  message: ReplyMessage,
+  userId: string
+): Promise<INotification> {
   const notificationData: INotification = {
     senderId: message.userId,
     receiverId: userId,
@@ -114,7 +125,7 @@ async function parseReply(message: ReplyMessage, userId: string): Promise<INotif
   return notificationData;
 }
 
-async function createNotification (notiMessage: INotification): Promise<void> {
+async function createNotification(notiMessage: INotification): Promise<void> {
   try {
     const newNotification = await createNotificationService(notiMessage);
     console.log("🔔 Notification created:", newNotification._id);
@@ -184,11 +195,13 @@ async function setupQueues(channel: Channel): Promise<void> {
 
     await new Promise<void>((resolve, reject) => {
       channel.assertExchange(
-        QUEUE_CONFIG.exchangeName,'direct', { 
-          durable: true 
+        QUEUE_CONFIG.exchangeName,
+        "direct",
+        {
+          durable: true,
         },
         (error) => {
-          console.log("assert exchange error", error)
+          console.log("assert exchange error", error);
 
           if (error) reject(error);
           else resolve();
@@ -203,10 +216,10 @@ async function setupQueues(channel: Channel): Promise<void> {
         {
           durable: true,
           deadLetterExchange: QUEUE_CONFIG.deadLetterExchange,
-          deadLetterRoutingKey: ""
+          deadLetterRoutingKey: "",
         },
         (error) => {
-          console.log("assert queue error", error)
+          console.log("assert queue error", error);
 
           if (error) reject(error);
           else resolve();
@@ -218,7 +231,7 @@ async function setupQueues(channel: Channel): Promise<void> {
       channel.bindQueue(
         QUEUE_CONFIG.name,
         QUEUE_CONFIG.exchangeName,
-        'reply', // routing key
+        "reply", // routing key
         {},
         (error) => {
           if (error) reject(error);
@@ -230,8 +243,8 @@ async function setupQueues(channel: Channel): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       channel.bindQueue(
         QUEUE_CONFIG.name,
-        QUEUE_CONFIG.exchangeName,    
-        'thread', // routing key
+        QUEUE_CONFIG.exchangeName,
+        "thread", // routing key
         {},
         (error) => {
           if (error) reject(error);
@@ -247,8 +260,6 @@ async function setupQueues(channel: Channel): Promise<void> {
   }
 }
 
-
-
 function setupChannel(channel: Channel): void {
   channel.prefetch(1);
   console.log("⏱️ Waiting for messages in queue:", QUEUE_CONFIG.name);
@@ -258,33 +269,33 @@ function setupChannel(channel: Channel): void {
     async (msg) => {
       if (!msg) return;
 
-      try{
+      try {
         const message = JSON.parse(msg.content.toString());
-        const threadId=message.threadId as string
-        const userIds = await getPinnedThreadUsers(threadId)
-        console.log(msg.fields.routingKey)
-        if (msg.fields.routingKey == 'reply') {
+        const threadId = message.threadId as string;
+        const userIds = await getPinnedThreadUsers(threadId);
+        console.log(msg.fields.routingKey);
+        if (msg.fields.routingKey == "reply") {
           console.log("✉️ Received message for reply:", message.replyId);
           try {
             const sendingPromise = userIds.map(async (userId) => {
-              const notiMessage = await parseReply(message, userId)
+              const notiMessage = await parseReply(message, userId);
               await createNotification(notiMessage);
             });
             await Promise.all(sendingPromise);
           } catch (error) {
-            console.log("Fail to create notification from reply: ", error)
+            console.log("Fail to create notification from reply: ", error);
           }
         }
-        if (msg.fields.routingKey == 'thread') {
+        if (msg.fields.routingKey == "thread") {
           console.log("✉️ Received message for thread:", message.threadId);
           try {
             const sendingPromise = userIds.map(async (userId) => {
-              const notiMessage = await parseThread(message, userId)
+              const notiMessage = await parseThread(message, userId);
               await createNotification(notiMessage);
             });
             await Promise.all(sendingPromise);
           } catch (error) {
-            console.log("Fail to create notification from thread: ", error)
+            console.log("Fail to create notification from thread: ", error);
           }
         }
         channel.ack(msg);
@@ -307,12 +318,12 @@ function createChannel(connection: Connection): Promise<Channel> {
         return;
       }
 
-      channel.on('error', (err) => {
-        console.error('⛔️ Channel error:', err.message);
+      channel.on("error", (err) => {
+        console.error("⛔️ Channel error:", err.message);
       });
 
-      channel.on('close', () => {
-        console.log('📡 Channel closed');
+      channel.on("close", () => {
+        console.log("📡 Channel closed");
       });
 
       resolve(channel);
@@ -345,8 +356,8 @@ function connectWithRetry(retryCount = 0): Promise<Connection> {
         return;
       }
 
-      connection.on('error', (err) => {
-        console.error('⛔️ RabbitMQ connection error:', err.message);
+      connection.on("error", (err) => {
+        console.error("⛔️ RabbitMQ connection error:", err.message);
       });
 
       connection.on("close", () => {
@@ -384,10 +395,9 @@ export async function main(): Promise<void> {
   try {
     await connectToDatabase();
     await connectToRabbitMQ();
-    console.log('🚀 Rabbitmq fully initialized and ready');
-
+    console.log("🚀 Rabbitmq fully initialized and ready");
   } catch (error) {
-    console.error('🚩 Rabbitmq startup error:', error);
+    console.error("🚩 Rabbitmq startup error:", error);
     process.exit(1);
   }
 }
