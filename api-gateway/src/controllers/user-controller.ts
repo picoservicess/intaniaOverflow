@@ -1,23 +1,7 @@
 import { Request, Response } from "express";
 
 import { controllerWrapper, validateAuth } from "../middleware/auth";
-import {
-    ApplyPinRequest,
-    ApplyPinResponse,
-    GetUserDetailRequest,
-    GetUserDetailResponse,
-    GetUserProfileRequest,
-    GetUsersWhoPinnedThreadRequest,
-    GetUsersWhoPinnedThreadResponse,
-    HealthCheckRequest,
-    HealthCheckResponse,
-    LoginRequest,
-    LoginResponse,
-    UpdateUserProfileRequest,
-    UserProfileResponse,
-    ViewPinnedRequest,
-    ViewPinnedResponse,
-} from "../models/user-model";
+import { UpdateUserProfileRequest, GetUserProfileRequest, UserProfileResponse, LoginRequest, LoginResponse, ApplyPinRequest, ApplyPinResponse, ViewPinnedRequest, ViewPinnedResponse, GetUserDetailRequest, GetUserDetailResponse, GetUsersWhoPinnedThreadRequest, GetUsersWhoPinnedThreadResponse, HealthCheckRequest, HealthCheckResponse } from "../models/user-model";
 import userClient from "../routes/user-route/client";
 import { getGrpcRequest } from "../utils/grpc";
 
@@ -29,11 +13,7 @@ export const updateUserProfile = controllerWrapper(
         const token = validateAuth(req);
         try {
             const userProfileUpdate = req.body;
-            const updatedProfile = await grpcRequest(
-                "UpdateUserProfile",
-                userProfileUpdate,
-                { token }
-            );
+            const updatedProfile = await grpcRequest("UpdateUserProfile", userProfileUpdate, { token });
             res.status(200).json(updatedProfile);
         } catch (error) {
             res.status(500).json({ error: "Failed to update user profile" });
@@ -46,11 +26,7 @@ export const getUserProfile = controllerWrapper(
     async (req: Request, res: Response) => {
         const token = validateAuth(req);
         try {
-            const userProfile = await grpcRequest(
-                "GetUserProfile",
-                {},
-                { token }
-            );
+            const userProfile = await grpcRequest("GetUserProfile", {}, { token });
 
             if (!userProfile) {
                 res.status(404).json({ error: "User profile not found" });
@@ -65,15 +41,17 @@ export const getUserProfile = controllerWrapper(
 );
 
 // User login
-export const login = controllerWrapper(async (req: Request, res: Response) => {
-    try {
-        const loginData = req.body;
-        const loginResponse = await grpcRequest("Login", loginData);
-        res.status(200).json(loginResponse);
-    } catch (error) {
-        res.status(500).json({ error: "Login failed" });
+export const login = controllerWrapper(
+    async (req: Request, res: Response) => {
+        try {
+            const loginData = req.body;
+            const loginResponse = await grpcRequest("Login", loginData);
+            res.status(200).json(loginResponse);
+        } catch (error) {
+            res.status(500).json({ error: "Login failed" });
+        }
     }
-});
+);
 
 // Apply a pin
 export const applyPin = controllerWrapper(
@@ -81,9 +59,7 @@ export const applyPin = controllerWrapper(
         const token = validateAuth(req);
         try {
             const pinData = req.body;
-            const applyPinResponse = await grpcRequest("ApplyPin", pinData, {
-                token,
-            });
+            const applyPinResponse = await grpcRequest("ApplyPin", pinData, { token });
             res.status(200).json(applyPinResponse);
         } catch (error) {
             res.status(500).json({ error: "Failed to apply pin" });
@@ -111,9 +87,7 @@ export const getUserDetail = controllerWrapper(
         try {
             const userDetail = req.body;
 
-            const userDetails = await grpcRequest("GetUserDetail", userDetail, {
-                token,
-            });
+            const userDetails = await grpcRequest("GetUserDetail", userDetail, { token });
 
             if (!userDetails) {
                 res.status(404).json({ error: "User details not found" });
@@ -132,16 +106,10 @@ export const getUsersWhoPinnedThread = controllerWrapper(
     async (req: Request, res: Response) => {
         const token = validateAuth(req);
         try {
-            const pinnedUsers = await grpcRequest(
-                "GetUsersWhoPinnedThread",
-                {},
-                { token }
-            );
+            const pinnedUsers = await grpcRequest("GetUsersWhoPinnedThread", {}, { token });
             res.status(200).json({ userIds: pinnedUsers });
         } catch (error) {
-            res.status(500).json({
-                error: "Failed to retrieve users who pinned the thread",
-            });
+            res.status(500).json({ error: "Failed to retrieve users who pinned the thread" });
         }
     }
 );

@@ -1,22 +1,22 @@
 {
-    "devDependencies": {
-        "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-        "husky": "^9.1.6",
-        "lint-staged": "^15.2.10",
-        "prettier": "^3.3.3"
-    },
-    "scripts": {
-        "prepare": "husky",
-        "format": "prettier --write .",
-        "format:check": "prettier --check .",
-        "format:imports": "prettier --write . --plugin=@trivago/prettier-plugin-sort-imports",
-        "lint": "npm run lint --workspaces --if-present",
-        "lint:staged": "lint-staged"
-    },
-    "lint-staged": {
-        "*.{js,jsx,ts,tsx}": [
-            "biome check --apply",
-            "biome format --write"
-        ]
-    }
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:imports": "prettier --write . --plugin=@trivago/prettier-plugin-sort-imports",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:staged": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "biome check --apply",
+      "biome format --write"
+    ]
+  }
 }

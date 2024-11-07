@@ -12,283 +12,286 @@ console.log("Database connected");
 const PROTO_PATH = "../proto/user.proto";
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true,
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
 });
 
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any;
 const userService = protoDescriptor.UserService;
 
 const updateUserProfile: grpc.handleUnaryCall<any, any> = async (
-    call,
-    callback
+  call,
+  callback
 ) => {
-    const userId = await getAuthenticatedUserId(call.metadata);
-    if (!userId) {
-        return callback({
-            code: grpc.status.UNAUTHENTICATED,
-            message: "Authentication required",
-        });
-    }
+  const userId = await getAuthenticatedUserId(call.metadata);
+  if (!userId) {
+    return callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: "Authentication required",
+    });
+  }
 
-    const { displayname, profileImage } = call.request;
-    const updateData: any = {};
-    if (displayname !== undefined) updateData.displayname = displayname;
-    if (profileImage !== undefined) updateData.profileImage = profileImage;
+  const { displayname, profileImage } = call.request;
+  const updateData: any = {};
+  if (displayname !== undefined) updateData.displayname = displayname;
+  if (profileImage !== undefined) updateData.profileImage = profileImage;
 
-    try {
-        const user = await prisma.user.update({
-            where: { id: userId },
-            data: updateData,
-        });
-        callback(null, {
-            userId: user.id,
-            displayname: user.displayname,
-            profileImage: user.profileImage,
-            firstname: user.firstname,
-            lastname: user.lastname,
-            firstnameth: user.firstnameth,
-            lastnameth: user.lastnameth,
-            email: user.email,
-        });
-    } catch (error) {
-        callback({
-            code: grpc.status.INTERNAL,
-            message: "Failed to update profile",
-        });
-    }
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+    callback(null, {
+      userId: user.id,
+      displayname: user.displayname,
+      profileImage: user.profileImage,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      firstnameth: user.firstnameth,
+      lastnameth: user.lastnameth,
+      email: user.email,
+    });
+  } catch (error) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to update profile",
+    });
+  }
 };
 
 const getUserProfile: grpc.handleUnaryCall<any, any> = async (
-    call,
-    callback
+  call,
+  callback
 ) => {
-    const userId = await getAuthenticatedUserId(call.metadata);
-    if (!userId) {
-        return callback({
-            code: grpc.status.UNAUTHENTICATED,
-            message: "Authentication required",
-        });
-    }
-
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
+  const userId = await getAuthenticatedUserId(call.metadata);
+  if (!userId) {
+    return callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: "Authentication required",
     });
+  }
 
-    if (!user) {
-        return callback({
-            code: grpc.status.NOT_FOUND,
-            message: "User not found",
-        });
-    }
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
 
-    callback(null, {
-        userId: user.id,
-        displayname: user.displayname,
-        profileImage: user.profileImage,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        firstnameth: user.firstnameth,
-        lastnameth: user.lastnameth,
-        email: user.email,
+  if (!user) {
+    return callback({
+      code: grpc.status.NOT_FOUND,
+      message: "User not found",
     });
+  }
+
+  callback(null, {
+    userId: user.id,
+    displayname: user.displayname,
+    profileImage: user.profileImage,
+    firstname: user.firstname,
+    lastname: user.lastname,
+    firstnameth: user.firstnameth,
+    lastnameth: user.lastnameth,
+    email: user.email,
+  });
 };
 
 const login: grpc.handleUnaryCall<any, any> = async (call, callback) => {
-    const { ticket } = call.request;
+  const { ticket } = call.request;
 
-    console.log("Ticket:", ticket);
+  console.log("Ticket:", ticket);
 
-    try {
-        const verifiedUser = await verifyTicket(ticket);
-        if (!verifiedUser) {
-            return callback({
-                code: grpc.status.UNAUTHENTICATED,
-                message: "Invalid ticket",
-            });
-        }
-
-        const cookieHeader = createAuthCookie(verifiedUser.id);
-        const metadata = new grpc.Metadata();
-        metadata.set("Set-Cookie", cookieHeader);
-        callback(
-            null,
-            {
-                message: "Login successful",
-                token: cookieHeader,
-                userId: verifiedUser.id,
-            },
-            metadata
-        );
-    } catch (error) {
-        callback({
-            code: grpc.status.INTERNAL,
-            message: "Login failed",
-        });
+  try {
+    const verifiedUser = await verifyTicket(ticket);
+    if (!verifiedUser) {
+      return callback({
+        code: grpc.status.UNAUTHENTICATED,
+        message: "Invalid ticket",
+      });
     }
+
+    const cookieHeader = createAuthCookie(verifiedUser.id);
+    const metadata = new grpc.Metadata();
+    metadata.set("Set-Cookie", cookieHeader);
+    callback(
+      null,
+      {
+        message: "Login successful",
+        token: cookieHeader,
+        userId: verifiedUser.id,
+      },
+      metadata
+    );
+  } catch (error) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Login failed",
+    });
+  }
 };
 
 const applyPin: grpc.handleUnaryCall<any, any> = async (call, callback) => {
-    const userId = await getAuthenticatedUserId(call.metadata);
-    if (!userId) {
-        return callback({
-            code: grpc.status.UNAUTHENTICATED,
-            message: "Authentication required",
-        });
-    }
+  const userId = await getAuthenticatedUserId(call.metadata);
+  if (!userId) {
+    return callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: "Authentication required",
+    });
+  }
 
-    const { threadId } = call.request;
-    try {
-        await prisma.user.update({
-            where: { id: userId },
-            data: {
-                pinnedThreads: {
-                    push: threadId,
-                },
-            },
-        });
-        callback(null, { message: "Thread pinned successfully" });
-    } catch (error) {
-        callback({
-            code: grpc.status.INTERNAL,
-            message: "Failed to pin thread",
-        });
-    }
+  const { threadId } = call.request;
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        pinnedThreads: {
+          push: threadId,
+        },
+      },
+    });
+    callback(null, { message: "Thread pinned successfully" });
+  } catch (error) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to pin thread",
+    });
+  }
 };
 
 const viewPinned: grpc.handleUnaryCall<any, any> = async (call, callback) => {
-    const userId = await getAuthenticatedUserId(call.metadata);
-    if (!userId) {
-        return callback({
-            code: grpc.status.UNAUTHENTICATED,
-            message: "Authentication required",
-        });
-    }
-
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
+  const userId = await getAuthenticatedUserId(call.metadata);
+  if (!userId) {
+    return callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: "Authentication required",
     });
+  }
 
-    if (!user) {
-        return callback({
-            code: grpc.status.NOT_FOUND,
-            message: "User not found",
-        });
-    }
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
 
-    callback(null, { threadIds: user.pinnedThreads || [] });
+  if (!user) {
+    return callback({
+      code: grpc.status.NOT_FOUND,
+      message: "User not found",
+    });
+  }
+
+  callback(null, { threadIds: user.pinnedThreads || [] });
 };
 
 const getUserDetail: grpc.handleUnaryCall<any, any> = async (
-    call,
-    callback
+  call,
+  callback
 ) => {
-    const authenticatedUserId = await getAuthenticatedUserId(call.metadata);
-    if (!authenticatedUserId) {
-        return callback({
-            code: grpc.status.UNAUTHENTICATED,
-            message: "Authentication required",
-        });
+  const authenticatedUserId = await getAuthenticatedUserId(call.metadata);
+  if (!authenticatedUserId) {
+    return callback({
+      code: grpc.status.UNAUTHENTICATED,
+      message: "Authentication required",
+    });
+  }
+
+  const { userId } = call.request;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        displayname: true,
+        profileImage: true,
+      },
+    });
+
+    if (!user) {
+      return callback({
+        code: grpc.status.NOT_FOUND,
+        message: "User not found",
+      });
     }
 
-    const { userId } = call.request;
-
-    try {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-                displayname: true,
-                profileImage: true,
-            },
-        });
-
-        if (!user) {
-            return callback({
-                code: grpc.status.NOT_FOUND,
-                message: "User not found",
-            });
-        }
-
-        callback(null, user);
-    } catch (error) {
-        callback({
-            code: grpc.status.INTERNAL,
-            message: "Failed to fetch user details",
-        });
-    }
+    callback(null, user);
+  } catch (error) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to fetch user details",
+    });
+  }
 };
 
 const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (
-    call,
-    callback
+  call,
+  callback
 ) => {
-    const { threadId } = call.request;
-    if (!threadId) {
-        return callback({
-            code: grpc.status.INVALID_ARGUMENT,
-            message: "Thread ID is required",
-        });
-    }
+  const { threadId } = call.request;
+  if (!threadId) {
+    return callback({
+      code: grpc.status.INVALID_ARGUMENT,
+      message: "Thread ID is required",
+    });
+  }
 
-    try {
-        const users = await prisma.user.findMany({
-            where: {
-                pinnedThreads: {
-                    has: threadId,
-                },
-            },
-            select: {
-                id: true,
-            },
-        });
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        pinnedThreads: {
+          has: threadId,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
 
-        callback(null, { userIds: users.map((user) => user.id) });
-    } catch (error) {
-        callback({
-            code: grpc.status.INTERNAL,
-            message: "Failed to fetch users who pinned the thread",
-        });
-    }
+    callback(null, { userIds: users.map((user) => user.id) });
+  } catch (error) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to fetch users who pinned the thread",
+    });
+  }
 };
 
-const healthCheck: grpc.handleUnaryCall<any, any> = async (call, callback) => {
-    try {
-        console.log("💛 Health check request received");
-        callback(null, { success: true, message: "User Service is healthy" });
-    } catch (error) {
-        console.error("Error in healthCheck:", error);
-        callback({
-            code: grpc.status.INTERNAL,
-            message: "Failed to perform User Service health check",
-        });
-    }
+const healthCheck: grpc.handleUnaryCall<any, any> = async (
+  call,
+  callback
+) => {
+  try {
+    console.log("💛 Health check request received");
+    callback(null, { success: true, message: "User Service is healthy" });
+  } catch (error) {
+    console.error("Error in healthCheck:", error);
+    callback({
+      code: grpc.status.INTERNAL,
+      message: "Failed to perform User Service health check",
+    });
+  }
 };
 
 function main() {
-    const server = new grpc.Server();
-    server.addService(userService.service, {
-        UpdateUserProfile: updateUserProfile,
-        GetUserProfile: getUserProfile,
-        Login: login,
-        ApplyPin: applyPin,
-        ViewPinned: viewPinned,
-        GetUserDetail: getUserDetail,
-        GetUsersWhoPinnedThread: getUsersWhoPinnedThread,
-        HealthCheck: healthCheck,
-    });
+  const server = new grpc.Server();
+  server.addService(userService.service, {
+    UpdateUserProfile: updateUserProfile,
+    GetUserProfile: getUserProfile,
+    Login: login,
+    ApplyPin: applyPin,
+    ViewPinned: viewPinned,
+    GetUserDetail: getUserDetail,
+    GetUsersWhoPinnedThread: getUsersWhoPinnedThread,
+    HealthCheck: healthCheck
+  });
 
-    const host = process.env.HOST || "0.0.0.0";
-    const port = process.env.PORT || "5005";
+  const host = process.env.HOST || "0.0.0.0";
+  const port = process.env.PORT || "5005";
 
-    const address = `${host}:${port}`;
+  const address = `${host}:${port}`;
 
-    server.bindAsync(address, grpc.ServerCredentials.createInsecure(), () => {
-        console.log(`Server running at ${address}`);
-        server.start();
-    });
+  server.bindAsync(address, grpc.ServerCredentials.createInsecure(), () => {
+    console.log(`Server running at ${address}`);
+    server.start();
+  });
 }
 
 main();

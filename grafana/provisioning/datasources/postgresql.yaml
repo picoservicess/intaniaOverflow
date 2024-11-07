@@ -1,20 +1,20 @@
 apiVersion: 1
 
 datasources:
-    - name: PostgreSQL
-      type: postgres
-      uid: postgresql
-      url: ${GF_POSTGRES_HOST}:${GF_POSTGRES_PORT}
-      database: ${GF_POSTGRES_DB}
-      user: ${GF_POSTGRES_USER}
-      secureJsonData:
-          password: ${GF_POSTGRES_PASSWORD}
-      jsonData:
-          sslmode: disable # Options: disable, require, verify-ca, verify-full
-          maxOpenConns: 100 # Maximum number of open connections
-          maxIdleConns: 100 # Maximum number of idle connections
-          connMaxLifetime: 14400 # Maximum lifetime of a connection in seconds
-          postgresVersion: 1200 # Postgres version in XXYY format
-          timescaledb: false # Set to true if using TimescaleDB
-      isDefault: true
-      editable: false
+  - name: PostgreSQL
+    type: postgres
+    uid: postgresql
+    url: ${GF_POSTGRES_HOST}:${GF_POSTGRES_PORT}
+    database: ${GF_POSTGRES_DB}
+    user: ${GF_POSTGRES_USER}
+    secureJsonData:
+      password: ${GF_POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable    # Options: disable, require, verify-ca, verify-full
+      maxOpenConns: 100   # Maximum number of open connections
+      maxIdleConns: 100   # Maximum number of idle connections
+      connMaxLifetime: 14400  # Maximum lifetime of a connection in seconds
+      postgresVersion: 1200   # Postgres version in XXYY format
+      timescaledb: false     # Set to true if using TimescaleDB
+    isDefault: true
+    editable: false

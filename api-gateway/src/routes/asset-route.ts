@@ -1,10 +1,9 @@
 import axios from "axios";
 import express, { Request, Response } from "express";
+import { createLogMiddleware } from "../middleware/log";
+import multer from "multer";
 import FormData from "form-data";
 import fs from "fs";
-import multer from "multer";
-
-import { createLogMiddleware } from "../middleware/log";
 
 const assetRouter = express.Router();
 const upload = multer({ dest: "uploads/" });
@@ -15,11 +14,9 @@ const ASSET_SERVICE_URL =
     "http://asset-service:5001";
 console.log("ASSET_SERVICE_URL", ASSET_SERVICE_URL);
 
-assetRouter.use(createLogMiddleware("asset-service"));
+assetRouter.use(createLogMiddleware('asset-service'));
 
-assetRouter.post(
-    "/upload",
-    upload.single("file"),
+assetRouter.post("/upload", upload.single("file"),
     async (req: Request, res: Response) => {
         try {
             if (!req.file) {
@@ -29,11 +26,7 @@ assetRouter.post(
 
             // Forward the request to the asset service
             const formData = new FormData();
-            formData.append(
-                "file",
-                fs.createReadStream(req.file.path),
-                req.file.originalname
-            );
+            formData.append("file", fs.createReadStream(req.file.path), req.file.originalname);
 
             const response = await axios.post(
                 `${ASSET_SERVICE_URL}/asset/upload`,
@@ -41,7 +34,7 @@ assetRouter.post(
                 {
                     headers: {
                         ...formData.getHeaders(),
-                        Authorization: `${req.headers.authorization}`, // Add the token to the request headers
+                        'Authorization': `${req.headers.authorization}`, // Add the token to the request headers
                     },
                 }
             );
@@ -52,8 +45,7 @@ assetRouter.post(
                 message: "Error uploading asset",
             });
         }
-    }
-);
+    });
 
 assetRouter.get("/health", async (req: Request, res: Response) => {
     try {
