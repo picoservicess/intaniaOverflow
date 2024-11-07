@@ -6,9 +6,18 @@ import { z } from "zod";
 
 import { getAuthenticatedUserId } from "../../user-service/src/libs/token";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { Empty, GetAllThreadsParams, GetAllThreadsResponse, Pagination, SearchQuery, SearchThreadsResponse, ThreadId, ThreadList } from "./models";
-import { rabbitMQManager } from "./rabbitMQManager";
 import { RequestPage, RequestPageSize } from "./enums/request-enum";
+import {
+  Empty,
+  GetAllThreadsParams,
+  GetAllThreadsResponse,
+  Pagination,
+  SearchQuery,
+  SearchThreadsResponse,
+  ThreadId,
+  ThreadList,
+} from "./models";
+import { rabbitMQManager } from "./rabbitMQManager";
 
 const PROTO_PATH = "../proto/thread.proto";
 
@@ -52,13 +61,13 @@ server.addService(threadProto.ThreadService.service, {
           updatedAt: "desc",
         },
       });
-      
+
       const totalItems = await prisma.thread.count({
         where: {
           isDeleted: false,
         },
       });
-      
+
       const pagination: Pagination = {
         currentPage: page,
         totalPages: Math.ceil(totalItems / pageSize),

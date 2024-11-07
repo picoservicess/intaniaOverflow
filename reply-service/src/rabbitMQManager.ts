@@ -14,7 +14,7 @@ class RabbitMQManager {
   private constructor() {
     this.url = process.env.RABBITMQ_URL || "amqp://rabbitmq:5673";
     this.queue = process.env.RABBITMQ_QUEUE || "notification_queue";
-    this.exchange = process.env.RABBITMQ_EXCHANGE || "notification_exchange"; 
+    this.exchange = process.env.RABBITMQ_EXCHANGE || "notification_exchange";
   }
 
   public static getInstance(): RabbitMQManager {
@@ -59,8 +59,8 @@ class RabbitMQManager {
           }
 
           this.channel = channel;
-          channel.assertExchange(this.exchange, 'direct', {
-            durable: true
+          channel.assertExchange(this.exchange, "direct", {
+            durable: true,
           });
 
           channel.on("error", (err) => {
@@ -117,8 +117,8 @@ class RabbitMQManager {
             return;
           }
           this.channel = channel;
-          channel.assertExchange(this.exchange, 'direct', {
-            durable: true
+          channel.assertExchange(this.exchange, "direct", {
+            durable: true,
           });
         });
       } catch (error) {
@@ -139,11 +139,11 @@ class RabbitMQManager {
 
       this.channel.publish(
         this.exchange,
-        'reply',
+        "reply",
         Buffer.from(JSON.stringify(message)),
         { persistent: true }
       );
-      
+
       console.log("✅ Successfully published message:", message);
     } catch (error) {
       console.error("🚫 Error publishing message:", error);

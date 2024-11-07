@@ -254,10 +254,7 @@ const getUsersWhoPinnedThread: grpc.handleUnaryCall<any, any> = async (
   }
 };
 
-const healthCheck: grpc.handleUnaryCall<any, any> = async (
-  call,
-  callback
-) => {
+const healthCheck: grpc.handleUnaryCall<any, any> = async (call, callback) => {
   try {
     console.log("💛 Health check request received");
     callback(null, { success: true, message: "User Service is healthy" });
@@ -280,7 +277,7 @@ function main() {
     ViewPinned: viewPinned,
     GetUserDetail: getUserDetail,
     GetUsersWhoPinnedThread: getUsersWhoPinnedThread,
-    HealthCheck: healthCheck
+    HealthCheck: healthCheck,
   });
 
   const host = process.env.HOST || "0.0.0.0";
