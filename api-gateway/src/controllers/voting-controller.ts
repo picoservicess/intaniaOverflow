@@ -86,7 +86,6 @@ export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
 // Check user vote status
 export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
   const token = validateAuth(req);
-  // const { isThread, targetId } = req.query;
   const { targetId } = req.query;
   const isThread = req.query.isThread === 'true';
 
