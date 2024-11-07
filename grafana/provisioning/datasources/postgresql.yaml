@@ -10,11 +10,11 @@ datasources:
     secureJsonData:
       password: ${GF_POSTGRES_PASSWORD}
     jsonData:
-      sslmode: disable # Options: disable, require, verify-ca, verify-full
-      maxOpenConns: 100 # Maximum number of open connections
-      maxIdleConns: 100 # Maximum number of idle connections
-      connMaxLifetime: 14400 # Maximum lifetime of a connection in seconds
-      postgresVersion: 1200 # Postgres version in XXYY format
-      timescaledb: false # Set to true if using TimescaleDB
+      sslmode: disable    # Options: disable, require, verify-ca, verify-full
+      maxOpenConns: 100   # Maximum number of open connections
+      maxIdleConns: 100   # Maximum number of idle connections
+      connMaxLifetime: 14400  # Maximum lifetime of a connection in seconds
+      postgresVersion: 1200   # Postgres version in XXYY format
+      timescaledb: false     # Set to true if using TimescaleDB
     isDefault: true
     editable: false

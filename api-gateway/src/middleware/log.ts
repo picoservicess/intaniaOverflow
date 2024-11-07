@@ -1,7 +1,6 @@
 // middleware/logging.ts
-import { NextFunction, Request, Response } from "express";
-
-import { publishLog } from "../utils/log";
+import { Request, Response, NextFunction } from 'express';
+import { publishLog } from '../utils/log';
 
 export const createLogMiddleware = (serviceName: string) => {
   return (req: Request, res: Response, next: NextFunction) => {

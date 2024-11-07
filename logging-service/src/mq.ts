@@ -1,34 +1,28 @@
-import { PrismaClient } from "@prisma/client";
 import amqp, { Channel, Connection } from "amqplib/callback_api";
+import { PrismaClient } from "@prisma/client";
 
 const RABBITMQ_CONFIG = {
   url: process.env.RABBITMQ_URL || "amqp://rabbitmq:5672",
   queue: process.env.RABBITMQ_CONFIG || "logging_queue",
   retryOptions: {
     initialRetryDelay: 1000, // Start with 1 second delay
-    maxRetryDelay: 30000, // Max delay of 30 seconds
-    maxRetries: 5, // Maximum number of retry attempts
-    backoffMultiplier: 2, // Exponential backoff multiplier
-  },
+    maxRetryDelay: 30000,    // Max delay of 30 seconds
+    maxRetries: 5,           // Maximum number of retry attempts
+    backoffMultiplier: 2,    // Exponential backoff multiplier
+  }
 };
 
 // Helper function to delay execution
-const delay = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 // Calculate exponential backoff delay
 function calculateBackoff(attempt: number): number {
-  const { initialRetryDelay, maxRetryDelay, backoffMultiplier } =
-    RABBITMQ_CONFIG.retryOptions;
+  const { initialRetryDelay, maxRetryDelay, backoffMultiplier } = RABBITMQ_CONFIG.retryOptions;
   const delay = initialRetryDelay * Math.pow(backoffMultiplier, attempt);
   return Math.min(delay, maxRetryDelay);
 }
 
-async function processMessage(
-  prisma: PrismaClient,
-  msg: any,
-  channel: Channel
-): Promise<void> {
+async function processMessage(prisma: PrismaClient, msg: any, channel: Channel): Promise<void> {
   let attempt = 0;
 
   while (true) {
@@ -36,14 +30,9 @@ async function processMessage(
       const logData = JSON.parse(msg.content.toString());
 
       // Validate required fields
-      if (
-        !logData.statusCode ||
-        !logData.datetime ||
-        !logData.endpoint ||
-        !logData.message ||
-        !logData.serviceName
-      ) {
-        throw new Error("Missing required fields in log data");
+      if (!logData.statusCode || !logData.datetime || !logData.endpoint ||
+        !logData.message || !logData.serviceName) {
+        throw new Error('Missing required fields in log data');
       }
 
       await prisma.log.create({
@@ -69,9 +58,7 @@ async function processMessage(
       }
 
       const retryDelay = calculateBackoff(attempt);
-      console.warn(
-        `⚠️ Retry attempt ${attempt} for message processing. Retrying in ${retryDelay}ms`
-      );
+      console.warn(`⚠️ Retry attempt ${attempt} for message processing. Retrying in ${retryDelay}ms`);
       await delay(retryDelay);
     }
   }
@@ -109,9 +96,7 @@ async function connectWithRetry(): Promise<Connection> {
           });
 
           connection.on("close", () => {
-            console.warn(
-              "RabbitMQ connection closed. Attempting to reconnect..."
-            );
+            console.warn("RabbitMQ connection closed. Attempting to reconnect...");
             setTimeout(() => connectWithRetry(), calculateBackoff(0));
           });
 
@@ -122,15 +107,11 @@ async function connectWithRetry(): Promise<Connection> {
       attempt++;
 
       if (attempt >= RABBITMQ_CONFIG.retryOptions.maxRetries) {
-        throw new Error(
-          `Failed to connect to RabbitMQ after ${attempt} attempts: ${error}`
-        );
+        throw new Error(`Failed to connect to RabbitMQ after ${attempt} attempts: ${error}`);
       }
 
       const retryDelay = calculateBackoff(attempt);
-      console.warn(
-        `⚠️ Connection attempt ${attempt} failed. Retrying in ${retryDelay}ms`
-      );
+      console.warn(`⚠️ Connection attempt ${attempt} failed. Retrying in ${retryDelay}ms`);
       await delay(retryDelay);
     }
   }

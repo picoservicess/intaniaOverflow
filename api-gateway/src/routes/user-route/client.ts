@@ -10,8 +10,8 @@ const host = process.env.USER_SERVICE_HOST || "localhost";
 const port = process.env.USER_SERVICE_PORT || "5005";
 
 const userClient = new userProto.UserService(
-  `${host}:${port}`,
-  grpc.credentials.createInsecure()
+    `${host}:${port}`,
+    grpc.credentials.createInsecure()
 );
 
 console.log("👤 User client connected to", `${host}:${port}`);

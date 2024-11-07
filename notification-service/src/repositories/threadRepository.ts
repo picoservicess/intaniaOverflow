@@ -10,8 +10,8 @@ const host = process.env.THREAD_SERVICE_HOST || "localhost";
 const port = process.env.THREAD_SERVICE_PORT || "5004";
 
 const threadClient = new threadProto.ThreadService(
-  `${host}:${port}`,
-  grpc.credentials.createInsecure()
+    `${host}:${port}`,
+    grpc.credentials.createInsecure()
 );
 
 console.log("Thread client connected to", `${host}:${port}`);

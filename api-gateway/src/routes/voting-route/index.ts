@@ -1,11 +1,11 @@
 import { Router } from "express";
 
 import {
-  applyDownvote,
-  applyUpvote,
-  checkVoteStatus,
-  getVotes,
-  healthCheck,
+    applyDownvote,
+    applyUpvote,
+    checkVoteStatus,
+    getVotes,
+    healthCheck,
 } from "../../controllers/voting-controller";
 import { authMiddleware } from "../../middleware/auth";
 import { createLogMiddleware } from "../../middleware/log";
@@ -13,7 +13,7 @@ import { createLogMiddleware } from "../../middleware/log";
 const votingRouter = Router();
 
 // Register a middleware to log all requests
-votingRouter.use(createLogMiddleware("voting-service"));
+votingRouter.use(createLogMiddleware('voting-service'));
 
 // Check user vote status
 votingRouter.get("/health", healthCheck);

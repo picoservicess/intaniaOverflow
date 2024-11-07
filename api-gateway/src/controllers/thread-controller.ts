@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 
-import { RequestPage, RequestPageSize } from "../enums/request-enum";
 import { controllerWrapper, validateAuth } from "../middleware/auth";
 import { Thread } from "../models/thread-model";
 import threadClient from "../routes/thread-route/client";
 import { getGrpcRequest } from "../utils/grpc";
+import { RequestPage, RequestPageSize } from "../enums/request-enum";
 
 const grpcRequest = getGrpcRequest(threadClient);
 
@@ -15,7 +15,7 @@ export const getAllThreads = controllerWrapper(
 
     let pageSize = Number(req.query.pageSize) || RequestPageSize.DEFAULT;
     pageSize = Math.min(pageSize, RequestPageSize.MAX);
-
+    
     const threads = await grpcRequest("getAllThreads", { page, pageSize });
     res.status(200).json(threads);
   }
@@ -87,11 +87,7 @@ export const searchThreads = controllerWrapper(
     let pageSize = Number(req.query.pageSize) || RequestPageSize.DEFAULT;
     pageSize = Math.min(pageSize, RequestPageSize.MAX);
 
-    const threads = await grpcRequest("searchThreads", {
-      query,
-      page,
-      pageSize,
-    });
+    const threads = await grpcRequest("searchThreads", { query, page, pageSize });
     res.status(200).json(threads);
   }
 );

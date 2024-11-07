@@ -1,13 +1,13 @@
 import express from "express";
 
 import {
-  createThread,
-  deleteThread,
-  getAllThreads,
-  getThreadById,
-  healthCheck,
-  searchThreads,
-  updateThread,
+    createThread,
+    deleteThread,
+    getAllThreads,
+    getThreadById,
+    healthCheck,
+    searchThreads,
+    updateThread,
 } from "../../controllers/thread-controller";
 import { authMiddleware } from "../../middleware/auth";
 import { createLogMiddleware } from "../../middleware/log";
@@ -15,7 +15,7 @@ import { createLogMiddleware } from "../../middleware/log";
 const threadRouter = express.Router();
 
 // Register a middleware to log all requests
-threadRouter.use(createLogMiddleware("thread-service"));
+threadRouter.use(createLogMiddleware('thread-service'));
 
 // Health check
 threadRouter.get("/health", healthCheck);

@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 import express, { Application } from "express";
-
+import { PrismaClient } from "@prisma/client";
 import { main as startMQ } from "./mq";
 
 dotenv.config();
