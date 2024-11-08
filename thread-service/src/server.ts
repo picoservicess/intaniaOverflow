@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { getAuthenticatedUserId } from "../../user-service/src/libs/token";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { Empty, SearchQuery, ThreadId,  ThreadList } from "./models";
+import { Empty, SearchQuery, ThreadId, ThreadList } from "./models";
 import { rabbitMQManager } from "./rabbitMQManager";
 
 const PROTO_PATH = "../proto/thread.proto";
