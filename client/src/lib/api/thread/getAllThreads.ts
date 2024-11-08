@@ -10,5 +10,5 @@ export default async function getAllThreads() {
     throw new Error("Cannot get all threads");
   }
 
-  return await response.json();
+  return await response.json() as GetAllThreadResponse;
 }

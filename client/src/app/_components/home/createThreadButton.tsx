@@ -15,9 +15,24 @@ import {
 
 import ThreadForm from "./threadForm";
 
-export default function CreateThreadButton({setThread}: {setThread: React.Dispatch<SetStateAction<Thread[]>>}) {
-  const [open, setOpen] = useState(false);
+interface CreateThreadButtonProps {
+  setThread: React.Dispatch<SetStateAction<Thread[]>>;
+  setUserDetails: React.Dispatch<SetStateAction<User[]>>;
+  setVoteCounts: React.Dispatch<SetStateAction<VoteCounts[]>>;
+  setVoteStatuses: React.Dispatch<SetStateAction<number[]>>;
+  setReplyCounts: React.Dispatch<SetStateAction<number[]>>;
+  setPinStatuses: React.Dispatch<SetStateAction<boolean[]>>;
+}
 
+export default function CreateThreadButton({
+  setThread,
+  setUserDetails,
+  setVoteCounts,
+  setVoteStatuses,
+  setReplyCounts,
+  setPinStatuses
+}: CreateThreadButtonProps) {
+  const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -35,7 +50,15 @@ export default function CreateThreadButton({setThread}: {setThread: React.Dispat
         <DialogHeader>
           <DialogTitle>สร้างเธรด</DialogTitle>
         </DialogHeader>
-        <ThreadForm onClose={() => setOpen(false)} setThread={setThread} />
+        <ThreadForm 
+          onClose={() => setOpen(false)}
+          setThread={setThread}
+          setUserDetails={setUserDetails}
+          setVoteCounts={setVoteCounts}
+          setVoteStatuses={setVoteStatuses}
+          setReplyCounts={setReplyCounts}
+          setPinStatuses={setPinStatuses}
+        />
       </DialogContent>
     </Dialog>
   );

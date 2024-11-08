@@ -1,18 +1,23 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import PostListSkeleton from "./postListSkeleton";
 import Post from "./post";
 
-export default function PostList({ threads, isParentLoading }: { threads: Thread[], isParentLoading?: boolean }) {
+export default function PostList({ threads, userDetails, voteCounts, voteStatuses, replyCounts, pinStatuses }: PostListProps) {
   return (
     <Card className="w-full">
       <CardContent className="mt-5 px-2 sm:px-6">
-        {isParentLoading ? (
-          Array.from({ length: 5 }).map((_, index) => <PostListSkeleton key={index} />)
-        ) : (
-          threads.map((post) => <Post key={post.threadId} post={post}/>)
-        )}
+        {threads.map((thread, index) => (
+          <Post 
+            key={thread.threadId} 
+            post={thread}
+            userDetail={userDetails[index]} 
+            voteCount={voteCounts[index]} 
+            voteStatus={voteStatuses[index]} 
+            replyCount={replyCounts[index]} 
+            pinStatus={pinStatuses[index]} 
+          />
+        ))}
       </CardContent>
     </Card>
   );

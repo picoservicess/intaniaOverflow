@@ -7,19 +7,68 @@ import getUserProfile from "@/lib/api/user/getUserProfile";
 import viewPinned from "@/lib/api/user/viewPinned";
 import { getServerSession } from "next-auth";
 import getThread from "@/lib/api/thread/getThread";
+import getRepliesByThread from "@/lib/api/reply/getRepliesByThread";
+import isUserVote from "@/lib/api/vote/isUserVote";
+import getUserDetail from "@/lib/api/user/getUserDetail";
+import getVotes from "@/lib/api/vote/getCountVote";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
+  const token = session?.user.accessToken as string;
+
+  // User Profile
   const userProfile = await getUserProfile(session?.user.accessToken as string);
 
+  // Pinned Threads
   const pinnedThreadIds: ViewPinned = await viewPinned(session?.user.accessToken as string);
-  const aboutMeThreads: Thread[] = []; // Assuming you will populate this as needed
-
   const pinnedThreadsPromises = pinnedThreadIds.threadIds.map(async (threadId) => {
     return await getThread(session?.user.accessToken as string, threadId);
   });
-
   const pinnedThreads = await Promise.all(pinnedThreadsPromises);
+  const pinnedThreadsReplyCounts = await Promise.all(
+    pinnedThreads.map(async (thread) => {
+      const replies = await getRepliesByThread(thread.threadId);
+      return replies.length;
+    })
+  );
+  const pinnedThreadVoteCounts = await Promise.all(
+    pinnedThreads.map(async (thread) => await getVotes(true, thread.threadId))
+  );
+  const pinnedThreadsVoteStatuses = await Promise.all(
+    pinnedThreads.map(async (thread) => {
+      const response = await isUserVote(token, true, thread.threadId);
+      return response.voteStatus;
+    })
+  );
+  const pinnedThreadsUserDetails = await Promise.all(
+    pinnedThreads.map(async (thread) => {
+      return await getUserDetail(token, thread.authorId);
+    })
+  );
+  const pinnedThreadsPostlistProps:PostListProps = {
+    threads: pinnedThreads,
+    userDetails: pinnedThreadsUserDetails,
+    voteCounts: pinnedThreadVoteCounts,
+    voteStatuses: pinnedThreadsVoteStatuses,
+    replyCounts: pinnedThreadsReplyCounts,
+    pinStatuses: Array(pinnedThreads.length).fill(true),
+  }
+
+  // About me Threads
+  const aboutMeThreads: Thread[] = []; // Assuming you will populate this as needed
+  const aboutMeThreadsReplyCounts:number[] = [];
+  const aboutMeThreadsVoteCounts:VoteCounts[] = [];
+  const aboutMeThreadsVoteStatuses:number[] = [];
+  const aboutMeThreadsUserDetails:User[] = [];
+  const aboutMeThreadsPinStatuses:boolean[] = [];
+  const aboutMeThreadsPostlistProps:PostListProps = {
+    threads: aboutMeThreads,
+    userDetails: aboutMeThreadsUserDetails,
+    voteCounts: aboutMeThreadsVoteCounts,
+    voteStatuses: aboutMeThreadsVoteStatuses,
+    replyCounts: aboutMeThreadsReplyCounts,
+    pinStatuses: aboutMeThreadsPinStatuses,
+  }
 
   if (!userProfile) return <p>Loading...</p>;
 
@@ -46,7 +95,7 @@ export default async function Page() {
           </div>
         </CardContent>
       </Card>
-      <ProfileThreads aboutMeThreads={aboutMeThreads} pinnedThreads={pinnedThreads} />
+      <ProfileThreads aboutMeThreads={aboutMeThreadsPostlistProps} pinnedThreads={pinnedThreadsPostlistProps} />
     </div>
   );
 }

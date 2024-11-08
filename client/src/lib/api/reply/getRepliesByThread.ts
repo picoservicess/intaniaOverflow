@@ -1,11 +1,8 @@
 "use server";
 
-export default async function getRepliesByThread(token: string, threadId: string): Promise<Reply[]> {
+export default async function getRepliesByThread(threadId: string): Promise<Reply[]> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/replies/${threadId}`, {
         method: 'GET',
-        headers: {
-            authorization: `Bearer ${token}`,
-        },
         next: { tags: ["Replies"] },
     });
 

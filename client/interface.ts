@@ -25,6 +25,10 @@ interface ReplyRequest {
     assetUrls: string[];
 }
 
+interface GetAllThreadResponse {
+    threads: Thread[];
+}
+
 interface Thread {
     assetUrls: string[];
     tags: string[];
@@ -83,4 +87,13 @@ interface ApplyDownVote {
         success: boolean;
         message: string;
     };
+}
+
+interface PostListProps {
+    threads: Thread[];
+    userDetails: User[];
+    voteCounts: VoteCounts[];
+    voteStatuses: number[];
+    replyCounts: number[];
+    pinStatuses: boolean[];
 }

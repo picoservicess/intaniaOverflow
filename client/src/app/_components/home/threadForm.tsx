@@ -9,13 +9,27 @@ import { Textarea } from "@/components/ui/textarea";
 import createThread from "@/lib/api/thread/createThread";
 import { useSession } from "next-auth/react";
 import uploadFiles from "@/lib/api/asset/uploadFiles";
+import getUserDetail from "@/lib/api/user/getUserDetail";
 
 interface ThreadFormProps {
   onClose: () => void;
   setThread: React.Dispatch<SetStateAction<Thread[]>>;
+  setUserDetails: React.Dispatch<SetStateAction<User[]>>;
+  setVoteCounts: React.Dispatch<SetStateAction<VoteCounts[]>>;
+  setVoteStatuses: React.Dispatch<SetStateAction<number[]>>;
+  setReplyCounts: React.Dispatch<SetStateAction<number[]>>;
+  setPinStatuses: React.Dispatch<SetStateAction<boolean[]>>;
 }
 
-const ThreadForm: React.FC<ThreadFormProps> = ({ onClose, setThread }) => {
+const ThreadForm: React.FC<ThreadFormProps> = ({
+  onClose, 
+  setThread,
+  setUserDetails,
+  setVoteCounts,
+  setVoteStatuses,
+  setReplyCounts,
+  setPinStatuses,
+}) => {
   const { data: session } = useSession();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -34,14 +48,14 @@ const ThreadForm: React.FC<ThreadFormProps> = ({ onClose, setThread }) => {
     setLoading(true);
     e.preventDefault();
     try {
-      // Upload files and retrieve their URLs
+      // Upload Assets
       const assetUrls: string[] = [];
       if (assets.length > 0) {
         const responses = await uploadFiles(session?.user?.accessToken, assets);
         assetUrls.push(...responses.map((res) => res.responseObject.assetUrl));
       }
 
-      // Create thread with asset URLs and anonymity option
+      // Create Thread
       const newThread: ThreadRequest = {
         title,
         body,
@@ -50,12 +64,21 @@ const ThreadForm: React.FC<ThreadFormProps> = ({ onClose, setThread }) => {
         authorId: session?.user?.id,
         isAnonymous,
       };
-
       const responseThread = await createThread(session?.user?.accessToken, newThread);
+
+      // Get User Profile
+      const userProfile = await getUserDetail(session?.user.accessToken as string, session?.user.id);
+
       setThread((prev) => [responseThread, ...prev]);
-      onClose();
+      setUserDetails((prev) => [userProfile, ...prev]);
+      setVoteCounts((prev) => [{ upVotes: 0, downVotes: 0, netVotes: 0 }, ...prev]);
+      setVoteStatuses((prev) => [0, ...prev]);
+      setReplyCounts((prev) => [0, ...prev]);
+      setPinStatuses((prev) => [false, ...prev]);
     } catch (error) {
       console.error("Error creating thread:", error);
+    } finally {
+      onClose();
     }
   };
 

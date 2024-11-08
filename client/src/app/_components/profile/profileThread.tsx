@@ -4,8 +4,8 @@ import { useState } from 'react';
 import PostList from '../home/postList';
 
 interface ProfileThreadsProps {
-  aboutMeThreads: Thread[]; 
-  pinnedThreads: Thread[]; 
+  aboutMeThreads: PostListProps; 
+  pinnedThreads: PostListProps; 
 }
 
 const ProfileThreads: React.FC<ProfileThreadsProps> = ({ aboutMeThreads, pinnedThreads }) => {
@@ -33,14 +33,28 @@ const ProfileThreads: React.FC<ProfileThreadsProps> = ({ aboutMeThreads, pinnedT
       </div>
       <div>
         {showPinned ? (
-          pinnedThreads.length > 0 ? (
-            <PostList threads={pinnedThreads} />
+          pinnedThreads.threads.length > 0 ? (
+            <PostList 
+              threads={pinnedThreads.threads}
+              userDetails={pinnedThreads.userDetails}
+              voteCounts={pinnedThreads.voteCounts}
+              voteStatuses={pinnedThreads.voteStatuses}
+              replyCounts={pinnedThreads.replyCounts} 
+              pinStatuses={pinnedThreads.pinStatuses} 
+            />
           ) : (
             <p className="text-center">ไม่พบผลลัพธ์</p>
           )
         ) : (
-          aboutMeThreads.length > 0 ? (
-            <PostList threads={aboutMeThreads} />
+          aboutMeThreads.threads.length > 0 ? (
+            <PostList 
+              threads={aboutMeThreads.threads}
+              userDetails={aboutMeThreads.userDetails}
+              voteCounts={aboutMeThreads.voteCounts}
+              voteStatuses={aboutMeThreads.voteStatuses}
+              replyCounts={aboutMeThreads.replyCounts}
+              pinStatuses={aboutMeThreads.pinStatuses}
+            />
           ) : (
             <p className="text-center">ไม่พบผลลัพธ์</p>
           )

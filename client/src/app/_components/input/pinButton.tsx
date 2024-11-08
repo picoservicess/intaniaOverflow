@@ -1,38 +1,24 @@
 "use client";
 
 import { Bookmark } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import applyPin from "@/lib/api/user/applyPin";
 import { useSession } from "next-auth/react";
-import viewPinned from "@/lib/api/user/viewPinned";
 
 export default function PinButton({
   className = "",
   size,
   threadId,
+  pinnedStatus,
 }: {
   className?: string;
   size?: number;
   threadId: string;
+  pinnedStatus: boolean;
 }) {
   const { data: session } = useSession();
-  const [pinned, setPinned] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchIsPinned = async () => {
-      if (!session?.user.accessToken) return;
-      try {
-        const pinnedThreadIds = await viewPinned(session.user.accessToken);
-        setPinned(pinnedThreadIds.threadIds.includes(threadId));
-      } catch (err) {
-        console.error("Error checking if thread is pinned:", err);
-      }
-    };
-
-    if(!session?.user.accessToken) return;
-    fetchIsPinned();
-  }, [session, threadId]);
+  const [pinned, setPinned] = useState<boolean>(pinnedStatus);
 
   const handlePin = async () => {
     if (!session?.user.accessToken || pinned) return;
