@@ -1,13 +1,14 @@
 import express from "express";
 
 import {
-  createThread,
-  deleteThread,
-  getAllThreads,
-  getThreadById,
-  healthCheck,
-  searchThreads,
-  updateThread,
+    createThread,
+    deleteThread,
+    getAllThreads,
+    getThreadById,
+    getMyThreads,
+    healthCheck,
+    searchThreads,
+    updateThread,
 } from "../../controllers/thread-controller";
 import { authMiddleware } from "../../middleware/auth";
 import { createLogMiddleware } from "../../middleware/log";
@@ -19,6 +20,9 @@ threadRouter.use(createLogMiddleware("thread-service"));
 
 // Health check
 threadRouter.get("/health", healthCheck);
+
+// Get all my threads
+threadRouter.get("/me", getMyThreads);
 
 // Get all threads
 threadRouter.get("/", getAllThreads);
