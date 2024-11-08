@@ -16,7 +16,6 @@ router.get("/health-check", async (_req: Request, res: Response) => {
   res.status(200).json({ status: "OK", message: "Reply-Service is healthy" });
 });
 
-
 /**
  * Route to create a new reply
  * Method: POST
@@ -68,7 +67,7 @@ router.post(
       try {
         await rabbitMQManager.publishMessage(newReply);
       } catch (mqError) {
-        console.error("Failed to publish message to RabbitMQ: ", mqError)
+        console.error("Failed to publish message to RabbitMQ: ", mqError);
       }
 
       // Send a 201 Created response with the new reply

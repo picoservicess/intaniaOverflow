@@ -3,7 +3,7 @@ import "google/protobuf/empty.proto";
 
 service ThreadService {
     // Get all threads
-    rpc getAllThreads (GetAllThreadsParams) returns (ThreadList) {
+    rpc getAllThreads (GetAllThreadsParams) returns (GetAllThreadsResponse) {
     }
 
     // Get thread by ID
@@ -23,7 +23,7 @@ service ThreadService {
     }
 
     // Search threads
-    rpc searchThreads (SearchQuery) returns (ThreadList) {
+    rpc searchThreads (SearchQuery) returns (SearchThreadsResponse) {
     }
 
     // Health check
@@ -60,7 +60,24 @@ message ThreadId {
     string threadId = 1;
 }
 
+message Pagination {
+    int32 currentPage = 1;
+    int32 totalPages = 2;
+    int32 pageSize = 3;
+    int32 totalItems = 4;
+}
+
 message GetAllThreadsParams {
     optional int32 page = 1;
     optional int32 pageSize = 2;
+}
+
+message GetAllThreadsResponse {
+    repeated Thread threads = 1;
+    Pagination pagination = 2;
+}
+
+message SearchThreadsResponse {
+    repeated Thread threads = 1;
+    Pagination pagination = 2;
 }
