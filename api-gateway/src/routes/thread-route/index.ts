@@ -5,6 +5,7 @@ import {
     deleteThread,
     getAllThreads,
     getThreadById,
+    getMyThreads,
     healthCheck,
     searchThreads,
     updateThread,
@@ -20,8 +21,12 @@ threadRouter.use(createLogMiddleware('thread-service'));
 // Health check
 threadRouter.get("/health", healthCheck);
 
+// Get all my threads
+threadRouter.get("/me", getMyThreads);
+
 // Get all threads
 threadRouter.get("/", getAllThreads);
+
 
 // Get thread by ID
 threadRouter.get("/:threadId", getThreadById);

@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { getAuthenticatedUserId } from "../../user-service/src/libs/token";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { Empty, SearchQuery, ThreadId, ThreadList } from "./models";
+import { Empty, SearchQuery, ThreadId,  ThreadList } from "./models";
 import { rabbitMQManager } from "./rabbitMQManager";
 
 const PROTO_PATH = "../proto/thread.proto";
@@ -81,6 +81,34 @@ server.addService(threadProto.ThreadService.service, {
     }
   },
 
+  getMyThreads: async (
+    call: ServerUnaryCall<Empty, ThreadList>,
+    callback: sendUnaryData<ThreadList>
+  ) => {
+    const userId = await getAuthenticatedUserId(call.metadata);
+    if (!userId) {
+      return callback({
+        code: grpc.status.UNAUTHENTICATED,
+        details: "Authentication required",
+      });
+    }
+    try {
+      const threads = await prisma.thread.findMany({
+        where: {
+          authorId: userId,
+          isDeleted: false
+        }
+      });
+      callback(null, { threads });
+    } catch (error) {
+      console.error(`getMyThreads: ${error}`);
+      callback({
+        code: grpc.status.INTERNAL,
+        details: "Interal Server Error"
+      })
+    }
+  },
+      
   createThread: async (
     call: ServerUnaryCall<Thread, Thread>,
     callback: sendUnaryData<Thread>

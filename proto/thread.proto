@@ -16,6 +16,14 @@ service ThreadService {
         };
     }
 
+    // Get my thread
+    rpc getMyThreads (google.protobuf.Empty) returns (ThreadList)
+    {
+        option (google.api.http) = {
+            get: "/threads/me"
+        };
+    }
+
     // Create new thread
     rpc createThread (Thread) returns (Thread) {
         option (google.api.http) = {
