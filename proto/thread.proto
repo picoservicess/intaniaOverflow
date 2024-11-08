@@ -3,17 +3,11 @@ import "google/protobuf/empty.proto";
 
 service ThreadService {
     // Get all threads
-    rpc getAllThreads (google.protobuf.Empty) returns (ThreadList) {
-        option (google.api.http) = {
-            get: "/threads"
-        };
+    rpc getAllThreads (GetAllThreadsParams) returns (GetAllThreadsResponse) {
     }
 
     // Get thread by ID
     rpc getThreadById (ThreadId) returns (Thread) {
-        option (google.api.http) = {
-            get: "/threads/{ThreadId}"
-        };
     }
 
     // Get my thread
@@ -26,39 +20,22 @@ service ThreadService {
 
     // Create new thread
     rpc createThread (Thread) returns (Thread) {
-        option (google.api.http) = {
-            post: "/threads"
-            body: "*"
-        };
     }
 
     // Update existing thread
     rpc updateThread (Thread) returns (Thread) {
-        option (google.api.http) = {
-            put: "/threads/{threadId}"
-            body: "*"
-        };
     }
 
     // Delete thread
     rpc deleteThread (ThreadId) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            delete: "/threads/{ThreadId}"
-        };
     }
 
     // Search threads
-    rpc searchThreads (SearchQuery) returns (ThreadList) {
-        option (google.api.http) = {
-            get: "/threads/search"
-        };
+    rpc searchThreads (SearchQuery) returns (SearchThreadsResponse) {
     }
 
     // Health check
     rpc healthCheck (google.protobuf.Empty) returns (google.protobuf.Empty) {
-        option (google.api.http) = {
-            get: "/health"
-        };
     }
 }
 
@@ -66,6 +43,8 @@ message Empty{}
 
 message SearchQuery {
     string query = 1;
+    optional int32 page = 2;
+    optional int32 pageSize = 3;
 }
 
 message Thread {
@@ -87,4 +66,26 @@ message ThreadList {
 
 message ThreadId {
     string threadId = 1;
+}
+
+message Pagination {
+    int32 currentPage = 1;
+    int32 totalPages = 2;
+    int32 pageSize = 3;
+    int32 totalItems = 4;
+}
+
+message GetAllThreadsParams {
+    optional int32 page = 1;
+    optional int32 pageSize = 2;
+}
+
+message GetAllThreadsResponse {
+    repeated Thread threads = 1;
+    Pagination pagination = 2;
+}
+
+message SearchThreadsResponse {
+    repeated Thread threads = 1;
+    Pagination pagination = 2;
 }

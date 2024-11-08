@@ -6,7 +6,7 @@ import hpp from "hpp";
 
 // Rate limiting configuration
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 60 * 1000, // 1 minute
   max: 100, // Limit each IP to 100 requests per windowMs
 });
 

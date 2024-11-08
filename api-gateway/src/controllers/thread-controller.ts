@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 
+import { RequestPage, RequestPageSize } from "../enums/request-enum";
 import { controllerWrapper, validateAuth } from "../middleware/auth";
 import { Thread } from "../models/thread-model";
 import threadClient from "../routes/thread-route/client";
@@ -10,7 +11,12 @@ const grpcRequest = getGrpcRequest(threadClient);
 // Get all threads
 export const getAllThreads = controllerWrapper(
   async (req: Request, res: Response) => {
-    const threads = await grpcRequest("getAllThreads", {});
+    const page = Number(req.query.page) || RequestPage.DEFAULT;
+
+    let pageSize = Number(req.query.pageSize) || RequestPageSize.DEFAULT;
+    pageSize = Math.min(pageSize, RequestPageSize.MAX);
+
+    const threads = await grpcRequest("getAllThreads", { page, pageSize });
     res.status(200).json(threads);
   }
 );
@@ -91,7 +97,16 @@ export const deleteThread = controllerWrapper(
 export const searchThreads = controllerWrapper(
   async (req: Request, res: Response) => {
     const query = (req.query.query as string) || "";
-    const threads = await grpcRequest("searchThreads", { query });
+    const page = Number(req.query.page) || RequestPage.DEFAULT;
+
+    let pageSize = Number(req.query.pageSize) || RequestPageSize.DEFAULT;
+    pageSize = Math.min(pageSize, RequestPageSize.MAX);
+
+    const threads = await grpcRequest("searchThreads", {
+      query,
+      page,
+      pageSize,
+    });
     res.status(200).json(threads);
   }
 );

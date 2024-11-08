@@ -13,10 +13,10 @@ class RabbitMQManager {
   private readonly maxRetries: number = 5;
 
   private constructor() {
-    this.url = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
-    this.queue = process.env.RABBITMQ_QUEUE || 'notification_queue';
-    this.deadLetterExchange = process.env.RABBITMQ_DLX || 'notification_dlx';
-    this.exchange = process.env.RABBITMQ_EXCHANGE || "notification_exchange"; 
+    this.url = process.env.RABBITMQ_URL || "amqp://rabbitmq:5672";
+    this.queue = process.env.RABBITMQ_QUEUE || "notification_queue";
+    this.deadLetterExchange = process.env.RABBITMQ_DLX || "notification_dlx";
+    this.exchange = process.env.RABBITMQ_EXCHANGE || "notification_exchange";
   }
 
   public static getInstance(): RabbitMQManager {
@@ -61,8 +61,8 @@ class RabbitMQManager {
           }
 
           this.channel = channel;
-          channel.assertExchange(this.exchange, 'direct', {
-            durable: true
+          channel.assertExchange(this.exchange, "direct", {
+            durable: true,
           });
 
           channel.on("error", (err) => {
@@ -119,8 +119,8 @@ class RabbitMQManager {
             return;
           }
           this.channel = channel;
-          channel.assertExchange(this.exchange, 'direct', {
-            durable: true
+          channel.assertExchange(this.exchange, "direct", {
+            durable: true,
           });
         });
       } catch (error) {
@@ -141,7 +141,7 @@ class RabbitMQManager {
 
       this.channel.publish(
         this.exchange,
-        'thread',
+        "thread",
         Buffer.from(JSON.stringify(message)),
         { persistent: true }
       );

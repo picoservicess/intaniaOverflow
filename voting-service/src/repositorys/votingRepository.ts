@@ -64,14 +64,13 @@ export const applyDownVote = async (
 
 export const getCountVote = async (isThread: boolean, targetId: string) => {
   try {
+    const query = { targetId, isThread: isThread };
     const upVotes = await Vote.countDocuments({
-      isThread,
-      targetId,
+      ...query,
       isUpVote: true,
     });
     const downVotes = await Vote.countDocuments({
-      isThread,
-      targetId,
+      ...query,
       isUpVote: false,
     });
     const netVotes = upVotes - downVotes;

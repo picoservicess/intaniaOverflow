@@ -23,4 +23,28 @@ export interface Empty {}
 
 export interface SearchQuery {
   query: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+}
+
+export interface GetAllThreadsParams {
+  page: number;
+  pageSize: number;
+}
+
+export interface GetAllThreadsResponse {
+  threads: Thread[];
+  pagination: Pagination;
+}
+
+export interface SearchThreadsResponse {
+  threads: Thread[];
+  pagination: Pagination;
 }

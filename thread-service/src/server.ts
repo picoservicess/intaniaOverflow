@@ -6,7 +6,17 @@ import { z } from "zod";
 
 import { getAuthenticatedUserId } from "../../user-service/src/libs/token";
 import { applyAnonymity, sanitizeThreadRequest } from "./decorator";
-import { Empty, SearchQuery, ThreadId, ThreadList } from "./models";
+import { RequestPage, RequestPageSize } from "./enums/request-enum";
+import {
+  Empty,
+  GetAllThreadsParams,
+  GetAllThreadsResponse,
+  Pagination,
+  SearchQuery,
+  SearchThreadsResponse,
+  ThreadId,
+  ThreadList,
+} from "./models";
 import { rabbitMQManager } from "./rabbitMQManager";
 
 const PROTO_PATH = "../proto/thread.proto";
@@ -32,17 +42,42 @@ const address = `${HOST}:${PORT}`;
 
 server.addService(threadProto.ThreadService.service, {
   getAllThreads: async (
-    call: ServerUnaryCall<Empty, ThreadList>,
-    callback: sendUnaryData<ThreadList>
+    call: ServerUnaryCall<GetAllThreadsParams, GetAllThreadsResponse>,
+    callback: sendUnaryData<GetAllThreadsResponse>
   ) => {
     try {
+      const page = call.request?.page || RequestPage.DEFAULT;
+
+      let pageSize = call.request?.pageSize || RequestPageSize.DEFAULT;
+      pageSize = Math.min(pageSize, RequestPageSize.MAX);
+
       const rawThreads = await prisma.thread.findMany({
         where: {
           isDeleted: false,
         },
+        skip: page * pageSize,
+        take: pageSize,
+        orderBy: {
+          updatedAt: "desc",
+        },
       });
+
+      const totalItems = await prisma.thread.count({
+        where: {
+          isDeleted: false,
+        },
+      });
+
+      const pagination: Pagination = {
+        currentPage: page,
+        totalPages: Math.ceil(totalItems / pageSize),
+        pageSize: pageSize,
+        totalItems: totalItems,
+      };
+
       const threads = rawThreads.map((thread) => applyAnonymity(thread));
-      callback(null, { threads });
+
+      callback(null, { threads: threads, pagination: pagination });
     } catch (error) {
       console.error(`getAllThreads: ${error}`);
       callback({
@@ -278,10 +313,15 @@ server.addService(threadProto.ThreadService.service, {
 
   // TODO : searchThread
   searchThreads: async (
-    call: ServerUnaryCall<SearchQuery, ThreadList>,
-    callback: sendUnaryData<ThreadList>
+    call: ServerUnaryCall<SearchQuery, SearchThreadsResponse>,
+    callback: sendUnaryData<SearchThreadsResponse>
   ) => {
     try {
+      const page = call.request?.page || RequestPage.DEFAULT;
+
+      let pageSize = call.request?.pageSize || RequestPageSize.DEFAULT;
+      pageSize = Math.min(pageSize, RequestPageSize.MAX);
+
       const rawThreads = await prisma.thread.findMany({
         where: {
           OR: [
@@ -300,9 +340,40 @@ server.addService(threadProto.ThreadService.service, {
           ],
           isDeleted: false, // Only show non-deleted threads in search
         },
+        skip: page * pageSize,
+        take: pageSize,
       });
+
+      const totalItems = await prisma.thread.count({
+        where: {
+          OR: [
+            {
+              title: {
+                contains: call.request.query,
+                mode: "insensitive",
+              },
+            },
+            {
+              body: {
+                contains: call.request.query,
+                mode: "insensitive",
+              },
+            },
+          ],
+          isDeleted: false,
+        },
+      });
+
+      const pagination: Pagination = {
+        currentPage: page,
+        totalPages: Math.ceil(totalItems / pageSize),
+        pageSize: pageSize,
+        totalItems: totalItems,
+      };
+
       const threads = rawThreads.map((thread) => applyAnonymity(thread));
-      callback(null, { threads });
+
+      callback(null, { threads: threads, pagination: pagination });
     } catch (error) {
       console.error(`searchThreads: ${error}`);
       callback({

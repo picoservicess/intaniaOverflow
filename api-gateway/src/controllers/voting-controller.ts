@@ -7,7 +7,8 @@ const grpcRequest = getGrpcRequest(votingClient);
 
 // Get current vote counts
 export const getVotes = controllerWrapper(async (req: any, res: any) => {
-  const { isThread, targetId } = req.query;
+  const { targetId } = req.query;
+  const isThread = req.query.isThread === "true";
 
   if (!targetId) {
     res.status(400).json({ error: "targetId is required" });
@@ -85,7 +86,8 @@ export const applyDownvote = controllerWrapper(async (req: any, res: any) => {
 // Check user vote status
 export const checkVoteStatus = controllerWrapper(async (req: any, res: any) => {
   const token = validateAuth(req);
-  const { isThread, targetId } = req.query;
+  const { targetId } = req.query;
+  const isThread = req.query.isThread === "true";
 
   if (!targetId) {
     res.status(400).json({ error: "targetId is required" });

@@ -16,7 +16,7 @@ import { createLogMiddleware } from "../../middleware/log";
 const threadRouter = express.Router();
 
 // Register a middleware to log all requests
-threadRouter.use(createLogMiddleware('thread-service'));
+threadRouter.use(createLogMiddleware("thread-service"));
 
 // Health check
 threadRouter.get("/health", healthCheck);
@@ -27,6 +27,8 @@ threadRouter.get("/me", getMyThreads);
 // Get all threads
 threadRouter.get("/", getAllThreads);
 
+// Search threads
+threadRouter.get("/search", searchThreads);
 
 // Get thread by ID
 threadRouter.get("/:threadId", getThreadById);
@@ -39,8 +41,5 @@ threadRouter.put("/:threadId", authMiddleware, updateThread);
 
 // Delete thread
 threadRouter.delete("/:threadId", authMiddleware, deleteThread);
-
-// Search threads
-threadRouter.get("/search", searchThreads);
 
 export default threadRouter;
