@@ -41,6 +41,17 @@ interface Thread {
     updatedAt: string;
     isDeleted: boolean;
 }
+interface Pagination {
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
+}
+
+interface SearchThreadResponse {
+    threads: Thread[];
+    pagination: Pagination;
+}
 
 interface Reply {
     replyId: string;
