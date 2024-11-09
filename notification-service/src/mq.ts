@@ -98,7 +98,8 @@ async function parseThread(
   const notificationData: INotification = {
     senderId: message.authorId,
     receiverId: userId,
-    targetId: message.threadId,
+    threadId: message.threadId,
+    replyId: "",
     isThread: true,
     isReply: false,
     isUser: false,
@@ -115,7 +116,8 @@ async function parseReply(
   const notificationData: INotification = {
     senderId: message.userId,
     receiverId: userId,
-    targetId: message.replyId,
+    threadId: message.threadId,
+    replyId: message.replyId,
     isThread: false,
     isReply: true,
     isUser: false,
