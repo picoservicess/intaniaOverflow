@@ -16,6 +16,7 @@ import Reply from "@/app/_components/thread/reply";
 import viewPinned from "@/lib/api/user/viewPinned";
 import getVotes from "@/lib/api/vote/getCountVote";
 import isUserVote from "@/lib/api/vote/isUserVote";
+import UpdateThreadButton from "@/app/_components/thread/updateThreadButton";
 
 export default async function ThreadPage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions);
@@ -59,7 +60,12 @@ export default async function ThreadPage({ params }: { params: { slug: string } 
                 <h1 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">
                   {threadData.title}
                 </h1>
-                <PinButton className="pt-2" size={24} threadId={params.slug} pinnedStatus={pinnedStatus}/>
+                <div className="flex gap-3">
+                  {session.user.id === threadData.authorId && (
+                    <UpdateThreadButton threadToUpdate={threadData} />
+                  )}
+                  <PinButton className="pt-2" size={24} threadId={params.slug} pinnedStatus={pinnedStatus}/>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2 mb-3">
                 {threadData.tags.map((tag) => (

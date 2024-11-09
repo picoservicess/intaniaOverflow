@@ -108,3 +108,28 @@ interface PostListProps {
     replyCounts: number[];
     pinStatuses: boolean[];
 }
+
+interface NotificationResponse {
+    _id: string;
+    senderId: string;
+    receiverId: string;
+    targetId: string;
+    isThread: boolean;
+    isReply: boolean;
+    isUser: boolean;
+    isSeen: boolean;
+    payload: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+}
+
+interface NotificationItem {
+    isPinned: boolean;
+    userName: string;
+    userProfile: string;
+    threadTitle: string;
+    threadId: string;
+    isSeen: boolean;
+}
+  

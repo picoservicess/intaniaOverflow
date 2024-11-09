@@ -1,4 +1,4 @@
-import { Bell, Bookmark, LogOut, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -9,72 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
 import Icon from "@/app/assets/icon.svg";
 import getUserProfile from "@/lib/api/user/getUserProfile";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
-
-interface Notification {
-  isPinned: boolean;
-  userName: string;
-  userProfile: string;
-  threadTitle: string;
-}
-
-// Sample notifications data
-const notifications: Notification[] = [
-  {
-    isPinned: true,
-    userName: "John Doe",
-    userProfile: "https://example.com/profiles/john_doe",
-    threadTitle: "How to use TypeScript interfaces effectively",
-  },
-  {
-    isPinned: false,
-    userName: "Jane Smith",
-    userProfile: "https://example.com/profiles/jane_smith",
-    threadTitle: "JavaScript ES6 features and beyond",
-  },
-];
-
-const NotificationItem = ({ notification }: { notification: Notification }) => {
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-3 p-3 rounded-lg relative",
-        "hover:bg-muted/50 transition-colors cursor-pointer"
-      )}
-    >
-      <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-destructive" />
-      <div className="relative flex-shrink-0">
-        <Avatar className="h-[52px] w-[52px]">
-          <AvatarImage src={notification.userProfile} alt={notification.userName} />
-          <AvatarFallback className="text-base">
-            {notification.userName[0]}
-          </AvatarFallback>
-        </Avatar>
-        {notification.isPinned && (
-          <Bookmark
-            className="absolute -right-1 -bottom-1 text-muted-foreground"
-            size={14}
-            fill="currentColor"
-          />
-        )}
-      </div>
-      <div className="flex flex-col gap-1 min-w-0">
-        <p className="text-sm break-words pr-6">
-          <span className="font-medium">{notification.userName}</span>{" "}
-          ได้ตอบกลับเธรด{" "}
-          <span className="font-medium">{notification.threadTitle}</span>{" "}
-          {notification.isPinned ? "ที่คุณบันทึกไว้" : "ของคุณ"}
-        </p>
-        <span className="text-xs text-muted-foreground">20 นาทีที่แล้ว</span>
-      </div>
-    </div>
-  );
-};
+import NotificationDropdown from "./notificationDropdown";
 
 export default async function Header() {
   const session = await  getServerSession(authOptions);
@@ -96,23 +35,7 @@ export default async function Header() {
 
           {session ? (
             <div className="flex items-center gap-2 md:gap-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative h-9 w-9 md:h-10 md:w-10">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-1 right-1.5 h-2 w-2 rounded-full bg-destructive" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[320px] md:w-[450px]" align="end" sideOffset={8}>
-                  <ScrollArea className="h-[calc(100vh-120px)] rounded-md">
-                    <div className="flex flex-col p-2 gap-1">
-                      {notifications.map((notification, index) => (
-                        <NotificationItem key={index} notification={notification} />
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* <NotificationDropdown /> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">

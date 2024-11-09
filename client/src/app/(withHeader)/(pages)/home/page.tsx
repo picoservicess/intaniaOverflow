@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import searchThreads from "@/lib/api/thread/searchThreads";
 import getVotes from "@/lib/api/vote/getCountVote";
 import isUserVote from "@/lib/api/vote/isUserVote";
@@ -41,10 +41,17 @@ const Home = () => {
 
   // Loading
   const [loading, setLoading] = useState(true);
+  const [paginationLoading, setPaginationLoading] = useState(true);
+
+  // Refs to track previous values
+  const prevSearchTerm = useRef(searchTerm);
 
   useEffect(() => {
     const fetchHomeData = async () => {
       setLoading(true);
+      if (prevSearchTerm.current !== searchTerm) {
+        setPaginationLoading(true);
+      }
       try {
         const threadsResponse = await searchThreads(searchTerm, page);
         const threads = threadsResponse.threads;
@@ -95,10 +102,12 @@ const Home = () => {
         setReplyCounts(replyCounts);
         setPinStatuses(pinStatuses);
         setMaxPage(threadsResponse.pagination.totalPages);
+        prevSearchTerm.current = searchTerm;
       } catch (error) {
         console.error("Error fetching home page data:", error);
       } finally {
         setLoading(false);
+        setPaginationLoading(false);
       }
     };
 
@@ -163,7 +172,7 @@ const Home = () => {
             </div>
           )}
         </div>
-        {loading ? (
+        {paginationLoading ? (
           <Pagination
             className="mt-3 animate-pulse"
             classNames={{
@@ -174,12 +183,14 @@ const Home = () => {
             isDisabled
           />
         ) : (
-          <Pagination
-            className="mt-3"
-            total={maxPage}
-            initialPage={page + 1}
-            onChange={(page) => setPage(page - 1)}
-          />
+          threads.length > 0 && (
+            <Pagination
+              className="mt-3"
+              total={maxPage}
+              initialPage={page + 1}
+              onChange={(page) => setPage(page - 1)}
+            />
+          )
         )}
       </div>
     </div>
