@@ -26,6 +26,6 @@ app.listen(port, () => console.log(`Server started on port ${port}`));
 
 // Start RabbitMQ connection and message processing
 startMQ().catch((error) => {
-  console.error("❌ Failed to start RabbitMQ:", error);
-  process.exit(1);
+	console.error("❌ Failed to start RabbitMQ:", error);
+	process.exit(1);
 });

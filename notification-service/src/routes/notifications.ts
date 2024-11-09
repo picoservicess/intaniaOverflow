@@ -1,10 +1,10 @@
 import express from "express";
 
 import {
-  getAllNotificationsByUserId,
-  getHealthCheck,
-  getUnreadNotificationsByUserId,
-  markNotificationsAsSeenByUserId,
+	getAllNotificationsByUserId,
+	getHealthCheck,
+	getUnreadNotificationsByUserId,
+	markNotificationsAsSeenByUserId,
 } from "../controllers/notificationController";
 import { authenticateToken } from "../middlewares/auth";
 

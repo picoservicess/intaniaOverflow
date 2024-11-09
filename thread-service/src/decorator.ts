@@ -1,26 +1,24 @@
 import { Thread } from "@prisma/client";
 
-export const sanitizeThreadRequest = (
-  thread: Partial<Thread>
-): Partial<Thread> => {
-  const { threadId, ...updatedThread } = thread;
+export const sanitizeThreadRequest = (thread: Partial<Thread>): Partial<Thread> => {
+	const { threadId, ...updatedThread } = thread;
 
-  updatedThread.updatedAt = new Date();
+	updatedThread.updatedAt = new Date();
 
-  if (updatedThread.createdAt) {
-    delete updatedThread.createdAt;
-  }
-  if (updatedThread.isDeleted) {
-    delete updatedThread.isDeleted;
-  }
-  return updatedThread;
+	if (updatedThread.createdAt) {
+		delete updatedThread.createdAt;
+	}
+	if (updatedThread.isDeleted) {
+		delete updatedThread.isDeleted;
+	}
+	return updatedThread;
 };
 
 export const applyAnonymity = (thread: Thread): Thread => {
-  const newThread = { ...thread };
-  const isAnonymous = thread?.isAnonymous;
-  if (isAnonymous) {
-    newThread.authorId = "";
-  }
-  return newThread;
+	const newThread = { ...thread };
+	const isAnonymous = thread?.isAnonymous;
+	if (isAnonymous) {
+		newThread.authorId = "";
+	}
+	return newThread;
 };
