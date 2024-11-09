@@ -17,8 +17,6 @@ export default async function updateThread(token: string, threadId: string, upda
     throw new Error("Failed to update thread");
   }
 
-  console.log(await response.json());
-
   revalidateTag("Thread");
 
   return await response.json();
