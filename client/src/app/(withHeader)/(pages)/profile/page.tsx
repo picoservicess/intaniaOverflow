@@ -11,6 +11,7 @@ import getRepliesByThread from "@/lib/api/reply/getRepliesByThread";
 import isUserVote from "@/lib/api/vote/isUserVote";
 import getUserDetail from "@/lib/api/user/getUserDetail";
 import getVotes from "@/lib/api/vote/getCountVote";
+import getMyThread from "@/lib/api/thread/getMyThreads";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
@@ -55,12 +56,33 @@ export default async function Page() {
   }
 
   // About me Threads
-  const aboutMeThreads: Thread[] = []; // Assuming you will populate this as needed
-  const aboutMeThreadsReplyCounts:number[] = [];
-  const aboutMeThreadsVoteCounts:VoteCounts[] = [];
-  const aboutMeThreadsVoteStatuses:number[] = [];
-  const aboutMeThreadsUserDetails:User[] = [];
-  const aboutMeThreadsPinStatuses:boolean[] = [];
+  const myThreadResponse = await getMyThread(token);
+  const aboutMeThreads:Thread[] = myThreadResponse.threads.reverse();
+  const aboutMeThreadsReplyCounts:number[] = await Promise.all(
+    aboutMeThreads.map(async (thread) => {
+      const replies = await getRepliesByThread(thread.threadId);
+      return replies.length;
+    })
+  );
+  const aboutMeThreadsVoteCounts:VoteCounts[] = await Promise.all(
+    aboutMeThreads.map(async (thread) => await getVotes(true, thread.threadId))
+  );
+  const aboutMeThreadsVoteStatuses:number[] = await Promise.all(
+    aboutMeThreads.map(async (thread) => {
+      const response = await isUserVote(token, true, thread.threadId);
+      return response.voteStatus;
+    })
+  );
+  const aboutMeThreadsUserDetails:User[] = await Promise.all(
+    aboutMeThreads.map(async (thread) => {
+      return await getUserDetail(token, thread.authorId);
+    })
+  );
+  const aboutMeThreadsPinStatuses:boolean[] = await Promise.all(
+    aboutMeThreads.map(async (thread) => {
+      return pinnedThreadIds.threadIds.includes(thread.threadId);
+    })
+  );;
   const aboutMeThreadsPostlistProps:PostListProps = {
     threads: aboutMeThreads,
     userDetails: aboutMeThreadsUserDetails,

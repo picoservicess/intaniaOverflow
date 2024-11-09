@@ -17,6 +17,7 @@ import viewPinned from "@/lib/api/user/viewPinned";
 import getVotes from "@/lib/api/vote/getCountVote";
 import isUserVote from "@/lib/api/vote/isUserVote";
 import UpdateThreadButton from "@/app/_components/thread/updateThreadButton";
+import getMyThread from "@/lib/api/thread/getMyThreads";
 
 export default async function ThreadPage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions);
@@ -33,6 +34,11 @@ export default async function ThreadPage({ params }: { params: { slug: string } 
   const voteCount = await getVotes(true, threadData.threadId);
   const voteStatusResponse = await isUserVote(token, true, threadData.threadId);
   const voteStatus = voteStatusResponse.voteStatus;
+
+  // Check my thread
+  const mythreadResponse = await getMyThread(token);
+  const myThreadIds = mythreadResponse.threads.map((thread:Thread) => thread.threadId);
+  const isMyThread = myThreadIds.includes(threadData.threadId);
 
   const result = {
     threadImages: [] as string[],
@@ -61,7 +67,7 @@ export default async function ThreadPage({ params }: { params: { slug: string } 
                   {threadData.title}
                 </h1>
                 <div className="flex gap-3">
-                  {session.user.id === threadData.authorId && (
+                  {isMyThread && (
                     <UpdateThreadButton threadToUpdate={threadData} />
                   )}
                   <PinButton className="pt-2" size={24} threadId={params.slug} pinnedStatus={pinnedStatus}/>
@@ -85,7 +91,15 @@ export default async function ThreadPage({ params }: { params: { slug: string } 
                 <div className="flex items-center text-sm text-gray-600">
                   <span className="font-medium">{authorData?.displayname}</span>
                   <span className="mx-1">·</span>
-                  <span>{timeAgo(new Date(threadData.createdAt))}</span>
+                  <span>โพสเมื่อ {timeAgo(new Date(threadData.createdAt))}</span>
+                  {
+                    threadData.createdAt != threadData.updatedAt && (
+                      <>
+                        <span className="mx-1">·</span>
+                        <span>แก้ไขล่าสุด {timeAgo(new Date(threadData.updatedAt))}</span>
+                      </>
+                    )
+                  }
                 </div>
               </div>
               <div className="w-full bg-gray-300 my-4 rounded-full h-[2px]" />

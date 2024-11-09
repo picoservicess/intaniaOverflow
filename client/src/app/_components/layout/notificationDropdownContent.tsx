@@ -43,8 +43,6 @@ export default async function NotificationDropdownContent() {
     })
     .filter((item) => item !== null);
 
-    console.log()
-
     return (
         <>
             {notificationItems.map((notificationItem, index) => (

@@ -99,16 +99,16 @@ export default function Post({ post, userDetail, voteCount, voteStatus, replyCou
       <div className="flex items-center sm:items-start space-x-3 w-full sm:w-auto">
         <Avatar className="w-8 h-8 sm:w-10 sm:h-10">
           <AvatarImage
-            src={userDetail?.profileImage || ANONYMOUS_USER.profileImage}
+            src={post.isAnonymous ? ANONYMOUS_USER.profileImage : userDetail?.profileImage || ANONYMOUS_USER.profileImage}
             className="size-full rounded-[inherit] object-cover"
           />
           <AvatarFallback className="text-sm">
-            {userDetail?.displayname[0] || ANONYMOUS_USER.displayname[0]}
+            {post.isAnonymous ? ANONYMOUS_USER.displayname[0] : userDetail?.displayname[0] || ANONYMOUS_USER.displayname[0]}
           </AvatarFallback>
         </Avatar>
         <div className="flex-grow">
           <div className="flex flex-wrap items-center text-xs sm:text-sm text-gray-600">
-            <span className="font-medium">{userDetail?.displayname || ANONYMOUS_USER.displayname}</span>
+            <span className="font-medium">{post.isAnonymous ? ANONYMOUS_USER.displayname : userDetail?.displayname || ANONYMOUS_USER.displayname}</span>
             <span className="mx-1">·</span>
             <span>{timeAgo(new Date(post.createdAt))}</span>
           </div>

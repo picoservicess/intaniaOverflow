@@ -19,7 +19,7 @@ export default async function getThread(token: string, threadId: string) {
     headers: {
       authorization: `Bearer ${token}`,
     },
-    next: { tags: ["Thread"] },
+    next: { tags: ["My Thread"] },
   });
 
   if (!response.ok) {
