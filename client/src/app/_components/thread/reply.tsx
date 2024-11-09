@@ -18,7 +18,7 @@ export default async function Reply({ reply }: {reply: Reply}) {
 
   const authorData:User = await getUserDetail(session.user.accessToken, reply.userId);
   const voteCount = await getVotes(false, reply.replyId);
-  const voteStatusResponse = await isUserVote(token, true, reply.replyId);
+  const voteStatusResponse = await isUserVote(token, false, reply.replyId);
   const voteStatus = voteStatusResponse.voteStatus;
 
   const result = {
