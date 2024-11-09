@@ -66,6 +66,8 @@ services:
       PORT: 5002
       JWT_SECRET: ${JWT_SECRET}
       DATABASE_URL: ${NOTI_DATABASE_URL}
+      THREAD_SERVICE_HOST: load-balancer
+      THREAD_SERVICE_PORT: 5004
       USER_SERVICE_HOST: load-balancer
       USER_SERVICE_PORT: 5005
     depends_on:
