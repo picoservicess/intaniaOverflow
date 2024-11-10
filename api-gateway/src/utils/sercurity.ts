@@ -20,7 +20,7 @@ const applySecurityMiddleware = (app: Application) => {
   app.use(helmet());
 
   // Rate limiting to prevent DDoS attacks
-  app.use(limiter);
+  // app.use(limiter);
 
   // Prevent HTTP Parameter Pollution
   app.use(hpp());

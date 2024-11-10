@@ -143,7 +143,7 @@ server.addService(threadProto.ThreadService.service, {
       })
     }
   },
-      
+
   createThread: async (
     call: ServerUnaryCall<Thread, Thread>,
     callback: sendUnaryData<Thread>
@@ -177,6 +177,7 @@ server.addService(threadProto.ThreadService.service, {
             updatedAt: true,
             createdAt: true,
             isDeleted: true,
+            authorId: true,
           })
           .parse(call.request),
         authorId: userId, // Enforce the authenticated user's ID
