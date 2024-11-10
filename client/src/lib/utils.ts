@@ -11,7 +11,7 @@ export const THREADS_PER_PAGE = 5;
 export const FILE_SIZE_LIMIT = 5; // MB
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+	return twMerge(clsx(inputs));
 }
 
 export function timeAgo(date: Date): string {

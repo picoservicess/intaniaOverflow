@@ -16,29 +16,24 @@ const upload = multer();
 assetRegistry.register("Asset", AssetSchema);
 
 assetRegistry.registerPath({
-  method: "post",
-  path: "/asset/upload",
-  tags: ["Asset"],
-  request: {
-    body: {
-      content: {
-        "multipart/form-data": {
-          schema: z.object({
-            file: z.any().openapi({
-              type: "string",
-              format: "binary",
-            }),
-          }),
-        },
-      },
-    },
-  },
-  responses: createApiResponse(z.array(AssetSchema), "Success"),
+	method: "post",
+	path: "/asset/upload",
+	tags: ["Asset"],
+	request: {
+		body: {
+			content: {
+				"multipart/form-data": {
+					schema: z.object({
+						file: z.any().openapi({
+							type: "string",
+							format: "binary",
+						}),
+					}),
+				},
+			},
+		},
+	},
+	responses: createApiResponse(z.array(AssetSchema), "Success"),
 });
 
-assetRouter.post(
-  "/upload",
-  authenticateToken,
-  upload.single("file"),
-  assetController.uploadFile
-);
+assetRouter.post("/upload", authenticateToken, upload.single("file"), assetController.uploadFile);

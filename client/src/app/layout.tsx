@@ -22,7 +22,7 @@ const anuphan = Anuphan({
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
   return (

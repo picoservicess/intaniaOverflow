@@ -10,8 +10,8 @@ const host = process.env.VOTING_SERVICE_HOST || "voting-service";
 const port = process.env.VOTING_SERVICE_PORT || "5006";
 
 const votingClient = new votingProto.VotingService(
-  `${host}:${port}`, // gRPC server address
-  grpc.credentials.createInsecure()
+	`${host}:${port}`, // gRPC server address
+	grpc.credentials.createInsecure()
 );
 
 console.log("📩 Voting client connected to", `${host}:${port}`);
