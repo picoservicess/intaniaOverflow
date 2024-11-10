@@ -86,13 +86,13 @@ export default function Post({
 
 	const handlePin = async (event: React.MouseEvent) => {
 		event.stopPropagation();
-		event.preventDefault(); // Prevent navigation
-		if (!session || pinned) return;
+		event.preventDefault();
+		if (!session) return;
 		const token = session.user.accessToken as string;
 
 		try {
 			await applyPin(token, post.threadId);
-			setPinned(true);
+			setPinned((prev) => !prev);
 		} catch (error) {
 			console.error("Error applying pin:", error);
 		}

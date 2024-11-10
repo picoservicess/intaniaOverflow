@@ -22,11 +22,11 @@ export default function PinButton({
 	const [pinned, setPinned] = useState<boolean>(pinnedStatus);
 
 	const handlePin = async () => {
-		if (!session?.user.accessToken || pinned) return;
+		if (!session?.user.accessToken) return;
 
 		try {
 			await applyPin(session.user.accessToken, threadId);
-			setPinned(true);
+			setPinned((prev) => !prev);
 		} catch (error) {
 			console.error("Error applying pin:", error);
 		}
