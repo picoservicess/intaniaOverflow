@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { useSession } from "next-auth/react";
 
-import updateUserProfile from "@/lib/api/user/updateUserProfile";
-import uploadFiles from "@/lib/api/asset/uploadFiles"; // Updated import
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import uploadFiles from "@/lib/api/asset/uploadFiles";
+import updateUserProfile from "@/lib/api/user/updateUserProfile";
+import { FILE_SIZE_LIMIT } from "@/lib/utils";
 
 interface ProfileFormProps {
   onClose: () => void;
@@ -22,12 +24,21 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
   const [picture, setPicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setPicture(file);
-      setPreviewUrl(URL.createObjectURL(file));
+
+      if (file.size > FILE_SIZE_LIMIT * 1024 * 1024) {
+        setError(`ไฟล์ต้องมีขนาดไม่เกิน ${FILE_SIZE_LIMIT} MB`);
+        setPicture(null);
+        setPreviewUrl(null);
+      } else {
+        setError("");
+        setPicture(file);
+        setPreviewUrl(URL.createObjectURL(file));
+      }
     }
   };
 
@@ -38,11 +49,17 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
       let profileImageUrl: string | undefined;
 
       if (picture) {
-        const [response] = await uploadFiles(session?.user?.accessToken, [picture]);
+        const [response] = await uploadFiles(session?.user?.accessToken, [
+          picture,
+        ]);
         profileImageUrl = response?.responseObject.assetUrl;
       }
 
-      await updateUserProfile(session?.user.accessToken, displayName, profileImageUrl);
+      await updateUserProfile(
+        session?.user.accessToken,
+        displayName,
+        profileImageUrl
+      );
 
       onClose();
     } catch (error) {
@@ -82,6 +99,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
                 onChange={handleFileChange}
                 multiple={false}
               />
+              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}{" "}
               {picture && (
                 <p className="mt-2 text-sm text-muted-foreground">
                   ไฟล์ที่เลือก: {picture.name}
@@ -113,8 +131,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onClose }) => {
             ยกเลิก
           </Button>
         </DialogClose>
-        <Button type="submit" className="bg-primary">
-          {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : "ยืนยัน"}
+        <Button type="submit" className="bg-primary" disabled={error != ""}>
+          {loading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            "ยืนยัน"
+          )}
         </Button>
       </DialogFooter>
     </form>

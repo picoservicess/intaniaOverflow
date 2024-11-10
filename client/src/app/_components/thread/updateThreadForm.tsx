@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+
+import { useSession } from "next-auth/react";
+
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import updateThread from "@/lib/api/thread/updateThread";
-import { useSession } from "next-auth/react";
 import uploadFiles from "@/lib/api/asset/uploadFiles";
+import updateThread from "@/lib/api/thread/updateThread";
 
 interface UpdateThreadFormProps {
   onClose: () => void;
@@ -16,7 +18,7 @@ interface UpdateThreadFormProps {
 }
 
 const UpdateThreadForm: React.FC<UpdateThreadFormProps> = ({
-  onClose, 
+  onClose,
   threadToUpdate,
 }) => {
   const { data: session } = useSession();
@@ -55,11 +57,15 @@ const UpdateThreadForm: React.FC<UpdateThreadFormProps> = ({
         body,
         assetUrls,
         tags,
-        isAnonymous
+        isAnonymous,
       };
 
       // Call the update thread API
-      await updateThread(session?.user?.accessToken, threadToUpdate.threadId, updatedThread);
+      await updateThread(
+        session?.user?.accessToken,
+        threadToUpdate.threadId,
+        updatedThread
+      );
       onClose(); // Close the form after submission
     } catch (error) {
       console.error("Error updating thread:", error);

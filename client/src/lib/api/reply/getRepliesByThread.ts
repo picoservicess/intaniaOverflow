@@ -1,14 +1,18 @@
 "use server";
 
-export default async function getRepliesByThread(threadId: string): Promise<Reply[]> {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/replies/${threadId}`, {
-        method: 'GET',
-        next: { tags: ["Replies"] },
-    });
-
-    if (!response.ok) {
-        throw new Error("Cannot get replies for the thread");
+export default async function getRepliesByThread(
+  threadId: string
+): Promise<Reply[]> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_GATEWAY_URL}/replies/${threadId}`,
+    {
+      method: "GET",
     }
-    
-    return await response.json() as Reply[];
+  );
+
+  if (!response.ok) {
+    throw new Error("Cannot get replies for the thread");
+  }
+
+  return (await response.json()) as Reply[];
 }

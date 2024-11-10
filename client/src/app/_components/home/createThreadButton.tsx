@@ -30,7 +30,7 @@ export default function CreateThreadButton({
   setVoteCounts,
   setVoteStatuses,
   setReplyCounts,
-  setPinStatuses
+  setPinStatuses,
 }: CreateThreadButtonProps) {
   const [open, setOpen] = useState(false);
   return (
@@ -50,7 +50,7 @@ export default function CreateThreadButton({
         <DialogHeader>
           <DialogTitle>สร้างเธรด</DialogTitle>
         </DialogHeader>
-        <ThreadForm 
+        <ThreadForm
           onClose={() => setOpen(false)}
           setThread={setThread}
           setUserDetails={setUserDetails}

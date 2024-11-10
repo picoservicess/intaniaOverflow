@@ -1,15 +1,18 @@
 "use client";
 
 import { SetStateAction, useState } from "react";
+
+import { useSession } from "next-auth/react";
+
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import createThread from "@/lib/api/thread/createThread";
-import { useSession } from "next-auth/react";
 import uploadFiles from "@/lib/api/asset/uploadFiles";
+import createThread from "@/lib/api/thread/createThread";
 import getUserDetail from "@/lib/api/user/getUserDetail";
+import { FILE_SIZE_LIMIT, THREADS_PER_PAGE } from "@/lib/utils";
 
 interface ThreadFormProps {
   onClose: () => void;
@@ -22,7 +25,7 @@ interface ThreadFormProps {
 }
 
 const ThreadForm: React.FC<ThreadFormProps> = ({
-  onClose, 
+  onClose,
   setThread,
   setUserDetails,
   setVoteCounts,
@@ -37,10 +40,29 @@ const ThreadForm: React.FC<ThreadFormProps> = ({
   const [tags, setTags] = useState<string[]>([]);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setAssets(Array.from(e.target.files));
+      const selectedFiles = Array.from(e.target.files);
+
+      // Check if any file exceeds the size limit
+      const oversizedFiles = selectedFiles.filter(
+        (file) => file.size > FILE_SIZE_LIMIT * 1024 * 1024
+      );
+
+      if (oversizedFiles.length > 0) {
+        const fileNames = oversizedFiles
+          .map((file) => `"${file.name}"`)
+          .join(", ");
+        setError(
+          `ไฟล์ดังต่อไปนี้มีขนาดเกิน ${FILE_SIZE_LIMIT} MB: ${fileNames}`
+        );
+        setAssets([]); // Clear the files if any file is too large
+      } else {
+        setError("");
+        setAssets(selectedFiles); // Set valid files
+      }
     }
   };
 
@@ -64,17 +86,52 @@ const ThreadForm: React.FC<ThreadFormProps> = ({
         authorId: session?.user?.id,
         isAnonymous,
       };
-      const responseThread = await createThread(session?.user?.accessToken, newThread);
+      const responseThread = await createThread(
+        session?.user?.accessToken,
+        newThread
+      );
 
       // Get User Profile
-      const userProfile = await getUserDetail(session?.user.accessToken as string, session?.user.id);
+      const userProfile = await getUserDetail(
+        session?.user.accessToken as string,
+        session?.user.id
+      );
 
-      setThread((prev) => [responseThread, ...prev]);
-      setUserDetails((prev) => [userProfile, ...prev]);
-      setVoteCounts((prev) => [{ upVotes: 0, downVotes: 0, netVotes: 0 }, ...prev]);
-      setVoteStatuses((prev) => [0, ...prev]);
-      setReplyCounts((prev) => [0, ...prev]);
-      setPinStatuses((prev) => [false, ...prev]);
+      setThread((prev) => {
+        const updated = [...prev];
+        if (updated.length == THREADS_PER_PAGE) updated.pop();
+        return [responseThread, ...updated];
+      });
+
+      setUserDetails((prev) => {
+        const updated = [...prev];
+        if (updated.length == THREADS_PER_PAGE) updated.pop();
+        return [userProfile, ...updated];
+      });
+
+      setVoteCounts((prev) => {
+        const updated = [...prev];
+        if (updated.length == THREADS_PER_PAGE) updated.pop();
+        return [{ upVotes: 0, downVotes: 0, netVotes: 0 }, ...updated];
+      });
+
+      setVoteStatuses((prev) => {
+        const updated = [...prev];
+        if (updated.length == THREADS_PER_PAGE) updated.pop();
+        return [0, ...updated];
+      });
+
+      setReplyCounts((prev) => {
+        const updated = [...prev];
+        if (updated.length == THREADS_PER_PAGE) updated.pop();
+        return [0, ...updated];
+      });
+
+      setPinStatuses((prev) => {
+        const updated = [...prev];
+        if (updated.length == THREADS_PER_PAGE) updated.pop();
+        return [false, ...updated];
+      });
     } catch (error) {
       console.error("Error creating thread:", error);
     } finally {
@@ -115,6 +172,8 @@ const ThreadForm: React.FC<ThreadFormProps> = ({
           multiple
           className="cursor-pointer"
         />
+        {error && <p className="text-red-500 text-sm">{error}</p>}{" "}
+        {/* Display error message */}
       </div>
 
       <div className="space-y-2">
@@ -144,8 +203,12 @@ const ThreadForm: React.FC<ThreadFormProps> = ({
             ยกเลิก
           </Button>
         </DialogClose>
-        <Button type="submit" className="bg-primary">
-          {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : "สร้าง"}
+        <Button type="submit" className="bg-primary" disabled={error != ""}>
+          {loading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            "สร้าง"
+          )}
         </Button>
       </div>
     </form>

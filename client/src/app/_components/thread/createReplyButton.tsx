@@ -2,7 +2,7 @@
 
 import { Reply } from "lucide-react";
 
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,19 @@ import {
 
 import ReplyForm from "./replyForm";
 
-export default function CreateReplyButton() {
+interface CreateReplyButtonProps {
+  setReplies: Dispatch<SetStateAction<Reply[]>>;
+  setUserDetails: Dispatch<SetStateAction<User[]>>;
+  setVoteCounts: Dispatch<SetStateAction<VoteCounts[]>>;
+  setVoteStatuses: Dispatch<SetStateAction<number[]>>;
+}
+
+export default function CreateReplyButton({
+  setReplies,
+  setUserDetails,
+  setVoteCounts,
+  setVoteStatuses,
+}: CreateReplyButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,7 +48,13 @@ export default function CreateReplyButton() {
             แชร์ความคิดเห็นของคุณในการสนทนานี้
           </DialogDescription>
         </DialogHeader>
-        <ReplyForm onClose={() => setOpen(false)} />
+        <ReplyForm
+          onClose={() => setOpen(false)}
+          setReplies={setReplies}
+          setUserDetails={setUserDetails}
+          setVoteCounts={setVoteCounts}
+          setVoteStatuses={setVoteStatuses}
+        />
       </DialogContent>
     </Dialog>
   );

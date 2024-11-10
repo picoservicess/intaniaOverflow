@@ -1,20 +1,15 @@
-/*
-1. ทำ Home ให้เป็น ssr
-2. ดึงข้อมูลของ PostList ทั้งหมดบน Home
-3. สร้าง loading.tsx ไว้ใน Home
-4. ปรับ Props ของ PostList, Post ให้รับข้อมูลไปแจก
-5. แก้แบบนี้ในโปรไฟล์ด้วย
-*/
-
 "use client";
 
-import { useEffect, useState } from "react";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
+
+import { useEffect, useState } from "react";
+
 import { useSession } from "next-auth/react";
-import applyUpVote from "@/lib/api/vote/applyUpVote";
+
 import applyDownVote from "@/lib/api/vote/applyDownVote";
-import isUserVote from "@/lib/api/vote/isUserVote";
+import applyUpVote from "@/lib/api/vote/applyUpVote";
 import getVotes from "@/lib/api/vote/getCountVote";
+import isUserVote from "@/lib/api/vote/isUserVote";
 
 interface VoteButtonProps {
   isThread: boolean;
@@ -35,7 +30,7 @@ const VoteButton: React.FC<VoteButtonProps> = ({ isThread, targetId }) => {
         try {
           const [voteResponse, votes] = await Promise.all([
             isUserVote(token, isThread, targetId),
-            getVotes(token, isThread, targetId),
+            getVotes(isThread, targetId),
           ]);
           setVoteStatus(voteResponse.voteStatus);
           setUpVotes(votes.upVotes);

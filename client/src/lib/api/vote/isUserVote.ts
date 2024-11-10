@@ -1,6 +1,10 @@
 "use server";
 
-export default async function isUserVote(token: string, isThread: boolean, targetId: string): Promise<VoteStatus> {
+export default async function isUserVote(
+  token: string,
+  isThread: boolean,
+  targetId: string
+): Promise<VoteStatus> {
   const url = new URL(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/votes/checkvote`);
   url.searchParams.append("isThread", String(isThread));
   url.searchParams.append("targetId", targetId);
@@ -16,5 +20,5 @@ export default async function isUserVote(token: string, isThread: boolean, targe
     throw new Error("Failed to check vote status");
   }
 
-  return await response.json() as VoteStatus;
+  return (await response.json()) as VoteStatus;
 }

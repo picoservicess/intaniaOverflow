@@ -1,6 +1,6 @@
-import React from "react";
-import { Card } from "@/components/ui/card";
+import ReplySectionSkeleton from "@/app/_components/thread/replySectionSkeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 
 export default function Loading() {
   return (
@@ -15,7 +15,10 @@ export default function Loading() {
               {/* Tags Skeleton */}
               <div className="flex flex-wrap gap-2 mb-3">
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <span key={index} className="text-sm bg-gray-300 px-4 py-1 rounded-md w-12" />
+                  <span
+                    key={index}
+                    className="text-sm bg-gray-300 px-4 py-1 rounded-md w-12"
+                  />
                 ))}
               </div>
 
@@ -45,34 +48,17 @@ export default function Loading() {
 
               {/* Image Gallery and File List Skeleton */}
               <div className="mt-4 space-y-2">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="w-full h-48 bg-gray-300 rounded-md" />
+                {Array.from({ length: 1 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-full h-48 bg-gray-300 rounded-md"
+                  />
                 ))}
               </div>
             </Card>
 
             {/* Replies Section Skeleton */}
-            <div className="max-w-4xl mx-auto">
-              <div className="h-10 bg-gray-300 rounded-md mb-4" />
-              <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4 h-6 w-32 bg-gray-300 rounded-md" />
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="p-4 bg-gray-200 rounded-md mb-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Avatar>
-                      <AvatarFallback className="bg-gray-300" />
-                    </Avatar>
-                    <div className="flex flex-col space-y-1">
-                      <div className="w-20 h-4 bg-gray-300 rounded-md" />
-                      <div className="w-16 h-4 bg-gray-300 rounded-md" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-300 rounded-md" />
-                    <div className="h-4 bg-gray-300 rounded-md" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ReplySectionSkeleton />
           </div>
         </div>
       </div>

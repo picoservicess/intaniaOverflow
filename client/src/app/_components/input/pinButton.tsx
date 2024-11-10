@@ -1,14 +1,15 @@
 "use client";
 
 import { Bookmark } from "lucide-react";
+
 import { useState } from "react";
 
-import applyPin from "@/lib/api/user/applyPin";
 import { useSession } from "next-auth/react";
 
+import { Button } from "@/components/ui/button";
+import applyPin from "@/lib/api/user/applyPin";
+
 export default function PinButton({
-  className = "",
-  size,
   threadId,
   pinnedStatus,
 }: {
@@ -32,18 +33,17 @@ export default function PinButton({
   };
 
   return (
-    <div
-      title="Pin"
-      className={`cursor-pointer ${className}`}
-      role="button"
-      aria-pressed={pinned}
+    <Button
+      variant="ghost"
+      size="sm"
+      className="p-2 mt-1"
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
         handlePin();
       }}
     >
-      <Bookmark size={size} fill={pinned ? "#000000" : "none"} />
-    </div>
+      <Bookmark size={24} fill={pinned ? "#000000" : "none"} />
+    </Button>
   );
 }

@@ -5,10 +5,9 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
+import CUIcon from "@/app/assets/account-link-logo-cu.svg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import CUIcon from "@/app/assets/account-link-logo-cu.svg";
 
 const LoginPage = () => {
   const router = useRouter();

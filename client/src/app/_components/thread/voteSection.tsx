@@ -1,11 +1,14 @@
 "use client";
 
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
+
 import { useState } from "react";
+
+import { useSession } from "next-auth/react";
+
 import { Button } from "@/components/ui/button";
 import applyDownVote from "@/lib/api/vote/applyDownVote";
 import applyUpVote from "@/lib/api/vote/applyUpVote";
-import { useSession } from "next-auth/react";
 
 interface VoteButtonProps {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;

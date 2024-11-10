@@ -1,5 +1,14 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+
+export const ANONYMOUS_USER: User = {
+  displayname: "Anonymous",
+  profileImage: "",
+};
+
+export const THREADS_PER_PAGE = 5;
+
+export const FILE_SIZE_LIMIT = 5; // MB
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

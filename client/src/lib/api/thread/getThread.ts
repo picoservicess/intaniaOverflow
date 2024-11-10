@@ -14,18 +14,21 @@ const EMPTY_THREAD = {
 };
 
 export default async function getThread(token: string, threadId: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/threads/${threadId}`, {
-    method: "GET",
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-    next: { tags: ["My Thread"] },
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_GATEWAY_URL}/threads/${threadId}`,
+    {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+      next: { tags: ["My Thread"] },
+    }
+  );
 
   if (!response.ok) {
     // throw new Error("Failed to fetch thread");
     return EMPTY_THREAD;
   }
 
-  return await response.json();
+  return (await response.json()) as Thread;
 }

@@ -1,5 +1,12 @@
 import { LogOut, User } from "lucide-react";
+
+import { Suspense } from "react";
+
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import Icon from "@/app/assets/icon.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,21 +16,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Icon from "@/app/assets/icon.svg";
 import getUserProfile from "@/lib/api/user/getUserProfile";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+
 import NotificationDropdown from "./notificationDropdown";
+import NotificationDropdownButtonSkeleton from "./notificationDropdownButtonSkeleton";
 
 export default async function Header() {
-  const session = await  getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
   const userProfile = await getUserProfile(session?.user.accessToken as string);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 transition-colors hover:opacity-90">
+          <Link
+            href="/"
+            className="flex items-center gap-3 transition-colors hover:opacity-90"
+          >
             <div className="w-8 h-8">
               <Icon />
             </div>
@@ -35,12 +44,21 @@ export default async function Header() {
 
           {session ? (
             <div className="flex items-center gap-2 md:gap-4">
-              {/* <NotificationDropdown /> */}
+              <Suspense fallback={<NotificationDropdownButtonSkeleton />}>
+                <NotificationDropdown />
+              </Suspense>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={userProfile?.profileImage || ""} alt={userProfile?.displayname || ""} className="size-full rounded-[inherit] object-cover" />
+                      <AvatarImage
+                        src={userProfile?.profileImage || ""}
+                        alt={userProfile?.displayname || ""}
+                        className="size-full rounded-[inherit] object-cover"
+                      />
                       <AvatarFallback className="text-sm">
                         {userProfile?.displayname?.[0] || "U"}
                       </AvatarFallback>
@@ -50,7 +68,11 @@ export default async function Header() {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <div className="flex items-center justify-start gap-2 p-2">
                     <div className="flex flex-col space-y-1 leading-none">
-                      {userProfile?.displayname && <p className="font-medium">{userProfile?.displayname}</p>}
+                      {userProfile?.displayname && (
+                        <p className="font-medium">
+                          {userProfile?.displayname}
+                        </p>
+                      )}
                       {userProfile?.email && (
                         <p className="w-[200px] truncate text-sm text-muted-foreground">
                           {userProfile?.email}

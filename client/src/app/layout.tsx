@@ -28,9 +28,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={cn(anuphan.variable, bai_jamjuree.variable)}>
-        <NextAuthProvider session={session}>
-          {children}
-        </NextAuthProvider>
+        <NextAuthProvider session={session}>{children}</NextAuthProvider>
       </body>
     </html>
   );

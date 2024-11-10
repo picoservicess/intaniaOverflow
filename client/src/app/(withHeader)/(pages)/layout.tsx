@@ -1,15 +1,19 @@
-import Header from '@/app/_components/layout/header';
+import { Suspense } from "react";
 
-export default async function Layout({
-    children,
+import Header from "@/app/_components/layout/header";
+import HeaderSkeleton from "@/app/_components/layout/headerSkeleton";
+
+export default function Layout({
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
   return (
     <>
-      <Header />
-      
+      <Suspense fallback={<HeaderSkeleton />}>
+        <Header />
+      </Suspense>
       {children}
     </>
   );
-};
+}

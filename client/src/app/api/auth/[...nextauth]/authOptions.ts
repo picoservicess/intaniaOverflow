@@ -1,7 +1,7 @@
 // pages/api/auth/[...nextauth].js
+import axios from "axios";
 
 import { AuthOptions } from "next-auth";
-import axios from "axios";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: AuthOptions = {

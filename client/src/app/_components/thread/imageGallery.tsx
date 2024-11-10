@@ -1,14 +1,14 @@
-// components/ImageGallery.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
+
+import Link from "next/link";
+
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 
 interface ImageGalleryProps {
@@ -29,23 +29,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
 
   return (
     <div className="flex justify-center">
-      <div className="w-full sm:w-4/5">
+      <div className="w-full">
         <Carousel setApi={setApi} className="w-full">
           <CarouselContent>
             {images.map((image, index) => (
               <CarouselItem key={index}>
                 <AspectRatio ratio={16 / 9}>
-                  <img
-                    src={image}
-                    alt={`Slide ${index + 1}`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+                  <Link href={image} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={image}
+                      alt={`Slide ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </Link>
                 </AspectRatio>
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="-left-12 sm:-left-16" />
-          <CarouselNext className="-right-12 sm:-right-16" />
           <div className="py-2 text-center">
             <div className="flex items-center justify-center gap-2 mt-4">
               {images.map((_, index) => (
