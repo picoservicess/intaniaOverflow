@@ -8,28 +8,28 @@ import { authOptions } from "./api/auth/[...nextauth]/authOptions";
 import "./globals.css";
 
 const bai_jamjuree = Bai_Jamjuree({
-  subsets: ["latin", "thai"],
-  weight: ["200", "300", "400", "500", "600", "700"],
-  variable: "--font-bai-jamjuree",
+	subsets: ["latin", "thai"],
+	weight: ["200", "300", "400", "500", "600", "700"],
+	variable: "--font-bai-jamjuree",
 });
 
 const anuphan = Anuphan({
-  subsets: ["latin", "thai"],
-  weight: ["200", "300", "400", "500", "600", "700"],
-  variable: "--font-anuphan",
+	subsets: ["latin", "thai"],
+	weight: ["200", "300", "400", "500", "600", "700"],
+	variable: "--font-anuphan",
 });
 
 export default async function RootLayout({
-  children,
+	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
-  return (
-    <html lang="en">
-      <body className={cn(anuphan.variable, bai_jamjuree.variable)}>
-        <NextAuthProvider session={session}>{children}</NextAuthProvider>
-      </body>
-    </html>
-  );
+	const session = await getServerSession(authOptions);
+	return (
+		<html lang="en">
+			<body className={cn(anuphan.variable, bai_jamjuree.variable)}>
+				<NextAuthProvider session={session}>{children}</NextAuthProvider>
+			</body>
+		</html>
+	);
 }

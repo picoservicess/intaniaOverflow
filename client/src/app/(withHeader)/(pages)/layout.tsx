@@ -4,16 +4,16 @@ import Header from "@/app/_components/layout/header";
 import HeaderSkeleton from "@/app/_components/layout/headerSkeleton";
 
 export default function Layout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <>
-      <Suspense fallback={<HeaderSkeleton />}>
-        <Header />
-      </Suspense>
-      {children}
-    </>
-  );
+	return (
+		<>
+			<Suspense fallback={<HeaderSkeleton />}>
+				<Header />
+			</Suspense>
+			{children}
+		</>
+	);
 }

@@ -22,16 +22,13 @@ router.get("/health-check", async (_req: Request, res: Response) => {
  * URL: /
  * Access: Requires authentication
  */
-router.post(
-  "/:threadId",
-  authenticateToken,
-  async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      // Extract threadId from the URL parameters
-      const { threadId } = req.params;
+router.post("/:threadId", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+	try {
+		// Extract threadId from the URL parameters
+		const { threadId } = req.params;
 
-      // Add threadId to the request body
-      req.body.threadId = threadId;
+		// Add threadId to the request body
+		req.body.threadId = threadId;
 
 		// Validate request body against the ReplySchema using Zod
 		const validatedData = ReplySchema.safeParse(req.body);
@@ -44,25 +41,25 @@ router.post(
 			return;
 		}
 
-      // Destructure validated data
-      const { text, assetUrls } = validatedData.data;
-      const userId = req.user?.userId;
+		// Destructure validated data
+		const { text, assetUrls } = validatedData.data;
+		const userId = req.user?.userId;
 
-      // Ensure user is authenticated
-      if (!userId) {
-        res.status(401).json({ error: "User ID is required" });
-        return;
-      }
-      // Create new reply in database
-      const newReply = await prisma.reply.create({
-        data: {
-          threadId,
-          text,
-          assetUrls,
-          userId,
-          replyAt: new Date(),
-        },
-      });
+		// Ensure user is authenticated
+		if (!userId) {
+			res.status(401).json({ error: "User ID is required" });
+			return;
+		}
+		// Create new reply in database
+		const newReply = await prisma.reply.create({
+			data: {
+				threadId,
+				text,
+				assetUrls,
+				userId,
+				replyAt: new Date(),
+			},
+		});
 
 		try {
 			await rabbitMQManager.publishMessage(newReply);
@@ -70,18 +67,16 @@ router.post(
 			console.error("Failed to publish message to RabbitMQ: ", mqError);
 		}
 
-      // Send a 201 Created response with the new reply
-      res.status(201).json({
-        message: "Reply created successfully",
-        newReply,
-      });
-    } catch (error) {
-      console.error("Create reply error:", error);
-      res.status(500).json({ error: "Failed to create reply" });
-    }
-  }
-);
-
+		// Send a 201 Created response with the new reply
+		res.status(201).json({
+			message: "Reply created successfully",
+			newReply,
+		});
+	} catch (error) {
+		console.error("Create reply error:", error);
+		res.status(500).json({ error: "Failed to create reply" });
+	}
+});
 
 /**
  * Route to get all replies for a specific thread
