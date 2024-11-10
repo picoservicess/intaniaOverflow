@@ -1,11 +1,11 @@
 import { Router } from "express";
 
 import {
-  applyDownvote,
-  applyUpvote,
-  checkVoteStatus,
-  getVotes,
-  healthCheck,
+	applyDownvote,
+	applyUpvote,
+	checkVoteStatus,
+	getVotes,
+	healthCheck,
 } from "../../controllers/voting-controller";
 import { authMiddleware } from "../../middleware/auth";
 import { createLogMiddleware } from "../../middleware/log";

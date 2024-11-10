@@ -1,62 +1,58 @@
 {
-  "name": "voting-service",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "",
-  "main": "index.ts",
-  "scripts": {
-    "dev": "tsx watch --clear-screen=false src/server.ts | pino-pretty",
-    "build": "tsup",
-    "start": "npx tsx src/server.ts",
-    "lint": "biome check src/",
-    "lint:fix": "biome check src/ --fix",
-    "format": "biome format src/ --fix"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.1.1",
-    "@grpc/grpc-js": "^1.12.2",
-    "@grpc/proto-loader": "^0.7.13",
-    "@protobuf-ts/protoc": "^2.9.4",
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "envalid": "^8.0.0",
-    "express": "^4.21.0",
-    "grpc-tools": "^1.12.4",
-    "helmet": "^7.1.0",
-    "http-status-codes": "^2.3.0",
-    "mongodb": "^6.9.0",
-    "mongoose": "^8.6.2",
-    "pino": "^9.4.0",
-    "swagger-ui-express": "^5.0.1",
-    "uuid": "^10.0.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.0",
-    "@tsconfig/node-lts-strictest-esm": "^18.12.1",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/node": "^22.5.5",
-    "@types/swagger-jsdoc": "^6.0.4",
-    "@types/swagger-ui-express": "^4.1.6",
-    "pino-pretty": "^11.2.2",
-    "protoc-gen-ts": "^0.8.7",
-    "ts-node": "^10.9.2",
-    "tsup": "^8.2.4",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.2"
-  },
-  "tsup": {
-    "entry": [
-      "src",
-      "!src/**/__tests__/**",
-      "!src/**/*.test.*"
-    ],
-    "splitting": false,
-    "sourcemap": true,
-    "clean": true
-  }
+	"name": "voting-service",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "",
+	"main": "index.ts",
+	"scripts": {
+		"dev": "tsx watch --clear-screen=false src/server.ts | pino-pretty",
+		"build": "tsup",
+		"start": "npx tsx src/server.ts",
+		"lint": "biome check src/",
+		"lint:fix": "biome check src/ --fix",
+		"format": "biome format src/ --fix"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@asteasolutions/zod-to-openapi": "^7.1.1",
+		"@grpc/grpc-js": "^1.12.2",
+		"@grpc/proto-loader": "^0.7.13",
+		"@protobuf-ts/protoc": "^2.9.4",
+		"body-parser": "^1.20.3",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"envalid": "^8.0.0",
+		"express": "^4.21.0",
+		"grpc-tools": "^1.12.4",
+		"helmet": "^7.1.0",
+		"http-status-codes": "^2.3.0",
+		"mongodb": "^6.9.0",
+		"mongoose": "^8.6.2",
+		"pino": "^9.4.0",
+		"swagger-ui-express": "^5.0.1",
+		"uuid": "^10.0.0",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.0",
+		"@tsconfig/node-lts-strictest-esm": "^18.12.1",
+		"@types/cors": "^2.8.17",
+		"@types/express": "^4.17.21",
+		"@types/node": "^22.5.5",
+		"@types/swagger-jsdoc": "^6.0.4",
+		"@types/swagger-ui-express": "^4.1.6",
+		"pino-pretty": "^11.2.2",
+		"protoc-gen-ts": "^0.8.7",
+		"ts-node": "^10.9.2",
+		"tsup": "^8.2.4",
+		"tsx": "^4.19.1",
+		"typescript": "^5.6.2"
+	},
+	"tsup": {
+		"entry": ["src", "!src/**/__tests__/**", "!src/**/*.test.*"],
+		"splitting": false,
+		"sourcemap": true,
+		"clean": true
+	}
 }

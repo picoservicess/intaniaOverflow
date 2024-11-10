@@ -131,23 +131,20 @@ server.addService(threadProto.ThreadService.service, {
       const threads = await prisma.thread.findMany({
         where: {
           authorId: userId,
-          isDeleted: false
-        }
+          isDeleted: false,
+        },
       });
       callback(null, { threads });
     } catch (error) {
       console.error(`getMyThreads: ${error}`);
       callback({
         code: grpc.status.INTERNAL,
-        details: "Interal Server Error"
-      })
+        details: "Interal Server Error",
+      });
     }
   },
 
-  createThread: async (
-    call: ServerUnaryCall<Thread, Thread>,
-    callback: sendUnaryData<Thread>
-  ) => {
+  createThread: async (call: ServerUnaryCall<Thread, Thread>, callback: sendUnaryData<Thread>) => {
     const userId = await getAuthenticatedUserId(call.metadata);
     if (!userId) {
       return callback({
@@ -196,10 +193,7 @@ server.addService(threadProto.ThreadService.service, {
     }
   },
 
-  updateThread: async (
-    call: ServerUnaryCall<Thread, Thread>,
-    callback: sendUnaryData<Thread>
-  ) => {
+  updateThread: async (call: ServerUnaryCall<Thread, Thread>, callback: sendUnaryData<Thread>) => {
     const userId = await getAuthenticatedUserId(call.metadata);
     if (!userId) {
       return callback({
@@ -257,10 +251,7 @@ server.addService(threadProto.ThreadService.service, {
   },
 
   // TODO : deleteThread
-  deleteThread: async (
-    call: ServerUnaryCall<ThreadId, Empty>,
-    callback: sendUnaryData<Empty>
-  ) => {
+  deleteThread: async (call: ServerUnaryCall<ThreadId, Empty>, callback: sendUnaryData<Empty>) => {
     const userId = await getAuthenticatedUserId(call.metadata);
     if (!userId) {
       return callback({
@@ -388,27 +379,20 @@ server.addService(threadProto.ThreadService.service, {
   },
 
   // TODO : healthCheck
-  healthCheck: async (
-    _: ServerUnaryCall<Empty, Empty>,
-    callback: sendUnaryData<Empty>
-  ) => {
+  healthCheck: async (_: ServerUnaryCall<Empty, Empty>, callback: sendUnaryData<Empty>) => {
     callback(null, {});
   },
 });
 
 try {
-  server.bindAsync(
-    address,
-    grpc.ServerCredentials.createInsecure(),
-    (error, port) => {
-      if (error) {
-        console.error("🚨 Error binding server:", error);
-        return;
-      }
-      console.log(`💻 Thread service server is running on port ${port}`);
-      server.start();
+  server.bindAsync(address, grpc.ServerCredentials.createInsecure(), (error, port) => {
+    if (error) {
+      console.error("🚨 Error binding server:", error);
+      return;
     }
-  );
+    console.log(`💻 Thread service server is running on port ${port}`);
+    server.start();
+  });
 } catch (error) {
   console.error(`Failed to bind server: ${error}`);
 }

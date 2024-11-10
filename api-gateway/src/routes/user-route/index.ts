@@ -1,14 +1,14 @@
 import { Router } from "express";
 
 import {
-  applyPin,
-  getUserDetail,
-  getUserProfile,
-  getUsersWhoPinnedThread,
-  healthCheck,
-  login,
-  updateUserProfile,
-  viewPinned,
+	applyPin,
+	getUserDetail,
+	getUserProfile,
+	getUsersWhoPinnedThread,
+	healthCheck,
+	login,
+	updateUserProfile,
+	viewPinned,
 } from "../../controllers/user-controller";
 import { authMiddleware } from "../../middleware/auth";
 import { createLogMiddleware } from "../../middleware/log";
