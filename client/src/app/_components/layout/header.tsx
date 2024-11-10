@@ -46,7 +46,7 @@ export default async function Header() {
 							</Suspense>
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="ghost" className="relative h-8 w-8 rounded-full">
+									<Button variant="ghost" className="relative h-12 w-12 rounded-full">
 										<Avatar className="h-8 w-8">
 											<AvatarImage
 												src={userProfile?.profileImage || ""}

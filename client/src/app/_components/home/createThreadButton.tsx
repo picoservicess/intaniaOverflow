@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
@@ -48,7 +49,8 @@ export default function CreateThreadButton({
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>สร้างเธรด</DialogTitle>
+					<DialogTitle className="text-xl font-semibold">สร้างเธรด</DialogTitle>
+					<DialogDescription>เริ่มการสนทนาได้เลย !</DialogDescription>
 				</DialogHeader>
 				<ThreadForm
 					onClose={() => setOpen(false)}

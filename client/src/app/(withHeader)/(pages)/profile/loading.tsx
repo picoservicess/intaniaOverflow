@@ -22,7 +22,7 @@ export default function Loading() {
 			</Card>
 			<div className="w-1/2 flex-col gap-4 justify-center animate-pulse">
 				<div className="flex justify-center mb-8">
-					<p className="w-full rounded-l-lg py-2 text-center bg-gray-200 text-transparent">
+					<p className="w-full rounded-lg py-2 text-center bg-gray-200 text-transparent">
 						xxxxxxxx
 					</p>
 				</div>

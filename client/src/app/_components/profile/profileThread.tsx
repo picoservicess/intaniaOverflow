@@ -16,16 +16,16 @@ const ProfileThreads: React.FC<ProfileThreadsProps> = ({ aboutMeThreads, pinnedT
 		<div className="w-1/2 flex-col gap-4 justify-center">
 			<div className="flex justify-center mb-8">
 				<p
-					className={`w-full rounded-l-lg py-2 text-center ${
-						!showPinned ? "bg-slate-800 text-white" : "bg-gray-200"
+					className={`w-full rounded-l-lg py-2 text-center duration-200 hover:opacity-70 active:opacity-50 ${
+						!showPinned ? "bg-gray-800 text-white" : "bg-gray-200"
 					}`}
 					onClick={() => setShowPinned(false)}
 				>
 					ที่เกี่ยวกับฉัน
 				</p>
 				<p
-					className={`w-full rounded-r-lg py-2 text-center ${
-						showPinned ? "bg-slate-800 text-white" : "bg-gray-200"
+					className={`w-full rounded-r-lg py-2 text-center duration-200 hover:opacity-70 active:opacity-50 ${
+						showPinned ? "bg-gray-800 text-white" : "bg-gray-200"
 					}`}
 					onClick={() => setShowPinned(true)}
 				>

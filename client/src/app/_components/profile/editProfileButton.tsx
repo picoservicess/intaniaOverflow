@@ -25,7 +25,7 @@ export default function EditProfileButton() {
 				<Button
 					size="icon"
 					variant="outline"
-					className="absolute bottom-0 right-0 h-8 w-8 rounded-full border-gray-300 bg-white hover:bg-gray-50 shadow-sm"
+					className="absolute bottom-0 right-0 h-8 w-8 rounded-full border-gray-300 bg-white hover:bg-gray-200 shadow-sm"
 				>
 					<Pencil className="h-4 w-4 text-gray-600" />
 				</Button>

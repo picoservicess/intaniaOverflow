@@ -21,7 +21,7 @@ const VoteButton: React.FC<VoteButtonProps> = ({ icon: Icon, onClick, isActive }
 		variant="ghost"
 		size="icon"
 		onClick={onClick}
-		className="rounded-full w-8 h-8 sm:w-10 sm:h-10 hover:bg-transparent"
+		className="rounded-full w-8 h-8 sm:w-10 sm:h-10 hover:bg-gray-100"
 	>
 		<Icon
 			className={`w-4 h-4 sm:w-6 sm:h-6 transition-colors ${
