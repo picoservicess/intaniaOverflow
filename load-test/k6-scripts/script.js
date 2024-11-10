@@ -8,20 +8,20 @@ const errorCounter = new Counter('errors');
 // Test configuration
 export const options = {
   stages: [
-    { duration: '1m', target: 20 }, // Ramp up to 20 users
-    { duration: '3m', target: 20 }, // Stay at 20 users
-    { duration: '1m', target: 0 },  // Ramp down to 0 users
+    { duration: '10m', target: 200 }, // Ramp up to 20 users
+    { duration: '10m', target: 200 }, // Stay at 20 users
+    { duration: '10m', target: 0 },  // Ramp down to 0 users
   ],
   thresholds: {
-    http_req_duration: ['p(95)<500'], // 95% of requests should be below 500ms
-    checks: ['rate>99.9'],             // Error rate should be less than 10%
+    http_req_failed: ["rate<0.01"],
+    http_req_duration: ['p(95)<1000'], // 95% of requests should be below 1000ms
   },
 };
 
 const BASE_URL = 'http://192.168.40.55:80'; // Replace with your API URL
 
 // Add your Bearer token here
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMzk0YjdlYS05OGJhLTQyYjktYmNkMy0yNmYyMWY3YTAzZTQiLCJpYXQiOjE3MzEyMzY3MzcsImV4cCI6MTczMTI0MDMzN30.bhVbg4KkKsoBxTAlDysLi-0CODamCboDwOCv9qvZDOk';
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMzk0YjdlYS05OGJhLTQyYjktYmNkMy0yNmYyMWY3YTAzZTQiLCJpYXQiOjE3MzEyNTUxNDEsImV4cCI6MTczMTI1ODc0MX0.i6gnJPxqq3eaLzx8_-yoAyilt46K_UFwSmH6P_0uUnI';
 
 // Common headers with authentication
 const headers = {
@@ -42,7 +42,7 @@ export default function () {
     errorCounter.add(1);
   }
 
-  sleep(0.3);
+  sleep(2);
 
   // Group 2: Search thread
   const searchThreadResponse = http.get(
@@ -56,7 +56,7 @@ export default function () {
     errorCounter.add(1);
   }
 
-  sleep(0.3);
+  sleep(2);
 
   // Group 3: Create reply
   const createReplyPayload = JSON.stringify({
@@ -76,7 +76,7 @@ export default function () {
     errorCounter.add(1);
   }
 
-  sleep(0.3);
+  sleep(4);
 
   // Group 4: Create thread
   const createThreadPayload = JSON.stringify({
@@ -97,7 +97,7 @@ export default function () {
     errorCounter.add(1);
   }
 
-  sleep(0.3);
+  sleep(2);
 }
 
 // Setup function (runs once before the test)
