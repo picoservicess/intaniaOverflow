@@ -50,13 +50,12 @@ const UpdateThreadForm: React.FC<UpdateThreadFormProps> = ({
         assetUrls.push(...responses.map((res) => res.responseObject.assetUrl));
       }
 
-      const updatedThread: ThreadRequest = {
+      const updatedThread: UpdateThreadRequest = {
         title,
         body,
         assetUrls,
         tags,
-        isAnonymous,
-        authorId: threadToUpdate.authorId,
+        isAnonymous
       };
 
       // Call the update thread API

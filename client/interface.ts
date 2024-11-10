@@ -20,6 +20,14 @@ interface ThreadRequest {
     isAnonymous: boolean;
 }
 
+interface UpdateThreadRequest {
+    title: string;
+    body: string;
+    assetUrls: string[];
+    tags: string[];
+    isAnonymous: boolean;
+}
+
 interface ReplyRequest {
     text: string;
     assetUrls: string[];
@@ -113,7 +121,8 @@ interface NotificationResponse {
     _id: string;
     senderId: string;
     receiverId: string;
-    targetId: string;
+    threadId: string;
+    replyId: string;
     isThread: boolean;
     isReply: boolean;
     isUser: boolean;
