@@ -66,6 +66,8 @@ services:
       PORT: 5002
       JWT_SECRET: ${JWT_SECRET}
       DATABASE_URL: ${NOTI_DATABASE_URL}
+      THREAD_SERVICE_HOST: load-balancer
+      THREAD_SERVICE_PORT: 5004
       USER_SERVICE_HOST: load-balancer
       USER_SERVICE_PORT: 5005
     depends_on:
@@ -93,7 +95,7 @@ services:
       - intania-overflow-network
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 3
     restart: on-failure:3
 
   thread-service:
@@ -112,7 +114,7 @@ services:
       - intania-overflow-network
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 3
     restart: on-failure:3
 
   user-service:
@@ -134,7 +136,7 @@ services:
       - intania-overflow-network
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 3
     restart: on-failure:3
 
   voting-service:

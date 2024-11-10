@@ -33,17 +33,14 @@ export const getThreadById = controllerWrapper(async (req: Request, res: Respons
 });
 
 // Get my thread
-export const getMyThreads = controllerWrapper(async (req: Request, res: Response) => {
-	const token = validateAuth(req);
-	const threads = await grpcRequest("getMyThreads", {}, { token });
+export const getMyThreads = controllerWrapper(
+	async (req: Request, res: Response) => {
+		const token = validateAuth(req);
+		const threads = await grpcRequest("getMyThreads", {}, { token });
 
-	if (!threads) {
-		res.status(404).json({ error: "Thread not found" });
-		return;
+		res.status(200).json(threads);
 	}
-
-	res.status(200).json(threads);
-});
+);
 
 // Create a new thread
 export const createThread = controllerWrapper(async (req: Request, res: Response) => {

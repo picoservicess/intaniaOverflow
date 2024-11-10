@@ -6,27 +6,27 @@ import hpp from "hpp";
 
 // Rate limiting configuration
 const limiter = rateLimit({
-	windowMs: 60 * 1000, // 1 minute
-	max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // Limit each IP to 100 requests per windowMs
 });
 
 // Function to set up security middleware
 const applySecurityMiddleware = (app: Application) => {
-	// Limit body size to prevent DoS attacks
-	app.use(bodyParser.json({ limit: "10kb" }));
-	app.use(bodyParser.urlencoded({ limit: "10kb", extended: true }));
+  // Limit body size to prevent DoS attacks
+  app.use(bodyParser.json({ limit: "10kb" }));
+  app.use(bodyParser.urlencoded({ limit: "10kb", extended: true }));
 
-	// Set security headers
-	app.use(helmet());
+  // Set security headers
+  app.use(helmet());
 
-	// Rate limiting to prevent DDoS attacks
-	app.use(limiter);
+  // Rate limiting to prevent DDoS attacks
+  // app.use(limiter);
 
-	// Prevent HTTP Parameter Pollution
-	app.use(hpp());
+  // Prevent HTTP Parameter Pollution
+  app.use(hpp());
 
-	// Disable x-powered-by header
-	app.disable("x-powered-by");
+  // Disable x-powered-by header
+  app.disable("x-powered-by");
 };
 
 export default applySecurityMiddleware;
