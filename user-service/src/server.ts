@@ -141,20 +141,48 @@ const applyPin: grpc.handleUnaryCall<any, any> = async (call, callback) => {
   }
 
   const { threadId } = call.request;
+
   try {
-    await prisma.user.update({
+    const user = await prisma.user.findUnique({
       where: { id: userId },
-      data: {
-        pinnedThreads: {
-          push: threadId,
-        },
-      },
+      select: { pinnedThreads: true },
     });
-    callback(null, { message: "Thread pinned successfully" });
+
+    if (!user) {
+      return callback({
+        code: grpc.status.NOT_FOUND,
+        message: "User not found",
+      });
+    }
+
+    const currentPinnedThreads = user.pinnedThreads || [];
+    const isAlreadyPinned = currentPinnedThreads.includes(threadId);
+
+    if (isAlreadyPinned) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          pinnedThreads: {
+            set: currentPinnedThreads.filter((id) => id !== threadId),
+          },
+        },
+      });
+      callback(null, { message: "Thread unpinned successfully" });
+    } else {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          pinnedThreads: {
+            push: threadId,
+          },
+        },
+      });
+      callback(null, { message: "Thread pinned successfully" });
+    }
   } catch (error) {
     callback({
       code: grpc.status.INTERNAL,
-      message: "Failed to pin thread",
+      message: "Failed to toggle thread pin status",
     });
   }
 };
