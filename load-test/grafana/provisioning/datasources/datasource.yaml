@@ -1,0 +1,10 @@
+# ./grafana/provisioning/datasources/datasource.yaml
+apiVersion: 1
+
+datasources:
+  - name: k6influxdb
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    database: k6
+    isDefault: true
