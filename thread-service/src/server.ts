@@ -55,11 +55,11 @@ server.addService(threadProto.ThreadService.service, {
         where: {
           isDeleted: false,
         },
-        skip: page * pageSize,
-        take: pageSize,
         orderBy: {
           updatedAt: "desc",
         },
+        skip: page * pageSize,
+        take: pageSize,
       });
 
       const totalItems = await prisma.thread.count({
@@ -339,6 +339,9 @@ server.addService(threadProto.ThreadService.service, {
             },
           ],
           isDeleted: false, // Only show non-deleted threads in search
+        },
+        orderBy: {
+          updatedAt: "desc",
         },
         skip: page * pageSize,
         take: pageSize,
