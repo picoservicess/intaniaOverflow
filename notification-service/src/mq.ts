@@ -81,12 +81,12 @@ async function getPinnedThreadUsers(threadId: string): Promise<string[]> {
 
 async function getAuthorThreadUsers(threadId: string): Promise<string> {
   try {
-    const usersWhoAuthorThread = await grpcUserRequest("getThreadById", {
+    const thread = await grpcThreadRequest("getThreadById", {
       threadId,
     });
-    return usersWhoAuthorThread.authorId;
+    return thread.authorId;
   } catch (error) {
-    console.error("⛔️ Error getting users who pinned thread:", error);
+    console.error("⛔️ Error getting author of thread :", error);
     throw error;
   }
 }
@@ -262,6 +262,38 @@ async function setupQueues(channel: Channel): Promise<void> {
   }
 }
 
+async function sendNotiToUserWhoPinnedThread(routingKey: string, message: any) {
+  try {
+    const threadId = message.threadId as string;
+    const userIds = await getPinnedThreadUsers(threadId);
+    // Send to user who pinned thread
+    const sendingPromise = userIds.map(async (userId) => {
+      if (routingKey == "reply") {
+        const notiMessage = await parseReply(message, userId);
+        await createNotification(notiMessage);
+      }
+      if (routingKey == 'thread') {
+        const notiMessage = await parseThread(message, userId);
+        await createNotification(notiMessage);
+      }
+    });
+    await Promise.all(sendingPromise);
+  } catch (error) {
+    console.log("Fail to sendNotiToUserWhoPinnedThread: ", error);
+  }
+}
+
+async function sendNotiToAuthorThread(message: any) {
+  try {
+    const threadId = message.threadId as string;
+    const authorId = await getAuthorThreadUsers(threadId) as string;
+    const notiMessage = await parseReply(message, authorId);
+    await createNotification(notiMessage);
+  } catch (error) {
+    console.log("Fail to sendNotiToUserWhoPinnedThread: ", error);
+  }
+}
+
 function setupChannel(channel: Channel): void {
   channel.prefetch(1);
   console.log("⏱️ Waiting for messages in queue:", QUEUE_CONFIG.name);
@@ -272,37 +304,15 @@ function setupChannel(channel: Channel): void {
       if (!msg) return;
 
       try {
+        const routingKey = msg.fields.routingKey as string;
         const message = JSON.parse(msg.content.toString());
-        const threadId = message.threadId as string;
-        const userIds = await getPinnedThreadUsers(threadId);
-        console.log(msg.fields.routingKey);
-        if (msg.fields.routingKey == "reply") {
-          console.log("✉️ Received message for reply:", message.replyId);
-          try {
-            const sendingPromise = userIds.map(async (userId) => {
-              const notiMessage = await parseReply(message, userId);
-              await createNotification(notiMessage);
-            });
-            await Promise.all(sendingPromise);
-          } catch (error) {
-            console.log("Fail to create notification from reply: ", error);
-          }
-        }
-        if (msg.fields.routingKey == "thread") {
-          console.log("✉️ Received message for thread:", message.threadId);
-          try {
-            const sendingPromise = userIds.map(async (userId) => {
-              const notiMessage = await parseThread(message, userId);
-              await createNotification(notiMessage);
-            });
-            await Promise.all(sendingPromise);
-          } catch (error) {
-            console.log("Fail to create notification from thread: ", error);
-          }
+        await sendNotiToUserWhoPinnedThread(routingKey, message);
+        if (routingKey == 'reply') {
+          await sendNotiToAuthorThread(message);
         }
         channel.ack(msg);
       } catch (error) {
-        console.log("Processing data failed:", error);
+        console.log("Fail to create notification: ", error);
         channel.nack(msg, false, false);
       }
     },

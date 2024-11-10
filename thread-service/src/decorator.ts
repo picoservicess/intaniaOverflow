@@ -7,6 +7,9 @@ export const sanitizeThreadRequest = (
 
   updatedThread.updatedAt = new Date();
 
+  if (updatedThread.authorId) {
+    delete updatedThread.authorId;
+  }
   if (updatedThread.createdAt) {
     delete updatedThread.createdAt;
   }
