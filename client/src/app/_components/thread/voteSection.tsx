@@ -21,7 +21,7 @@ const VoteButton: React.FC<VoteButtonProps> = ({ icon: Icon, onClick, isActive }
 		variant="ghost"
 		size="icon"
 		onClick={onClick}
-		className="rounded-full w-8 h-8 sm:w-10 sm:h-10 hover:bg-gray-100"
+		className="rounded-full w-5 h-5 sm:w-8 sm:h-8 hover:bg-gray-100"
 	>
 		<Icon
 			className={`w-4 h-4 sm:w-6 sm:h-6 transition-colors ${
@@ -92,9 +92,7 @@ const VoteSection: React.FC<VoteSectionProps> = ({ voteCount, voteStatus, isThre
 	return (
 		<div className="flex flex-col items-center mr-2 sm:mr-4 mb-4 sm:mb-0">
 			<VoteButton icon={ArrowBigUp} onClick={handleUpVote} isActive={status === 1} />
-			<span className="text-sm sm:text-base font-bold my-1 sm:my-2">
-				{vote.upVotes - vote.downVotes}
-			</span>
+			<span className="text-sm sm:text-base font-bold">{vote.upVotes - vote.downVotes}</span>
 			<VoteButton icon={ArrowBigDown} onClick={handleDownVote} isActive={status === -1} />
 		</div>
 	);
