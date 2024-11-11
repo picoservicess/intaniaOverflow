@@ -91,12 +91,16 @@ export const viewPinned = controllerWrapper(async (req: Request, res: Response) 
 // Get user details
 export const getUserDetail = controllerWrapper(async (req: Request, res: Response) => {
 	const token = validateAuth(req);
+	const userId = req.params.userId;
 	try {
-		const userDetail = req.body;
+		if (!userId) {
+			res.status(400).json({ error: "User ID is required" });
+			return;
+		}
 
-		const userDetails = await grpcRequest("GetUserDetail", userDetail, {
-			token,
-		});
+		// Prepare the request for gRPC
+		const userDetail = { userId }; // Construct your request object as needed
+		const userDetails = await grpcRequest("GetUserDetail", userDetail, { token });
 
 		if (!userDetails) {
 			res.status(404).json({ error: "User details not found" });

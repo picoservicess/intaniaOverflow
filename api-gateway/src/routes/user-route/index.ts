@@ -25,7 +25,7 @@ userRouter.get("/health", healthCheck);
 userRouter.post("/login", login);
 userRouter.get("/userProfile", authMiddleware, getUserProfile);
 userRouter.put("/userProfile", authMiddleware, updateUserProfile);
-userRouter.get("/userDetail", authMiddleware, getUserDetail);
+userRouter.get("/userDetail/:userId", authMiddleware, getUserDetail);
 userRouter.post("/applyPin", authMiddleware, applyPin);
 userRouter.get("/viewPinned", authMiddleware, viewPinned);
 
