@@ -27,9 +27,6 @@ router.post("/:threadId", authenticateToken, async (req: AuthenticatedRequest, r
 		// Extract threadId from the URL parameters
 		const { threadId } = req.params;
 
-		// Add threadId to the request body
-		req.body.threadId = threadId;
-
 		// Validate request body against the ReplySchema using Zod
 		const validatedData = ReplySchema.safeParse(req.body);
 		if (!validatedData.success) {
@@ -43,10 +40,12 @@ router.post("/:threadId", authenticateToken, async (req: AuthenticatedRequest, r
 
 		// Destructure validated data
 		const { text, assetUrls } = validatedData.data;
+		// Get userId from authenticated request
 		const userId = req.user?.userId;
 
 		// Ensure user is authenticated
 		if (!userId) {
+			// If userId is not present, send a 401 Unauthorized error
 			res.status(401).json({ error: "User ID is required" });
 			return;
 		}
@@ -57,7 +56,7 @@ router.post("/:threadId", authenticateToken, async (req: AuthenticatedRequest, r
 				text,
 				assetUrls,
 				userId,
-				replyAt: new Date(),
+				replyAt: new Date(), // Set the reply time to the current date and time
 			},
 		});
 
@@ -73,7 +72,9 @@ router.post("/:threadId", authenticateToken, async (req: AuthenticatedRequest, r
 			newReply,
 		});
 	} catch (error) {
+		// Log any errors to the console
 		console.error("Create reply error:", error);
+		// Send a 500 Internal Server Error response
 		res.status(500).json({ error: "Failed to create reply" });
 	}
 });
