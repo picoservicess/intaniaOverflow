@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors"; // Import cors
+import cors from "cors";
 
 import assetRouter from "./routes/asset-route";
 import notificationRouter from "./routes/notification-route";
