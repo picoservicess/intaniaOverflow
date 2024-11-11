@@ -1,6 +1,8 @@
 "use client";
 
-import { SetStateAction, useState } from "react";
+import { Upload, X } from "lucide-react";
+
+import { SetStateAction, useRef, useState } from "react";
 
 import { useSession } from "next-auth/react";
 
@@ -41,6 +43,7 @@ const ThreadForm: React.FC<ThreadFormProps> = ({
 	const [isAnonymous, setIsAnonymous] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) {
@@ -55,10 +58,21 @@ const ThreadForm: React.FC<ThreadFormProps> = ({
 				const fileNames = oversizedFiles.map((file) => `"${file.name}"`).join(", ");
 				setError(`ไฟล์ดังต่อไปนี้มีขนาดเกิน ${FILE_SIZE_LIMIT} MB: ${fileNames}`);
 				setAssets([]); // Clear the files if any file is too large
+
+				if (fileInputRef.current) {
+					fileInputRef.current.value = "";
+				}
 			} else {
 				setError("");
 				setAssets(selectedFiles); // Set valid files
 			}
+		}
+	};
+
+	const removeFile = (indexToRemove: number) => {
+		setAssets(assets.filter((_, index) => index !== indexToRemove));
+		if (fileInputRef.current) {
+			fileInputRef.current.value = "";
 		}
 	};
 
@@ -156,16 +170,43 @@ const ThreadForm: React.FC<ThreadFormProps> = ({
 				/>
 			</div>
 
-			<div className="space-y-2">
+			<div className="space-y-4">
 				<Label htmlFor="assets">อัพโหลดไฟล์</Label>
-				<Input
-					id="assets"
-					type="file"
-					onChange={handleFileChange}
-					multiple
-					className="cursor-pointer"
-				/>
-				{error && <p className="text-red-500 text-sm">{error}</p>} {/* Display error message */}
+				<div className="space-y-4">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => fileInputRef.current?.click()}
+						className="w-full"
+					>
+						<Upload className="mr-2 h-4 w-4" /> แนบไฟล์
+					</Button>
+					<Input
+						ref={fileInputRef}
+						id="assets"
+						type="file"
+						onChange={handleFileChange}
+						multiple
+						className="hidden"
+					/>
+				</div>
+				{error && <p className="text-red-500 text-sm">{error}</p>}
+				<div className="flex flex-wrap gap-2">
+					{assets.map((file, index) => (
+						<div key={index} className="flex items-center gap-2 bg-gray-100 p-2 rounded">
+							<span className="text-sm">{file.name}</span>
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								className="p-1 h-6 w-6"
+								onClick={() => removeFile(index)}
+							>
+								<X className="h-4 w-4" />
+							</Button>
+						</div>
+					))}
+				</div>
 			</div>
 
 			<div className="space-y-2">

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Upload, X } from "lucide-react";
+
+import { useRef, useState } from "react";
 
 import { useSession } from "next-auth/react";
 
@@ -21,15 +23,35 @@ const UpdateThreadForm: React.FC<UpdateThreadFormProps> = ({ onClose, threadToUp
 	const { data: session } = useSession();
 	const [title, setTitle] = useState(threadToUpdate.title);
 	const [body, setBody] = useState(threadToUpdate.body);
+	const [existingAssets, setExistingAssets] = useState<string[]>(threadToUpdate.assetUrls);
 	const [assets, setAssets] = useState<File[]>([]);
 	const [tags, setTags] = useState<string[]>(threadToUpdate.tags);
 	const [isAnonymous, setIsAnonymous] = useState(threadToUpdate.isAnonymous);
 	const [loading, setLoading] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) {
 			setAssets(Array.from(e.target.files));
 		}
+	};
+
+	const removeExistingFile = (urlToRemove: string) => {
+		setExistingAssets(existingAssets.filter((url) => url !== urlToRemove));
+	};
+
+	const removeNewFile = (indexToRemove: number) => {
+		setAssets(assets.filter((_, index) => index !== indexToRemove));
+
+		if (fileInputRef.current) {
+			fileInputRef.current.value = "";
+		}
+	};
+
+	const getFileName = (url: string) => {
+		const fileName = url.split("/").pop()!;
+		const decodedFileName = decodeURIComponent(fileName);
+		return decodedFileName.split("_").slice(1).join("_");
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +74,7 @@ const UpdateThreadForm: React.FC<UpdateThreadFormProps> = ({ onClose, threadToUp
 			const updatedThread: UpdateThreadRequest = {
 				title,
 				body,
-				assetUrls,
+				assetUrls: [...existingAssets, ...assetUrls],
 				tags,
 				isAnonymous,
 			};
@@ -91,15 +113,66 @@ const UpdateThreadForm: React.FC<UpdateThreadFormProps> = ({ onClose, threadToUp
 				/>
 			</div>
 
-			<div className="space-y-2">
-				<Label htmlFor="assets">อัพโหลดไฟล์</Label>
-				<Input
-					id="assets"
-					type="file"
-					onChange={handleFileChange}
-					multiple
-					className="cursor-pointer"
-				/>
+			{existingAssets.length > 0 && (
+				<div className="space-y-4">
+					<Label>ไฟล์ปัจจุบัน</Label>
+					<div className="flex flex-wrap gap-2">
+						{existingAssets.map((url) => (
+							<div key={url} className="flex items-center gap-2 bg-gray-100 p-2 rounded">
+								<span className="text-sm">{getFileName(url)}</span>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className="p-1 h-6 w-6"
+									onClick={() => removeExistingFile(url)}
+								>
+									<X className="h-4 w-4" />
+								</Button>
+							</div>
+						))}
+					</div>
+				</div>
+			)}
+
+			<div className="space-y-4">
+				<Label htmlFor="assets">อัพโหลดไฟล์ใหม่</Label>
+
+				<div className="space-y-4">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => fileInputRef.current?.click()}
+						className="w-full"
+					>
+						<Upload className="mr-2 h-4 w-4" /> แนบไฟล์
+					</Button>
+					<Input
+						ref={fileInputRef}
+						id="assets"
+						type="file"
+						onChange={handleFileChange}
+						multiple
+						className="hidden"
+					/>
+				</div>
+
+				<div className="flex flex-wrap gap-2">
+					{assets.map((file, index) => (
+						<div key={index} className="flex items-center gap-2 bg-gray-100 p-2 rounded">
+							<span className="text-sm">{file.name}</span>
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								className="p-1 h-6 w-6"
+								onClick={() => removeNewFile(index)}
+							>
+								<X className="h-4 w-4" />
+							</Button>
+						</div>
+					))}
+				</div>
 			</div>
 
 			<div className="space-y-2">
