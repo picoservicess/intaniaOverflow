@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 
 import assetRouter from "./routes/asset-route";
 import notificationRouter from "./routes/notification-route";
@@ -10,6 +11,9 @@ import applySecurityMiddleware from "./utils/sercurity";
 
 const app = express();
 const PORT = Number(process.env.API_GATEWAY_PORT) || 80;
+
+// Enable CORS for all origins
+app.use(cors());
 
 // Apply security middleware
 applySecurityMiddleware(app);
