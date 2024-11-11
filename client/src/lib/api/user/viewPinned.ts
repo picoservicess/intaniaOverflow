@@ -10,7 +10,8 @@ export default async function viewPinned(token: string) {
 	});
 
 	if (!response.ok) {
-		throw new Error("Cannot retrieve pinned threads");
+		console.error(`Failed to fetch pinned threads with status: ${response.status}`);
+		return { threads: [] };
 	}
 
 	return await response.json();

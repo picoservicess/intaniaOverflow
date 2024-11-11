@@ -10,7 +10,8 @@ export default async function getMyThread(token: string) {
 	});
 
 	if (!response.ok) {
-		throw new Error("Failed to fetch my thread");
+		console.error(`Failed to fetch my threads with status: ${response.status}`);
+		return { threads: [] };
 	}
 
 	return await response.json();

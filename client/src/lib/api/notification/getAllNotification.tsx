@@ -10,7 +10,8 @@ export default async function getAllNotification(token: string) {
 	});
 
 	if (!response.ok) {
-		throw new Error("Failed to fetch notifications");
+		console.log(`Failed to fetch notifications with status: ${response.status}`);
+		return [];
 	}
 
 	return await response.json();
