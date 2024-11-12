@@ -96,7 +96,7 @@ export default async function ThreadPage({
 								<div className="flex items-center text-sm text-gray-600">
 									<span className="font-medium">{authorData?.displayname}</span>
 									<span className="mx-1">·</span>
-									<span>โพสเมื่อ {timeAgo(new Date(threadData.createdAt))}</span>
+									<span>โพสต์เมื่อ {timeAgo(new Date(threadData.createdAt))}</span>
 									{threadData.createdAt != threadData.updatedAt && (
 										<>
 											<span className="mx-1">·</span>
