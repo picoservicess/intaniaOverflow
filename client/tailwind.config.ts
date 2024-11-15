@@ -1,3 +1,4 @@
+import { nextui } from "@nextui-org/theme";
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -6,9 +7,13 @@ const config: Config = {
 		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+		"./node_modules/@nextui-org/theme/dist/components/pagination.js",
 	],
 	theme: {
 		extend: {
+			maxHeight: {
+				"screen-90": "90vh", // 90% of viewport height
+			},
 			colors: {
 				background: "hsl(var(--background))",
 				foreground: "hsl(var(--foreground))",
@@ -58,6 +63,6 @@ const config: Config = {
 			},
 		},
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), nextui()],
 };
 export default config;

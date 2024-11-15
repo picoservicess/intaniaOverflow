@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend of Intania Overflow
 
-## Getting Started
+## Manual Setup
 
-First, run the development server:
+1. Create a `.env.local` file in the root directory.
+2. Fill it with the environment variables provided on Discord.
+3. Run `npm install` to install all dependencies.
+4. Run `npm run dev` to start the website.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Use Cases
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Creating a Thread
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Log in via Chula SSO (`/login`).
+2. Navigate to the home page (`/home`).
+3. Click the "สร้างเธรด" button.
+4. Fill out the "Create Thread" form.
+5. Submit the form.
+6. Your thread will immediately appear as the first post on the home page and in your profile.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+### Replying to a Thread
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Log in via Chula SSO (`/login`).
+2. Navigate to the thread page by clicking the desired thread from the list on the home or profile page.
+3. Click the "ตอบกลับ" button.
+4. Fill out the "Create Reply" form.
+5. Submit the form.
+6. Your reply will instantly appear at the top of the replies.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+### Searching for a Thread
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Go to the home page (`/home`).
+2. Type a keyword in the search bar.
+3. Click the search button.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+### Voting on a Thread
+
+#### Option 1:
+
+1. Log in via Chula SSO (`/login`).
+2. Go to the home page (`/home`) or profile page (`/profile`).
+3. Click the up or down arrow button on the thread to vote.
+
+#### Option 2:
+
+1. Log in via Chula SSO (`/login`).
+2. Navigate to the thread page by clicking the desired thread from the list on the home or profile page.
+3. Click the up or down arrow button on the left to vote.
+
+---
+
+### Voting on a Reply
+
+1. Log in via Chula SSO (`/login`).
+2. Navigate to the thread page by clicking the desired thread from the list on the home or profile page.
+3. Scroll to the reply section.
+4. Click the up or down arrow button on the left side of the reply to vote.
+
+---
+
+### Pinning a Thread
+
+#### Option 1:
+
+1. Log in via Chula SSO (`/login`).
+2. Navigate to the home or profile page.
+3. Click the bookmark button to pin or unpin the thread.
+4. Your pinned threads will appear on the profile page.
+
+#### Option 2:
+
+1. Log in via Chula SSO (`/login`).
+2. Navigate to the thread page by clicking the desired thread from the list on the home or profile page.
+3. Click the bookmark button on the top right to pin or unpin the thread.
+4. Your pinned threads will appear on the profile page.
+
+---
+
+### Receiving Thread Notifications
+
+1. Log in via Chula SSO (`/login`).
+2. You will receive notifications when:
+   - Someone replies to your thread.
+   - Someone replies to your pinned thread.
+   - Someone updates your pinned thread.
+3. Click the bell icon in the header to view notifications.
+
+---
+
+## Additional Use Cases
+
+### Updating a Thread
+
+1. Log in via Chula SSO (`/login`).
+2. Navigate to a thread you own by clicking it from the home or profile page.
+3. Click the pencil icon on the top right.
+4. Fill out the "Update Thread" form.
+5. Submit the form.
+6. Your content will update within a few seconds.
+
+---
+
+### Updating Your Profile
+
+1. Log in via Chula SSO (`/login`).
+2. Go to the profile page.
+3. Click the pencil icon at the bottom right of your profile avatar.
+4. Fill out the "Update Profile" form.
+5. Submit the form.
+6. Your profile will update within a few seconds.

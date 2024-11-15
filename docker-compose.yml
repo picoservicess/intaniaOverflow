@@ -162,8 +162,6 @@ services:
     container_name: logging-service
     expose:
       - "5007"
-    ports:
-      - "5007:5007"
     environment:
       PORT: 5007
       RABBITMQ_URL: "amqp://rabbitmq:5672"
@@ -253,6 +251,19 @@ services:
       - user-service
       - voting-service
       - logging-service
+    networks:
+      - intania-overflow-network
+    restart: on-failure:3
+
+  client:
+    build:
+      context: ./
+      dockerfile: ./client/Dockerfile
+    container_name: client
+    expose:
+      - "3001"
+    ports:
+      - "3001:3001"
     networks:
       - intania-overflow-network
     restart: on-failure:3
