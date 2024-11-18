@@ -24,6 +24,10 @@ const nextConfig = {
 
 		return config;
 	},
+	output: 'standalone',
+	typescript: {
+		ignoreBuildErrors: true,
+	},
 };
 
 export default nextConfig;

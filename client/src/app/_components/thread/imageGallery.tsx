@@ -5,14 +5,14 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Carousel, CarouselApi, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 interface ImageGalleryProps {
 	images: string[];
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
-	const [api, setApi] = useState<any>();
+	const [api, setApi] = useState<CarouselApi>();
 	const [current, setCurrent] = useState(0);
 
 	useEffect(() => {
