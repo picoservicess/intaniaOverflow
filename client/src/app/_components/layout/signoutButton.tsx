@@ -14,7 +14,7 @@ export default function SignoutButton() {
 				className="w-full cursor-pointer"
 				onClick={() =>
 					signOut({
-						callbackUrl: process.env.BASE_URL || "http://localhost:3001",
+						callbackUrl: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001",
 						redirect: false,
 					})
 				}

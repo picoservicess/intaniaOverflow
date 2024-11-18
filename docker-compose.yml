@@ -255,18 +255,25 @@ services:
       - intania-overflow-network
     restart: on-failure:3
 
-  client:
-    build:
-      context: ./
-      dockerfile: ./client/Dockerfile
-    container_name: client
-    expose:
-      - "3001"
-    ports:
-      - "3001:3001"
-    networks:
-      - intania-overflow-network
-    restart: on-failure:3
+  # client:
+  #   build: 
+  #     context: ./client
+  #   container_name: client
+  #   expose:
+  #     - "3001"
+  #   ports:
+  #     - "3001:3001"
+  #   environment:
+  #     BASE_URL: "http://localhost:3001"
+  #     NEXTAUTH_URL: "http://localhost:3001/api/auth"
+  #     NEXTAUTH_SECRET: ${JWT_SECRET}
+  #     NEXT_PUBLIC_GATEWAY_URL: "http://localhost:80"
+  #     NEXT_PUBLIC_BASE_URL: "http://localhost:3001"
+  #   depends_on:
+  #     - api-gateway
+  #   networks:
+  #     - intania-overflow-network
+  #   restart: on-failure:3
 
 networks:
   intania-overflow-network:

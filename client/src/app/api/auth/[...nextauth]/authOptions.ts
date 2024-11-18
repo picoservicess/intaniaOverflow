@@ -22,7 +22,7 @@ export const authOptions: AuthOptions = {
 
 				try {
 					// Validate the ticket with your SSO
-					const response = await axios.post("http://localhost:80/users/login", {
+					const response = await axios.post(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/users/login`, {
 						ticket,
 					});
 
@@ -47,8 +47,12 @@ export const authOptions: AuthOptions = {
 		async jwt({ token, user }) {
 			return { ...token, ...user };
 		},
-		async session({ session, token, user }) {
-			session.user = token as any;
+		async session({ session, token }) {
+			// session.user = token;
+			session.user = {
+				id: token.id,
+				accessToken: token.accessToken,
+			};
 			return session;
 		},
 	},
